@@ -1,0 +1,39 @@
+PODS:
+  - GRMustache (7.3.2):
+    - JRSwizzle (~> 1.0)
+  - JRSwizzle (1.0)
+  - MessagePack (1.0.0)
+  - Q (0.9.0)
+  - SCFFLD/Core (0.9.5):
+    - SCFFLD/NoArc
+    - ZipArchive
+  - SCFFLD/DB (0.9.5):
+    - SCFFLD/Core
+  - SCFFLD/HTTP (0.9.5):
+    - MessagePack
+    - Q
+    - SCFFLD/Core
+    - SSKeychain
+  - SCFFLD/NoArc (0.9.5)
+  - SSKeychain (1.4.1)
+  - ZipArchive (1.4.0)
+
+DEPENDENCIES:
+  - GRMustache
+  - Q
+  - SCFFLD/Core
+  - SCFFLD/DB
+  - SCFFLD/HTTP
+
+SPEC CHECKSUMS:
+  GRMustache: ebe6104fd30a6d22c1f36af131e19e2dbf7cd292
+  JRSwizzle: dd5ead5d913a0f29e7f558200165849f006bb1e3
+  MessagePack: 6ef1d8f7c4b4021cf0b257d61ec5e8b4f3e9831c
+  Q: 003eeabd4b114fbaeec65d4bd970174fc6f4c71b
+  SCFFLD: 03260a0555fcc8e177f824ab12e0221a6a7e88ce
+  SSKeychain: 55cc80f66f5c73da827e3077f02e43528897db41
+  ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
+
+PODFILE CHECKSUM: 91e901078b5641d3888b1df2c842450f4048c7db
+
+COCOAPODS: 1.0.1
