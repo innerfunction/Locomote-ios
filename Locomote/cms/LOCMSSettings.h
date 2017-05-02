@@ -50,6 +50,8 @@
  */
 - (id)initWithRef:(NSString *)ref;
 
+- (id)initWithSettings:(NSDictionary *)settings;
+
 - (id)initAccount:(NSString *)account repository:(NSString *)repo;
 
 - (id)initWithAccount:(NSString *)account repository:(NSString *)repo username:(NSString *)username password:(NSString *)password;

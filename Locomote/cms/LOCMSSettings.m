@@ -45,6 +45,8 @@
 - (id)initWithRef:(NSString *)ref {
     self = [self init];
     if (self) {
+        // Ref is a whole or partial, absolute or relative URL which is resolved against
+        // the default repository base URL as defined in this class (e.g. http://loocmote.sh/cms/0.2/).
         NSURL *baseURL = [NSURL URLWithString:[self urlForPath:@"/"]];
         NSURL *repoURL = [NSURL URLWithString:ref relativeToURL:baseURL];
         self.protocol = repoURL.scheme;
@@ -65,6 +67,14 @@
         }
     }
     return self;
+}
+
+- (id)initWithSettings:(NSDictionary *)settings {
+    return [self initWithHost:settings[@"host"]
+                      account:settings[@"account"]
+                   repository:settings[@"repo"]
+                     username:settings[@"username"]
+                     password:settings[@"password"]];
 }
 
 - (id)initAccount:(NSString *)account repository:(NSString *)repo {

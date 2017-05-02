@@ -45,6 +45,8 @@
 /// A path for app packaged content.
 @property (nonatomic, strong) NSString *packagedContentPath;
 
+/// Add a content authority.
+- (void)setContentAuthority:(id<LOContentAuthority>)authority withName:(NSString *)name;
 /// Find a content authority by name, or return nil if no match found.
 - (id<LOContentAuthority>)contentAuthorityForName:(NSString *)name;
 

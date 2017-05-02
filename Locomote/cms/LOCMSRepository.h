@@ -53,5 +53,7 @@
 /// The authority's scheduled command protocol.
 @property (nonatomic, strong) LOCMSCommandProtocol *commandProtocol;
 
+- (id)initWithSettings:(LOCMSSettings *)settings;
+
 @end
 

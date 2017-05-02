@@ -136,6 +136,12 @@
     return self;
 }
 
+- (id)initWithSettings:(LOCMSSettings *)settings {
+    self = [self init];
+    self.cms = settings;
+    return self;
+}
+
 - (NSDictionary *)filesets {
     return _fileDB.filesets;
 }

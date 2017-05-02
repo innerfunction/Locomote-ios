@@ -20,6 +20,7 @@
 #import "LOContentAuthority.h"
 //#import "LOCMSContentAuthority.h"
 #import "LOContentURLProtocol.h"
+#import "NSDictionary+SC.h"
 
 #define NamePrefix (@"locomote")
 
@@ -70,6 +71,11 @@
         id<LOContentAuthority> authority = _authorities[name];
         authority.provider = self;
     }
+}
+
+- (void)setContentAuthority:(id<LOContentAuthority>)authority withName:(NSString *)name {
+    _authorities = [_authorities dictionaryWithAddedObject:authority forKey:name];
+    authority.provider = self;
 }
 
 - (id<LOContentAuthority>)contentAuthorityForName:(NSString *)name {
