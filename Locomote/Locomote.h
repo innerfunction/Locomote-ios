@@ -45,6 +45,15 @@ typedef void (^LOStartCallbackBlock) (BOOL ok);
 + (QPromise *)start;
 /**
  * Start the Locomote content provider.
+ * Starting the provider will cause it to synchronize each source content repository with the remote server.
+ * The method returns immediately with a deferred promise which resolves once all source repositories have
+ * synchronized, or when the timeout interval has elapsed, whichever occurs first.
+ * The promise will resolve with a value of _YES_ (_true_) if content synchronization has completed, or
+ * _NO_ (_false_) if content is still synchronizing when the timeout completes.
+ */
++ (QPromise *)startWithTimeout:(NSTimeInterval)timeout;
+/**
+ * Start the Locomote content provider.
  * This method is provided as an alternative to the [Locomote start] method. The method will return immediately
  * whilst the source content repositories synchronize in the background. the callback block will be invoked
  * once all source content repositories have synchronized.
@@ -52,16 +61,25 @@ typedef void (^LOStartCallbackBlock) (BOOL ok);
 + (void)startWithCallback:(LOStartCallbackBlock)callback;
 /**
  * Start the Locomote content provider.
+ * This method is provided as an alternative to the [Locomote startWithTimeout:] method. The method will return
+ * immediately whilst the source content repositories synchronize in the background. the callback block will be
+ * invoked once all source content repositories have synchronized, or when the timeout interval has elapsed,
+ * whichever occurs first. The callback block is passed a _BOOL_ value indicating whether content synchronization
+ * has completed when the callback is invoked.
+ */
++ (void)startWithTimeout:(NSTimeInterval)timeout callback:(LOStartCallbackBlock)callback;
+/**
+ * Start the Locomote content provider.
  * Starts the content provider and blocks until all content repositories have synchronized.
  */
-+ (BOOL)startInForeground;
++ (BOOL)startAndWait;
 /**
  * Start the Locomote content provider.
  * Starts the content provider and blocks until all content repositories have synchronized, or until the
  * specified timeout delay has elapsed. Repositories will continue to synchronize in the background if
  * the timeout interval is exceeded.
  */
-+ (BOOL)startInForegroundWithTimeout:(NSTimeInterval)timeout;
++ (BOOL)startAndWaitWithTimeout:(NSTimeInterval)timeout;
 /**
  * Get the default Locomote resource bundle.
  * The result can be used as a stand-in replacement for [NSBundle mainBundle]. File resources can be referenced
@@ -79,6 +97,10 @@ typedef void (^LOStartCallbackBlock) (BOOL ok);
 
 @interface UIImage (Locomote)
 
+/**
+ * Load an image from a Locomote.sh path.
+ * The image path has to include an authority name prefix.
+ */
 + (UIImage *)locoImageWithPath:(NSString *)path;
 
 @end

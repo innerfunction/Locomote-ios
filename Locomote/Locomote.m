@@ -19,6 +19,13 @@
 #import "LOContentProvider.h"
 
 void logStartupError(id error);
+/**
+ * Start content provider synchronization and wait for a result.
+ * @param timeout The maximum time, in seconds, to wait for sync completion.
+ *                If 0 or less then waits until synchronization is fully complete.
+ * @return YES if synchronization completed.
+ */
+BOOL startAndWait(NSTimeInterval timeout);
 
 @implementation Locomote
 
@@ -41,30 +48,57 @@ void logStartupError(id error);
 }
 
 + (QPromise *)start {
-    return [Q resolve:nil];
+    return [Locomote startWithTimeout:0];
+}
+
++ (QPromise *)startWithTimeout:(NSTimeInterval)timeout {
+    QPromise *promise = [QPromise new];
+    dispatch_async( dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        BOOL result = startAndWait( timeout );
+        [promise resolve:[NSNumber numberWithBool:result]];
+    });
+    return promise;
 }
 
 + (void)startWithCallback:(LOStartCallbackBlock)callback {
-    [Locomote start]
-    .then( (id)^(BOOL ok) {
-        callback( ok );
+    [Locomote startWithTimeout:0 callback:callback];
+}
+
++ (void)startWithTimeout:(NSTimeInterval)timeout callback:(LOStartCallbackBlock)callback {
+    [Locomote startWithTimeout:timeout]
+    .then( (id)^(NSNumber *ok) {
+        callback( [ok boolValue] );
     })
     .fail( ^(id error) {
         callback( NO );
-        logStartupError( error );
     });
 }
 
-+ (BOOL)startInForeground {
-    return [Locomote startInForegroundWithTimeout:0];
++ (BOOL)startAndWait {
+    return [Locomote startAndWaitWithTimeout:0];
 }
 
-+ (BOOL)startInForegroundWithTimeout:(NSTimeInterval)timeout {
++ (BOOL)startAndWaitWithTimeout:(NSTimeInterval)timeout {
+    return startAndWait(timeout);
+}
+
++ (NSBundle *)bundle {
+    return nil;
+}
+
++ (NSBundle *)bundleForAuthority:(NSString *)authorityName {
+    return nil;
+}
+
+@end
+
+BOOL startAndWait(NSTimeInterval timeout) {
     __block BOOL result = NO;
     NSCondition *checkpoint = [NSCondition new];
-    [self start]
-    .then( (id)^(BOOL ok) {
-        result = ok;
+    LOContentProvider *provider = [LOContentProvider getInstance];
+    [provider syncSources]
+    .then( (id)^(NSNumber *ok) {
+        result = [ok boolValue];
         [checkpoint signal];
         return nil;
     })
@@ -83,15 +117,9 @@ void logStartupError(id error);
     return result;
 }
 
-+ (NSBundle *)bundle {
-    return nil;
+void logStartupError(id error) {
+    NSLog(@"Locomote start error: %@", error );
 }
-
-+ (NSBundle *)bundleForAuthority:(NSString *)authorityName {
-    return nil;
-}
-
-@end
 
 @implementation UIImage (Locomote)
 
