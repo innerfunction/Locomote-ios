@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+//  Created by Julian Goacher on 30/04/2017.
+//  Copyright © 2017 Locomote.sh. All rights reserved.
+//
 
 #import "Locomote.h"
 #import "LOCMSSettings.h"
 #import "LOCMSRepository.h"
 #import "LOContentProvider.h"
+#import "LOBundle.h"
 
-void logStartupError(id error);
 /**
  * Start content provider synchronization and wait for a result.
  * @param timeout The maximum time, in seconds, to wait for sync completion.
@@ -28,6 +31,13 @@ void logStartupError(id error);
 BOOL startAndWait(NSTimeInterval timeout);
 
 @implementation Locomote
+
+/// Map of instantiated resource bundles, keyed by root authority name.
+static NSMutableDictionary *Locomote_bundles;
+
++ (void)initialize {
+    Locomote_bundles = [NSMutableDictionary new];
+}
 
 + (void)addRepository:(id)config {
     LOCMSSettings *settings = nil;
@@ -40,10 +50,11 @@ BOOL startAndWait(NSTimeInterval timeout);
     if (settings) {
         LOCMSRepository *repo = [[LOCMSRepository alloc] initWithSettings:settings];
         LOContentProvider *provider = [LOContentProvider getInstance];
-        [provider setContentAuthority:repo withName:name]; // TODO What is the authority name?
+        [provider setContentAuthority:repo withName:settings.authorityName];
     }
     else {
         // Invalid repository config.
+        NSLog(@"ERROR: Locomote repository config must be NSString or NSDictionary type; %@ provided", [config class]);
     }
 }
 
@@ -53,6 +64,7 @@ BOOL startAndWait(NSTimeInterval timeout);
 
 + (QPromise *)startWithTimeout:(NSTimeInterval)timeout {
     QPromise *promise = [QPromise new];
+    // Execute the start operation on a background thread.
     dispatch_async( dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         BOOL result = startAndWait( timeout );
         [promise resolve:[NSNumber numberWithBool:result]];
@@ -79,15 +91,31 @@ BOOL startAndWait(NSTimeInterval timeout);
 }
 
 + (BOOL)startAndWaitWithTimeout:(NSTimeInterval)timeout {
-    return startAndWait(timeout);
+    // Execute the start operation on the current thread.
+    return startAndWait( timeout );
 }
 
 + (NSBundle *)bundle {
-    return nil;
+    NSString *rootAuthorityName = @"";
+    NSBundle *bundle = Locomote_bundles[rootAuthorityName];
+    if (!bundle) {
+        bundle = [LOBundle new];
+        Locomote_bundles[rootAuthorityName] = bundle;
+    }
+    return bundle;
 }
 
 + (NSBundle *)bundleForAuthority:(NSString *)authorityName {
-    return nil;
+    NSBundle *bundle = Locomote_bundles[authorityName];
+    if (!bundle) {
+        LOContentProvider *provider = [LOContentProvider getInstance];
+        id<LOContentAuthority> authority = [provider contentAuthorityForName:authorityName];
+        if (authority) {
+            bundle = [[LOBundle alloc] initWithAuthority:authority];
+            Locomote_bundles[authorityName] = bundle;
+        }
+    }
+    return bundle;
 }
 
 @end
@@ -96,7 +124,7 @@ BOOL startAndWait(NSTimeInterval timeout) {
     __block BOOL result = NO;
     NSCondition *checkpoint = [NSCondition new];
     LOContentProvider *provider = [LOContentProvider getInstance];
-    [provider syncSources]
+    [provider syncAuthorities]
     .then( (id)^(NSNumber *ok) {
         result = [ok boolValue];
         [checkpoint signal];
@@ -105,7 +133,7 @@ BOOL startAndWait(NSTimeInterval timeout) {
     .fail( ^(id error) {
         result = NO;
         [checkpoint signal];
-        logStartupError( error );
+        NSLog(@"ERROR: Locomote start failure %@", error );
     });
     if (timeout > 0) {
         NSDate *until = [NSDate dateWithTimeIntervalSinceNow:timeout];
@@ -115,10 +143,6 @@ BOOL startAndWait(NSTimeInterval timeout) {
         [checkpoint wait];
     }
     return result;
-}
-
-void logStartupError(id error) {
-    NSLog(@"Locomote start error: %@", error );
 }
 
 @implementation UIImage (Locomote)

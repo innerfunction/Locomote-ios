@@ -22,7 +22,6 @@
 #import "SCIOCConfigurationAware.h"
 #import "SCIOCTypeInspectable.h"
 #import "SCIOCProxyObject.h"
-#import "SCJSONData.h"
 
 /**
  * An abstract content authority.

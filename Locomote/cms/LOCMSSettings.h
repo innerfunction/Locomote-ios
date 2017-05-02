@@ -40,6 +40,8 @@
 @property (nonatomic, strong) NSString *username;
 /// A password to go with the username.
 @property (nonatomic, strong) NSString *password;
+/// An authority name, derived from the settings values.
+@property (nonatomic, strong) NSString *authorityName;
 
 /**
  * Initialize settings with a string reference.
@@ -49,15 +51,9 @@
  *      (protocol:)?(username : password @)?((host (: port)? /)? account / repo (/ branch)?
  */
 - (id)initWithRef:(NSString *)ref;
-
+/// Initialize settings with a dictionary of values.
 - (id)initWithSettings:(NSDictionary *)settings;
-
-- (id)initAccount:(NSString *)account repository:(NSString *)repo;
-
-- (id)initWithAccount:(NSString *)account repository:(NSString *)repo username:(NSString *)username password:(NSString *)password;
-
-- (id)initWithHost:(NSString *)host account:(NSString *)account repository:(NSString *)repo;
-
+/// Initialize settings with the specified values.
 - (id)initWithHost:(NSString *)host account:(NSString *)account repository:(NSString *)narepome username:(NSString *)username password:(NSString *)password;
 
 /// Return the URL for login authentication.
@@ -68,7 +64,7 @@
 - (NSString *)urlForFileset:(NSString *)category;
 /// Return the URL for downloading a file at the specified path.
 - (NSString *)urlForFile:(NSString *)path;
-// Get the API's base URL. Used as the HTTP authentication protection space.
+/// Get the API's base URL. Used as the HTTP authentication protection space.
 - (NSString *)apiBaseURL;
 
 @end

@@ -24,6 +24,7 @@
 #import "SCService.h"
 #import "SCMessageRouter.h"
 #import "SCMessageReceiver.h"
+#import "Q.h"
 
 /**
  * A provider of content to the content: URL protocol.
@@ -49,7 +50,11 @@
 - (void)setContentAuthority:(id<LOContentAuthority>)authority withName:(NSString *)name;
 /// Find a content authority by name, or return nil if no match found.
 - (id<LOContentAuthority>)contentAuthorityForName:(NSString *)name;
-
+/**
+ * Synchronize all content authorities with their remote sources.
+ * @return A promise which resolves once all authorities have synchronized.
+ */
+- (QPromise *)syncAuthorities;
 /// Return the singleton instance of this class.
 + (LOContentProvider *)getInstance;
 

@@ -205,25 +205,25 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                                     followOn.runTimeID = item.runTimeID;
                                 }
                             }
-                            // If completed command has a runtime ID then check whether
-                            // a pending promise needs to be resolved.
-                            if (item.runTimeID) {
-                                QPromise *promise = _pendingPromises[item.runTimeID];
-                                if (promise) {
-                                    // Check for pending commands with the same runtime ID.
-                                    BOOL pending = NO;
-                                    for (LOCommandQueueItem *pendingItem in _queue) {
-                                        if ([item.runTimeID isEqual:pendingItem.runTimeID]) {
-                                            pending = YES;
-                                            break;
-                                        }
+                        }
+                        // If completed command has a runtime ID then check whether
+                        // a pending promise needs to be resolved.
+                        if (item.runTimeID) {
+                            QPromise *promise = _pendingPromises[item.runTimeID];
+                            if (promise) {
+                                // Check for pending commands with the same runtime ID.
+                                BOOL pending = NO;
+                                for (LOCommandQueueItem *pendingItem in _queue) {
+                                    if ([item.runTimeID isEqual:pendingItem.runTimeID]) {
+                                        pending = YES;
+                                        break;
                                     }
-                                    // If no pending commands with the same runtime ID then
-                                    // resolve the promise and remove it from the set of pending.
-                                    if (!pending) {
-                                        [promise resolve:nil];
-                                        [_pendingPromises removeObjectForKey:item.runTimeID];
-                                    }
+                                }
+                                // If no pending commands with the same runtime ID then
+                                // resolve the promise and remove it from the set of pending.
+                                if (!pending) {
+                                    [promise resolve:nil];
+                                    [_pendingPromises removeObjectForKey:item.runTimeID];
                                 }
                             }
                         }

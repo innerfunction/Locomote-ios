@@ -43,61 +43,51 @@
 }
 
 - (id)initWithRef:(NSString *)ref {
-    self = [self init];
-    if (self) {
-        // Ref is a whole or partial, absolute or relative URL which is resolved against
-        // the default repository base URL as defined in this class (e.g. http://loocmote.sh/cms/0.2/).
-        NSURL *baseURL = [NSURL URLWithString:[self urlForPath:@"/"]];
-        NSURL *repoURL = [NSURL URLWithString:ref relativeToURL:baseURL];
-        self.protocol = repoURL.scheme;
-        if (repoURL.user) {
-            self.username = repoURL.user;
-        }
-        if (repoURL.password) {
-            self.password = repoURL.password;
-        }
-        self.host = repoURL.host;
-        self.port = [repoURL.port integerValue];
-        if ([repoURL.pathComponents count] > 2) {
-            self.account = repoURL.pathComponents[1];
-            self.repo = repoURL.pathComponents[2];
-            if ([repoURL.pathComponents count] > 3) {
-                self.branch = repoURL.pathComponents[3];
-            }
-        }
+    // Ref is a whole or partial, absolute or relative URL which is resolved against
+    // the default repository base URL as defined in this class (e.g. http://locomote.sh/cms/0.2/).
+    NSURL *baseURL = [NSURL URLWithString:[self urlForPath:@"/"]];
+    NSURL *repoURL = [NSURL URLWithString:ref relativeToURL:baseURL];
+    
+    // Extract core properties from the URL and use to initialize the settings object.
+    id account = nil, repo = nil;
+    if ([repoURL.pathComponents count] > 3) {
+        // First two components are API root & version, e.g. 'cms' & '0.2'
+        account = repoURL.pathComponents[2];
+        repo = repoURL.pathComponents[3];
+    }
+    self = [self initWithHost:repoURL.host
+                      account:account
+                   repository:repo
+                     username:repoURL.user
+                     password:repoURL.password];
+    
+    // Complete configuration with non-core properties.
+    self.protocol = repoURL.scheme;
+    self.port = [repoURL.port integerValue];
+    if ([repoURL.pathComponents count] > 4) {
+        self.branch = repoURL.pathComponents[4];
+    }
+    
+    // Allow the URL fragment to specify an authority name.
+    if (repoURL.fragment) {
+        self.authorityName = repoURL.fragment;
     }
     return self;
 }
 
 - (id)initWithSettings:(NSDictionary *)settings {
-    return [self initWithHost:settings[@"host"]
+
+    self = [self initWithHost:settings[@"host"]
                       account:settings[@"account"]
                    repository:settings[@"repo"]
                      username:settings[@"username"]
                      password:settings[@"password"]];
-}
 
-- (id)initAccount:(NSString *)account repository:(NSString *)repo {
-    self = [self init];
-    self.account = account;
-    self.repo = repo;
-    return self;
-}
-
-- (id)initWithAccount:(NSString *)account repository:(NSString *)repo username:(NSString *)username password:(NSString *)password {
-    self = [self init];
-    self.account = account;
-    self.repo = repo;
-    self.username = username;
-    self.password = password;
-    return self;
-}
-
-- (id)initWithHost:(NSString *)host account:(NSString *)account repository:(NSString *)repo {
-    self = [self init];
-    self.host = host;
-    self.account = account;
-    self.repo = repo;
+    // If a specific authority name is provided then override the default name.
+    NSString *authorityName = settings[@"authorityName"];
+    if (authorityName) {
+        self.authorityName = authorityName;
+    }
     return self;
 }
 
@@ -108,6 +98,7 @@
     self.repo = repo;
     self.username = username;
     self.password = password;
+    self.authorityName = [account stringByAppendingPathComponent:repo];
     return self;
 }
 
