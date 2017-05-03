@@ -55,6 +55,22 @@
  * @return A promise which resolves once all authorities have synchronized.
  */
 - (QPromise *)syncAuthorities;
+/**
+ * Test whether the provider has content for the file with the specified path.
+ * The file path must have a content authority name prefix (e.g. account.repo/).
+ * Returns true if the relevant content authority has content for the file with
+ * the specified path.
+ */
+- (BOOL)hasContentForPath:(NSString *)path;
+/**
+ * Get the path of the local cache location of the file with the specified path.
+ * The file path must have a content authority name prefix (e.g. account.repo/).
+ * Returns the path to the location where the local copy of the file is cached.
+ * This may be (i) a path to the app bundle, if the file is packaged with the app;
+ * (ii) a path to one of the app's cache locations; or (iii) _nil_ if the file
+ * isn't cached locally.
+ */
+- (NSString *)localCacheLocationOfPath:(NSString *)path;
 /// Return the singleton instance of this class.
 + (LOContentProvider *)getInstance;
 

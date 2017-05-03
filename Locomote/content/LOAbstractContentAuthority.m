@@ -128,7 +128,7 @@
            parameters:(NSDictionary *)parameters {
     
     // Look-up a path root for the first path component, and if one is found then delegate the request to it.
-    NSString *root = [path root];
+    NSString *root = [path head];
     id<LOContentAuthorityPathRoot> pathRoot = _pathRoots[root];
     if (pathRoot) {
         // The path root only sees the rest of the path.

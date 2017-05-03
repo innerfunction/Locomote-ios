@@ -17,10 +17,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LOContentAuthority.h"
+#import "LOContentProvider.h"
 
-@interface LOBundle : NSBundle
+@interface LOBundle : NSBundle {
+    NSBundle *_mainBundle;
+    LOContentProvider *_provider;
+}
 
-- (id)initWithAuthority:(id<LOContentAuthority>)authority;
++ (LOBundle *)locoBundle;
 
 @end

@@ -45,7 +45,7 @@
 - (id)initWithURL:(NSURL *)url;
 
 /// Return the root path component.
-- (NSString *)root;
+- (NSString *)head;
 
 /// Return the path extension, or nil if the path has no extension.
 - (NSString *)ext;

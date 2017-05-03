@@ -194,7 +194,7 @@
         // referenced by file ID and has a type modifier. Otherwise, the relative portion of the path
         // at this point can be used to reference a resource by its file path.
         NSDictionary *entry = nil;
-        NSString *head = [path root];
+        NSString *head = [path head];
         NSString *type = [path ext];
         // Check for reference by ID.
         if ([head hasPrefix:@"$"] && [[path components] count] == 1) {

@@ -160,7 +160,7 @@
     // A tilde at the start of a path indicates a fileset category reference; so any path which
     // doesn't start with tilde is a direct reference to a file by its path. Convert the reference
     // to a fileset reference by looking up the file ID and category for the path.
-    NSString *root = [path root];
+    NSString *root = [path head];
     if (![root hasPrefix:@"~"]) {
         // Lookup file entry by path.
         NSString *filePath = [path fullPath];

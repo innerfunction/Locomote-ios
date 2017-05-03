@@ -82,6 +82,30 @@
     return _authorities[name];
 }
 
+- (QPromise *)syncAuthorities {
+    return nil;
+}
+
+- (BOOL)hasContentForPath:(NSString *)path {
+    LOContentPath *contentPath = [[LOContentPath alloc] initWithPath:path];
+    NSString *authorityName = [contentPath head];
+    id<LOContentAuthority> authority = [self contentAuthorityForName:authorityName];
+    if (authority) {
+        return [authority hasContentForPath:[contentPath rest] parameters:@{}];
+    }
+    return NO;
+}
+
+- (NSString *)localCacheLocationOfPath:(NSString *)path {
+    LOContentPath *contentPath = [[LOContentPath alloc] initWithPath:path];
+    NSString *authorityName = [contentPath head];
+    id<LOContentAuthority> authority = [self contentAuthorityForName:authorityName];
+    if (authority) {
+        return [authority localCacheLocationOfPath:[contentPath rest] paremeters:@{}];
+    }
+    return nil;
+}
+
 + (LOContentProvider *)getInstance {
     static LOContentProvider *instance;
     if (instance == nil) {

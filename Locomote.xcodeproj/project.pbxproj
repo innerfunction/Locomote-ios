@@ -51,6 +51,9 @@
 		072C47BB1EB67673003222DD /* LOMIMETypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C478D1EB67673003222DD /* LOMIMETypes.m */; };
 		072C47BC1EB67673003222DD /* LOPlainContentTypeConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C478E1EB67673003222DD /* LOPlainContentTypeConverter.h */; };
 		072C47BD1EB67673003222DD /* LOPlainContentTypeConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C478F1EB67673003222DD /* LOPlainContentTypeConverter.m */; };
+		07BD90241EB8B05F0067B24C /* Locomote.m in Sources */ = {isa = PBXBuildFile; fileRef = 07BD90231EB8B05F0067B24C /* Locomote.m */; };
+		07BD90271EB9295B0067B24C /* LOBundle.h in Headers */ = {isa = PBXBuildFile; fileRef = 07BD90251EB9295B0067B24C /* LOBundle.h */; };
+		07BD90281EB9295B0067B24C /* LOBundle.m in Sources */ = {isa = PBXBuildFile; fileRef = 07BD90261EB9295B0067B24C /* LOBundle.m */; };
 		388326C21FE761492DBDAEB2 /* libPods-Locomote.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 17D50A5BA576A82BED4E1CD0 /* libPods-Locomote.a */; };
 /* End PBXBuildFile section */
 
@@ -99,6 +102,9 @@
 		072C478D1EB67673003222DD /* LOMIMETypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOMIMETypes.m; sourceTree = "<group>"; };
 		072C478E1EB67673003222DD /* LOPlainContentTypeConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOPlainContentTypeConverter.h; sourceTree = "<group>"; };
 		072C478F1EB67673003222DD /* LOPlainContentTypeConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOPlainContentTypeConverter.m; sourceTree = "<group>"; };
+		07BD90231EB8B05F0067B24C /* Locomote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Locomote.m; path = Locomote/Locomote.m; sourceTree = "<group>"; };
+		07BD90251EB9295B0067B24C /* LOBundle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOBundle.h; sourceTree = "<group>"; };
+		07BD90261EB9295B0067B24C /* LOBundle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOBundle.m; sourceTree = "<group>"; };
 		07D3899B1EB67589006495A3 /* Locomote.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Locomote.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		17D50A5BA576A82BED4E1CD0 /* libPods-Locomote.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Locomote.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5562A4CB5008490DA7043B8A /* Pods-Locomote.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Locomote.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Locomote/Pods-Locomote.debug.xcconfig"; sourceTree = "<group>"; };
@@ -165,6 +171,8 @@
 			children = (
 				072C47811EB67673003222DD /* LOAbstractContentAuthority.h */,
 				072C47821EB67673003222DD /* LOAbstractContentAuthority.m */,
+				07BD90251EB9295B0067B24C /* LOBundle.h */,
+				07BD90261EB9295B0067B24C /* LOBundle.m */,
 				072C47831EB67673003222DD /* LOContentAuthority.h */,
 				072C47841EB67673003222DD /* LOContentAuthority.m */,
 				072C47851EB67673003222DD /* LOContentPath.h */,
@@ -188,6 +196,7 @@
 			children = (
 				072C475F1EB67673003222DD /* Info.plist */,
 				072C47601EB67673003222DD /* Locomote.h */,
+				07BD90231EB8B05F0067B24C /* Locomote.m */,
 				072C47611EB67673003222DD /* cms */,
 				072C47721EB67673003222DD /* commands */,
 				072C47801EB67673003222DD /* content */,
@@ -250,6 +259,7 @@
 				072C47A41EB67673003222DD /* LOCommand.h in Headers */,
 				072C47A71EB67673003222DD /* LOGetURLCommand.h in Headers */,
 				072C47A91EB67673003222DD /* LOMvFileCommand.h in Headers */,
+				07BD90271EB9295B0067B24C /* LOBundle.h in Headers */,
 				072C47B31EB67673003222DD /* LOContentPath.h in Headers */,
 				072C47981EB67673003222DD /* LOCMSFileset.h in Headers */,
 			);
@@ -363,6 +373,7 @@
 				072C47971EB67673003222DD /* LOCMSFileDB.m in Sources */,
 				072C47A11EB67673003222DD /* LOCMSSettings.m in Sources */,
 				072C47B61EB67673003222DD /* LOContentProvider.m in Sources */,
+				07BD90241EB8B05F0067B24C /* Locomote.m in Sources */,
 				072C47AE1EB67673003222DD /* LOUnzipCommand.m in Sources */,
 				072C479D1EB67673003222DD /* LOCMSPostsPathRoot.m in Sources */,
 				072C479B1EB67673003222DD /* LOCMSFilesetCategoryPathRoot.m in Sources */,
@@ -377,6 +388,7 @@
 				072C47BB1EB67673003222DD /* LOMIMETypes.m in Sources */,
 				072C479F1EB67673003222DD /* LOCMSRepository.m in Sources */,
 				072C47B21EB67673003222DD /* LOContentAuthority.m in Sources */,
+				07BD90281EB9295B0067B24C /* LOBundle.m in Sources */,
 				072C47991EB67673003222DD /* LOCMSFileset.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

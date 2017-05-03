@@ -83,8 +83,12 @@
 - (void)handleURLProtocolRequest:(NSURLProtocol *)protocol;
 /// Cancel an NSURLProtocol request currently being processed by the container.
 - (void)cancelURLProtocolRequest:(NSURLProtocol *)protocol;
+/// Test if the authority has content for the specified path.
+- (BOOL)hasContentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters;
+/// Return the local cache location of the content with the specified path.
+- (NSString *)localCacheLocationOfPath:(LOContentPath *)path paremeters:(NSDictionary *)parameters;
 /// Return content for an internal content URI.
-- (id)contentForPath:(NSString *)path parameters:(NSDictionary *)parameters;
+- (id)contentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters;
 /// Write a content reponse for the specified path.
 - (void)writeResponse:(id<LOContentAuthorityResponse>)response
               forPath:(LOContentPath *)path

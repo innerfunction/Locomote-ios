@@ -87,11 +87,6 @@ typedef void (^LOStartCallbackBlock) (BOOL ok);
  * prefixed to their path.
  */
 + (NSBundle *)bundle;
-/**
- * Get a resource bundle for a specific content authority.
- * File resources can be referenced by path, and don't need the authority name to be prefixed to the path.
- */
-+ (NSBundle *)bundleForAuthority:(NSString *)authorityName;
 
 @end
 

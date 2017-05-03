@@ -46,7 +46,7 @@
     return [self initWithPath:path];
 }
 
-- (NSString *)root {
+- (NSString *)head {
     return [self isEmpty] ? nil : _path[_rootIdx];
 }
 

@@ -43,6 +43,7 @@
 }
 
 - (id)initWithRef:(NSString *)ref {
+
     // Ref is a whole or partial, absolute or relative URL which is resolved against
     // the default repository base URL as defined in this class (e.g. http://locomote.sh/cms/0.2/).
     NSURL *baseURL = [NSURL URLWithString:[self urlForPath:@"/"]];
@@ -66,12 +67,14 @@
     self.port = [repoURL.port integerValue];
     if ([repoURL.pathComponents count] > 4) {
         self.branch = repoURL.pathComponents[4];
+        self.authorityName = [NSString stringWithFormat:@"%@.%@", self.authorityName, self.branch ];
     }
     
-    // Allow the URL fragment to specify an authority name.
+    // Allow the URL fragment to override the default authority name.
     if (repoURL.fragment) {
         self.authorityName = repoURL.fragment;
     }
+    
     return self;
 }
 
@@ -83,11 +86,19 @@
                      username:settings[@"username"]
                      password:settings[@"password"]];
 
+    // Test for branch setting.
+    id branch = settings[@"branch"];
+    if (branch) {
+        self.branch = branch;
+        self.authorityName = [NSString stringWithFormat:@"%@.%@", self.authorityName, branch ];
+    }
+    
     // If a specific authority name is provided then override the default name.
     NSString *authorityName = settings[@"authorityName"];
     if (authorityName) {
         self.authorityName = authorityName;
     }
+    
     return self;
 }
 
@@ -98,7 +109,7 @@
     self.repo = repo;
     self.username = username;
     self.password = password;
-    self.authorityName = [account stringByAppendingPathComponent:repo];
+    self.authorityName = [NSString stringWithFormat:@"%@.%@", account, repo ];
     return self;
 }
 
@@ -128,6 +139,14 @@
 
 - (NSString *)apiBaseURL {
     return [self urlForPath:@""];
+}
+
+#pragma mark - Properties
+
+- (void)setAuthorityName:(NSString *)authorityName {
+    // NOTE that slashes / in the name are replaced with underscore; this is to ensure that
+    // the authority name can take the place of a host name in a content: URL.
+    _authorityName = [authorityName stringByReplacingOccurrencesOfString:@"/" withString:@"_"];
 }
 
 #pragma mark - Private methods

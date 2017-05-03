@@ -18,10 +18,206 @@
 
 #import "LOBundle.h"
 
+#define FileExists(path) ([[NSFileManager defaultManager] fileExistsAtPath:path])
+#define ResourcePath(subpath, name, ext) ([[subpath stringByAppendingPathComponent:name] stringByAppendingPathExtension:ext])
+#define ContentURLForPath(path) ([NSURL URLWithString:[@"content://" stringByAppendingString:path]])
+
+@interface LOBundle ()
+
+//- (void)_localizeTextViewChildren:(UIView *)view;
+
+@end
+
 @implementation LOBundle
 
-- (id)initWithAuthority:(id<LOContentAuthority>)authority {
+static NSBundle *LocoBundle;
+
++ (void)initialize {
+    LocoBundle = [LOBundle new];
+}
+
++ (NSBundle *)locoBundle {
+    return LocoBundle;
+}
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        _mainBundle = [NSBundle mainBundle];
+        _provider = [LOContentProvider getInstance];
+    }
     return self;
 }
+
+- (NSURL *)bundleURL {
+    return _mainBundle.bundleURL;
+}
+
+- (NSURL *)resourceURL {
+    return _mainBundle.resourceURL;
+}
+
+- (NSURL *)executableURL {
+    return _mainBundle.executableURL;
+}
+
+- (NSURL *)privateFrameworksURL {
+    return _mainBundle.privateFrameworksURL;
+}
+
+- (NSURL *)sharedFrameworksURL {
+    return _mainBundle.sharedFrameworksURL;
+}
+
+- (NSURL *)sharedSupportURL {
+    return _mainBundle.sharedSupportURL;
+}
+
+- (NSURL *)builtInPlugInsURL {
+    return _mainBundle.builtInPlugInsURL;
+}
+
+- (NSURL *)appStoreReceiptURL {
+    return _mainBundle.appStoreReceiptURL;
+}
+
+- (NSString *)bundlePath {
+    return _mainBundle.bundlePath;
+}
+
+- (NSString *)resourcePath {
+    return _mainBundle.resourcePath;
+}
+
+- (NSString *)executablePath {
+    return _mainBundle.executablePath;
+}
+
+- (NSString *)pathForAuxiliaryExecutable:(NSString *)executableName {
+    return [_mainBundle pathForAuxiliaryExecutable:executableName];
+}
+
+- (NSString *)privateFrameworksPath {
+    return _mainBundle.sharedFrameworksPath;
+}
+
+- (NSString *)sharedFrameworksPath {
+    return _mainBundle.sharedFrameworksPath;
+}
+
+- (NSString *)sharedSupportPath {
+    return _mainBundle.sharedSupportPath;
+}
+
+- (NSString *)builtInPlugInsPath {
+    return _mainBundle.builtInPlugInsPath;
+}
+
+- (NSString *)bundleIdentifier {
+    return _mainBundle.bundleIdentifier;
+}
+
+- (NSDictionary<NSString *, id> *)infoDictionary {
+    return _mainBundle.infoDictionary;
+}
+
+- (NSDictionary<NSString *, id> *)localizedInfoDictionary {
+    return _mainBundle.localizedInfoDictionary;
+}
+
+- (nullable id)objectForInfoDictionaryKey:(NSString *)key {
+    return [_mainBundle objectForInfoDictionaryKey:key];
+}
+
+- (nullable Class)classNamed:(NSString *)className {
+    return [_mainBundle classNamed:className];
+}
+
+- (Class)principalClass {
+    return _mainBundle.principalClass;
+}
+
+- (NSArray<NSString *> *)preferredLocalizations {
+    return _mainBundle.preferredLocalizations;
+}
+
+- (NSArray<NSString *> *)localizations {
+    return _mainBundle.localizations;
+}
+
+- (NSString *)developmentLocalization {
+    return _mainBundle.developmentLocalization;
+}
+
+- (nullable NSURL *)URLForResource:(nullable NSString *)name withExtension:(nullable NSString *)ext {
+    return [self URLForResource:name withExtension:ext subdirectory:@""];
+}
+
+- (nullable NSURL *)URLForResource:(nullable NSString *)name withExtension:(nullable NSString *)ext subdirectory:(nullable NSString *)subpath {
+    NSString *path = ResourcePath(subpath, name, ext);
+    if ([_provider hasContentForPath:path]) {
+        return ContentURLForPath(path);
+    }
+    return [_mainBundle URLForResource:name withExtension:ext];
+}
+
+- (nullable NSURL *)URLForResource:(nullable NSString *)name withExtension:(nullable NSString *)ext subdirectory:(nullable NSString *)subpath localization:(nullable NSString *)localizationName {
+    return [self URLForResource:name withExtension:ext subdirectory:subpath]; // TODO Use parameters for localization info?
+}
+
+- (nullable NSArray<NSURL *> *)URLsForResourcesWithExtension:(nullable NSString *)ext subdirectory:(nullable NSString *)subpath {
+    return [_mainBundle URLsForResourcesWithExtension:ext subdirectory:subpath];
+}
+
+- (nullable NSArray<NSURL *> *)URLsForResourcesWithExtension:(nullable NSString *)ext subdirectory:(nullable NSString *)subpath localization:(nullable NSString *)localizationName {
+    return [_mainBundle URLsForResourcesWithExtension:ext subdirectory:subpath localization:localizationName];
+}
+
+- (nullable NSString *)pathForResource:(nullable NSString *)name ofType:(nullable NSString *)ext {
+    NSString *path = ResourcePath(@"", name, ext);
+    // TODO Need path to appropriate file system cache location
+    if (FileExists(path)) {
+        return path;
+    }
+    return [[NSBundle mainBundle] pathForResource:name ofType:ext];
+}
+
+- (nullable NSString *)pathForResource:(nullable NSString *)name ofType:(nullable NSString *)ext inDirectory:(nullable NSString *)subpath {
+    NSString *path = ResourcePath(@"", name, ext);
+    NSString *filePath = [_provider localCacheLocationOfPath:path];
+    if (filePath) {
+        if (FileExists(filePath)) {
+            return filePath;
+        }
+        return nil;
+    }
+    return [_mainBundle pathForResource:name ofType:ext inDirectory:subpath];
+}
+
+- (nullable NSString *)pathForResource:(nullable NSString *)name ofType:(nullable NSString *)ext inDirectory:(nullable NSString *)subpath forLocalization:(nullable NSString *)localizationName {
+    return [self pathForResource:name ofType:ext inDirectory:subpath];
+}
+
+- (NSArray<NSString *> *)pathsForResourcesOfType:(nullable NSString *)ext inDirectory:(nullable NSString *)subpath {
+    return [_mainBundle pathsForResourcesOfType:ext inDirectory:subpath];
+}
+
+- (NSArray<NSString *> *)pathsForResourcesOfType:(nullable NSString *)ext inDirectory:(nullable NSString *)subpath forLocalization:(nullable NSString *)localizationName {
+    return [_mainBundle pathsForResourcesOfType:ext inDirectory:subpath forLocalization:localizationName];
+}
+
+- (NSString *)localizedStringForKey:(NSString *)key value:(nullable NSString *)value table:(nullable NSString *)tableName {
+    return [_mainBundle localizedStringForKey:key value:value table:tableName];
+}
+
+/*
+- (NSArray *)loadNibNamed:(NSString *)name owner:(id)owner options:(NSDictionary *)options {
+    NSArray *result = [super loadNibNamed:name owner:owner options:options];
+    for (UIView *view in result) {
+        [self _localizeTextViewChildren:view];
+    }
+    return result;
+}
+*/
 
 @end

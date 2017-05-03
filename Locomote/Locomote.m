@@ -32,13 +32,6 @@ BOOL startAndWait(NSTimeInterval timeout);
 
 @implementation Locomote
 
-/// Map of instantiated resource bundles, keyed by root authority name.
-static NSMutableDictionary *Locomote_bundles;
-
-+ (void)initialize {
-    Locomote_bundles = [NSMutableDictionary new];
-}
-
 + (void)addRepository:(id)config {
     LOCMSSettings *settings = nil;
     if ([config isKindOfClass:[NSString class]]) {
@@ -65,7 +58,7 @@ static NSMutableDictionary *Locomote_bundles;
 + (QPromise *)startWithTimeout:(NSTimeInterval)timeout {
     QPromise *promise = [QPromise new];
     // Execute the start operation on a background thread.
-    dispatch_async( dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async( dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0 ), ^{
         BOOL result = startAndWait( timeout );
         [promise resolve:[NSNumber numberWithBool:result]];
     });
@@ -96,26 +89,7 @@ static NSMutableDictionary *Locomote_bundles;
 }
 
 + (NSBundle *)bundle {
-    NSString *rootAuthorityName = @"";
-    NSBundle *bundle = Locomote_bundles[rootAuthorityName];
-    if (!bundle) {
-        bundle = [LOBundle new];
-        Locomote_bundles[rootAuthorityName] = bundle;
-    }
-    return bundle;
-}
-
-+ (NSBundle *)bundleForAuthority:(NSString *)authorityName {
-    NSBundle *bundle = Locomote_bundles[authorityName];
-    if (!bundle) {
-        LOContentProvider *provider = [LOContentProvider getInstance];
-        id<LOContentAuthority> authority = [provider contentAuthorityForName:authorityName];
-        if (authority) {
-            bundle = [[LOBundle alloc] initWithAuthority:authority];
-            Locomote_bundles[authorityName] = bundle;
-        }
-    }
-    return bundle;
+    return [LOBundle locoBundle];
 }
 
 @end
