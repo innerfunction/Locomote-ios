@@ -28,13 +28,12 @@
 #import "SCIOCContainerAware.h"
 #import "SCIOCConfigurationAware.h"
 #import "SCMessageReceiver.h"
-#import "SCJSONData.h"
 #import "Q.h"
 
 /**
  * A content authority which sources its content from a Locomote.sh content repository.
  */
-@interface LOCMSRepository : LOAbstractContentAuthority <SCService>
+@interface LOCMSRepository : LOAbstractContentAuthority <SCService, SCIOCObjectAware>
 
 /// The file database.
 @property (nonatomic, strong) LOCMSFileDB *fileDB;

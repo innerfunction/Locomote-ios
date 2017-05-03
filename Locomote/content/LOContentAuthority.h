@@ -18,6 +18,7 @@
 
 #import <Foundation/Foundation.h>
 #import "LOContentPath.h"
+#import "Q.h"
 
 @class LOContentProvider;
 @protocol LOContentAuthority;
@@ -93,7 +94,11 @@
 - (void)writeResponse:(id<LOContentAuthorityResponse>)response
               forPath:(LOContentPath *)path
            parameters:(NSDictionary *)parameters;
-
+/**
+ * Synchronize the authoritie's content with its source.
+ * Returns a deferred promise which resolves once the synchronize operation is complete.
+ */
+- (QPromise *)syncContent;
 
 @end
 

@@ -66,7 +66,9 @@
     return [self.provider.packagedContentPath stringByAppendingPathComponent:_authorityName];
 }
 
-- (void)syncContent {}
+- (QPromise *)syncContent {
+    return [Q resolve:[NSNumber numberWithBool:YES]];
+}
 
 #pragma mark - SCService
 
@@ -112,6 +114,16 @@
 
 - (void)cancelURLProtocolRequest:(NSURLProtocol *)protocol {
     [_liveResponses removeObject:protocol];
+}
+
+- (BOOL)hasContentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters {
+    // Subclass should override this with an appropriate implementation.
+    return NO;
+}
+
+- (NSString *)localCacheLocationOfPath:(LOContentPath *)path paremeters:(NSDictionary *)parameters {
+    // Subclass should override this with an appropriate implementation.
+    return nil;
 }
 
 - (id)contentForPath:(NSString *)path parameters:(NSDictionary *)parameters {

@@ -50,9 +50,4 @@
 /// Interval between content refreshes; in minutes.
 @property (nonatomic, assign) CGFloat refreshInterval;
 
-/**
- * Sync content by performing checking with the server for downloadable updates.
- */
-- (void)syncContent;
-
 @end

@@ -146,11 +146,30 @@
     return _fileDB.filesets;
 }
 
-#pragma mark - LOAbstractContentAuthority overrides
-
 - (void)refreshContent {
     NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.authorityName];
     [self.provider.commandQueue queueCommandWithName:cmd arguments:@[]];
+}
+
+#pragma mark - LOAbstractContentAuthority overrides
+
+- (BOOL)hasContentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters {
+    NSString *filePath = [path relativePath];
+    NSArray *result = [_fileDB performQuery:@"SELECT id FROM files WHERE path=?" withParams:@[ filePath ]];
+    return [result count];
+}
+
+- (NSString *)localCacheLocationOfPath:(LOContentPath *)path paremeters:(NSDictionary *)parameters {
+    NSString *cacheLocation = nil;
+    NSString *filePath = [path relativePath];
+    NSArray *result = [_fileDB performQuery:@"SELECT category FROM files WHERE path=?" withParams:@[ filePath ]];
+    if ([result count] > 0) {
+        NSDictionary *row = result[0];
+        NSString *category = row[@"category"];
+        LOCMSFileset *fileset = self.filesets[category];
+        cacheLocation = [fileset cachePath:self];
+    }
+    return cacheLocation;
 }
 
 - (void)writeResponse:(id<LOContentAuthorityResponse>)response
@@ -189,6 +208,14 @@
     // Refresh content.
     NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.authorityName];
     return [self.provider.commandQueue clearPendingAndExecuteCommandWithName:cmd arguments:@[]];
+}
+
+#pragma mark - SCIOCObjectAware
+
+- (void)notifyIOCObject:(id)object propertyName:(NSString *)propertyName {
+    // When the repo is configured as an authority within a content provider, use the name
+    // is is mapped under as the authority name.
+    self.cms.authorityName = propertyName;
 }
 
 #pragma mark - SCMessageReceiver

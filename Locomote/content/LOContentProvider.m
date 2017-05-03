@@ -83,7 +83,12 @@
 }
 
 - (QPromise *)syncAuthorities {
-    return nil;
+    NSMutableArray *promises = [NSMutableArray new];
+    for (id key in _authorities) {
+        id<LOContentAuthority> authority = _authorities[key];
+        [promises addObject:[authority syncContent]];
+    }
+    return [Q all:promises];
 }
 
 - (BOOL)hasContentForPath:(NSString *)path {

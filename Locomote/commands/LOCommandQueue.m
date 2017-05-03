@@ -94,14 +94,20 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
     return nil;
 }
 
-- (void)queueCommand:(id<LOCommand>)command arguments:(NSArray *)args {
+- (QPromise *)queueCommand:(id<LOCommand>)command arguments:(NSArray *)args {
+    QPromise *promise = [QPromise new];
     // Modify the queue on the dispatch queue.
     dispatch_async(commandDispatchQueue, ^{
         LOCommandQueueItem *item = [[LOCommandQueueItem alloc] initWithCommand:command args:args];
         // Test whether the same command already exists on the queue.
-        if (![_queue containsObject:item]) {
+        NSInteger idx = [_queue indexOfObject:item];
+        if (idx == NSNotFound) {
             // Add new command to the queue.
             [_queue addObject:item];
+            // Give the command a runtime identity.
+            item.runTimeID = [NSNumber numberWithInteger:[item hash]];
+            // Add the command's promise to the map of pending.
+            _pendingPromises[item.runTimeID] = promise;
             // Execute if the queue was empty (if not empty then a
             // command is currently executing, and will eventually
             // dispatch the new command once the rest of the queue
@@ -110,34 +116,35 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                 [self dispatchNext];
             }
         }
-    });
-}
-
-- (void)queueCommandWithName:(NSString *)name arguments:(NSArray *)args {
-    id<LOCommand> command = _registeredCommands[name];
-    if (command) {
-        [self queueCommand:command arguments:args];
-    }
-}
-
-- (QPromise *)executeCommand:(id<LOCommand>)command arguments:(NSArray *)args {
-    LOCommandQueueItem *item = [[LOCommandQueueItem alloc] initWithCommand:command args:args];
-    QPromise *promise = [QPromise new];
-    dispatch_async(commandDispatchQueue, ^{
-        // Remove any existing copy of the command already on the queue.
-        [_queue removeObject:item];
-        // Add the command to the head of the queue.
-        [_queue insertObject:item atIndex:0];
-        // Give the command a runtime identity.
-        item.runTimeID = [NSNumber numberWithInteger:[item hash]];
-        // Add the command's promise to the map of pending.
-        _pendingPromises[item.runTimeID] = promise;
-        // Execute if the queue was empty.
-        if ([_queue count] == 1) {
-            [self dispatchNext];
+        else {
+            // So that this command invocation's promise resolves when
+            // the matching, pending command completes, join the current
+            // promise and the pending promise in a new promise, and replace
+            // the pending promise with the new joined promise.
+            LOCommandQueueItem *queuedItem = _queue[idx];
+            QPromise *pending = _pendingPromises[queuedItem.runTimeID];
+            QPromise *joined = [QPromise new];
+            joined.then( (id)^(id result) {
+                [pending resolve:result];
+                [promise resolve:result];
+                return nil;
+            })
+            .fail( ^(id error) {
+                [pending reject:error];
+                [promise reject:error];
+            });
+            _pendingPromises[queuedItem.runTimeID] = joined;
         }
     });
     return promise;
+}
+
+- (QPromise *)queueCommandWithName:(NSString *)name arguments:(NSArray *)args {
+    id<LOCommand> command = _registeredCommands[name];
+    if (command) {
+        return [self queueCommand:command arguments:args];
+    }
+    return [Q reject:[NSString stringWithFormat:@"LOCommandQueue: Unrecogized command '%@'", name]];
 }
 
 - (QPromise *)clearPending {
@@ -147,21 +154,6 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
         [promise resolve:self];
     });
     return promise;
-}
-
-- (QPromise *)clearPendingAndExecuteCommand:(id<LOCommand>)command arguments:(NSArray *)args {
-    return [self clearPending]
-    .then((id)^(id result) {
-        return [self executeCommand:command arguments:args];
-    });
-}
-
-- (QPromise *)clearPendingAndExecuteCommandWithName:(NSString *)name arguments:(NSArray *)args {
-    id<LOCommand> command = _registeredCommands[name];
-    if (command) {
-        return [self clearPendingAndExecuteCommand:command arguments:args];
-    }
-    return [Q reject:[NSString stringWithFormat:@"Unrecognized command: %@", name ]];
 }
 
 #pragma mark - SCService

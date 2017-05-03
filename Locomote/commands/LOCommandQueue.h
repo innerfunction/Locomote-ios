@@ -63,21 +63,12 @@
  * The command will be appended to the end of the queue, providing the same command
  * with the same arguments doesn't already exist on the queue. The command will be
  * executed after all commands ahead of it are executed.
+ * The method returns a deferred promise which resolves once the command, and any
+ * follow on command it generates, have completed execution.
  */
-- (void)queueCommand:(id<LOCommand>)command arguments:(NSArray *)args;
-/// Append a new command by name.
-- (void)queueCommandWithName:(NSString *)name arguments:(NSArray *)args;
-/**
- * Add a new command to the head of the queue and execute immediately.
- * The command is inserted at the front of the queue. If the same command with the
- * same arguments exists later in the queue then it is removed from the queue. The
- * command is executed as soon as any currently executing command completes; or
- * immediately, if no command is currently executing. The method returns a promise
- * which resolves once all commands on the queue have been processed - this includes
- * any additional commands appended to the queue as a result of executing commands
- * on the queue.
- */
-- (QPromise *)executeCommand:(id<LOCommand>)command arguments:(NSArray *)args;
+- (QPromise *)queueCommand:(id<LOCommand>)command arguments:(NSArray *)args;
+/// Append a new command to the queue, by name.
+- (QPromise *)queueCommandWithName:(NSString *)name arguments:(NSArray *)args;
 /**
  * Clear all pending commands on the queue.
  * If any command is currently executing then it will complete, but any follow-on
@@ -85,15 +76,6 @@
  * Returns a deferred promise which resolves when the queue is cleared.
  */
 - (QPromise *)clearPending;
-/**
- * Clear the queue of pending commands before executing the provided command.
- * A combination of the clearPending and executeCommand: method.
- */
-- (QPromise *)clearPendingAndExecuteCommand:(id<LOCommand>)command arguments:(NSArray *)args;
-/**
- * Clear the queue of pending commands before executing the command with the specified name.
- */
-- (QPromise *)clearPendingAndExecuteCommandWithName:(NSString *)name arguments:(NSArray *)args;
 /// Return the command dispatch queue.
 + (dispatch_queue_t)getDispatchQueue;
 
