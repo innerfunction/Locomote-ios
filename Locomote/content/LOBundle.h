@@ -19,11 +19,18 @@
 #import <Foundation/Foundation.h>
 #import "LOContentProvider.h"
 
+/**
+ * A subclass of NSBundle that allows access to resources through the Locomote content provider.
+ * Note that this only works reliably for resources that have been packaged with the app, or
+ * which are published with through the Locomote CMS with a fileset cache policy of 'app'.
+ * No guarantees can be made for resources published to the content cache, as these might not
+ * be downloaded, or may have been cleared from the cache at the time of request.
+ */
 @interface LOBundle : NSBundle {
     NSBundle *_mainBundle;
     LOContentProvider *_provider;
 }
 
-+ (LOBundle *)locoBundle;
++ (LOBundle *)locomoteBundle;
 
 @end

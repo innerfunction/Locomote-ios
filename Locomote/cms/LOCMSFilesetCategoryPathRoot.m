@@ -21,9 +21,9 @@
 #import "LOCMSRepository.h"
 #import "LOCMSFileset.h"
 #import "LOContentTypeConverter.h"
+#import "LOMIMETypes.h"
 #import "SCDBORM.h"
 #import "SCHTTPClient.h"
-#import "SCMIMETypes.h"
 
 @implementation LOCMSFilesetCategoryPathRoot
 

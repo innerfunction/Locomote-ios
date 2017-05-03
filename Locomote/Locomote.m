@@ -89,7 +89,7 @@ BOOL startAndWait(NSTimeInterval timeout);
 }
 
 + (NSBundle *)bundle {
-    return [LOBundle locoBundle];
+    return [LOBundle locomoteBundle];
 }
 
 @end
@@ -124,6 +124,14 @@ BOOL startAndWait(NSTimeInterval timeout) {
 + (UIImage *)locoImageWithPath:(NSString *)path {
     NSBundle *bundle = [Locomote bundle];
     return [UIImage imageNamed:path inBundle:bundle compatibleWithTraitCollection:nil];
+}
+
+@end
+
+@implementation NSBundle (Locomote)
+
++ (NSBundle *)locomoteBundle {
+    return [LOBundle locomoteBundle];
 }
 
 @end

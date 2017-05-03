@@ -18,9 +18,11 @@
 
 #import "LOBundle.h"
 
-#define FileExists(path) ([[NSFileManager defaultManager] fileExistsAtPath:path])
+// Test that a path is non-nil and that a file exists at the path.
+#define FileExists(path) (path != nil && [[NSFileManager defaultManager] fileExistsAtPath:path])
+
+// Assemble a dir path, file name and extension into a full path string.
 #define ResourcePath(subpath, name, ext) ([[subpath stringByAppendingPathComponent:name] stringByAppendingPathExtension:ext])
-#define ContentURLForPath(path) ([NSURL URLWithString:[@"content://" stringByAppendingString:path]])
 
 @interface LOBundle ()
 
@@ -30,14 +32,14 @@
 
 @implementation LOBundle
 
-static NSBundle *LocoBundle;
+static NSBundle *LocomoteBundle;
 
 + (void)initialize {
-    LocoBundle = [LOBundle new];
+    LocomoteBundle = [LOBundle new];
 }
 
-+ (NSBundle *)locoBundle {
-    return LocoBundle;
++ (NSBundle *)locomoteBundle {
+    return LocomoteBundle;
 }
 
 - (id)init {
@@ -154,9 +156,10 @@ static NSBundle *LocoBundle;
 }
 
 - (nullable NSURL *)URLForResource:(nullable NSString *)name withExtension:(nullable NSString *)ext subdirectory:(nullable NSString *)subpath {
-    NSString *path = ResourcePath(subpath, name, ext);
-    if ([_provider hasContentForPath:path]) {
-        return ContentURLForPath(path);
+    NSString *rscPath = ResourcePath(subpath, name, ext);
+    NSString *filePath = [_provider localCacheLocationOfPath:rscPath];
+    if (FileExists(filePath)) {
+        return [NSURL fileURLWithPath:filePath];
     }
     return [_mainBundle URLForResource:name withExtension:ext];
 }
@@ -165,19 +168,23 @@ static NSBundle *LocoBundle;
     return [self URLForResource:name withExtension:ext subdirectory:subpath]; // TODO Use parameters for localization info?
 }
 
+/* Assume that the default implementation routes through URLForResource:
 - (nullable NSArray<NSURL *> *)URLsForResourcesWithExtension:(nullable NSString *)ext subdirectory:(nullable NSString *)subpath {
     return [_mainBundle URLsForResourcesWithExtension:ext subdirectory:subpath];
 }
+*/
 
+/* Assume that the default implementation routes through URLsForResourcesWithExtension:
 - (nullable NSArray<NSURL *> *)URLsForResourcesWithExtension:(nullable NSString *)ext subdirectory:(nullable NSString *)subpath localization:(nullable NSString *)localizationName {
     return [_mainBundle URLsForResourcesWithExtension:ext subdirectory:subpath localization:localizationName];
 }
+*/
 
 - (nullable NSString *)pathForResource:(nullable NSString *)name ofType:(nullable NSString *)ext {
-    NSString *path = ResourcePath(@"", name, ext);
-    // TODO Need path to appropriate file system cache location
-    if (FileExists(path)) {
-        return path;
+    NSString *rscPath = ResourcePath(@"", name, ext);
+    NSString *filePath = [_provider localCacheLocationOfPath:rscPath];
+    if (FileExists(filePath)) {
+        return filePath;
     }
     return [[NSBundle mainBundle] pathForResource:name ofType:ext];
 }
@@ -185,11 +192,8 @@ static NSBundle *LocoBundle;
 - (nullable NSString *)pathForResource:(nullable NSString *)name ofType:(nullable NSString *)ext inDirectory:(nullable NSString *)subpath {
     NSString *path = ResourcePath(@"", name, ext);
     NSString *filePath = [_provider localCacheLocationOfPath:path];
-    if (filePath) {
-        if (FileExists(filePath)) {
-            return filePath;
-        }
-        return nil;
+    if (FileExists(filePath)) {
+        return filePath;
     }
     return [_mainBundle pathForResource:name ofType:ext inDirectory:subpath];
 }

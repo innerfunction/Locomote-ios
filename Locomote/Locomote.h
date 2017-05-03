@@ -99,3 +99,10 @@ typedef void (^LOStartCallbackBlock) (BOOL ok);
 + (UIImage *)locoImageWithPath:(NSString *)path;
 
 @end
+
+@interface NSBundle (Locomote)
+
+/// Return the Locomote bundle.
++ (NSBundle *)locomoteBundle;
+
+@end

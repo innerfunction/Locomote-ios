@@ -23,9 +23,6 @@
 
 @interface LOCMSRepository()
 
-/// Force a content refresh.
-- (QPromise *)forceRefresh;
-
 @end
 
 @implementation LOCMSRepository
@@ -146,30 +143,22 @@
     return _fileDB.filesets;
 }
 
-- (void)refreshContent {
-    NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.authorityName];
-    [self.provider.commandQueue queueCommandWithName:cmd arguments:@[]];
+- (QPromise *)refreshContent {
+    return [self syncContent];
 }
 
 #pragma mark - LOAbstractContentAuthority overrides
 
 - (BOOL)hasContentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters {
     NSString *filePath = [path relativePath];
-    NSArray *result = [_fileDB performQuery:@"SELECT id FROM files WHERE path=?" withParams:@[ filePath ]];
+    NSString *sql = [NSString stringWithFormat:@"SELECT id FROM %@ WHERE path=?", _fileDB.filesTable ];
+    NSArray *result = [_fileDB performQuery:sql withParams:@[ filePath ]];
     return [result count];
 }
 
 - (NSString *)localCacheLocationOfPath:(LOContentPath *)path paremeters:(NSDictionary *)parameters {
-    NSString *cacheLocation = nil;
     NSString *filePath = [path relativePath];
-    NSArray *result = [_fileDB performQuery:@"SELECT category FROM files WHERE path=?" withParams:@[ filePath ]];
-    if ([result count] > 0) {
-        NSDictionary *row = result[0];
-        NSString *category = row[@"category"];
-        LOCMSFileset *fileset = self.filesets[category];
-        cacheLocation = [fileset cachePath:self];
-    }
-    return cacheLocation;
+    return [_fileDB cacheLocationForFileWithPath:filePath];
 }
 
 - (void)writeResponse:(id<LOContentAuthorityResponse>)response
@@ -183,8 +172,8 @@
     if (![root hasPrefix:@"~"]) {
         // Lookup file entry by path.
         NSString *filePath = [path fullPath];
-        NSArray *result = [_fileDB performQuery:@"SELECT id, category FROM files WHERE path=?"
-                                     withParams:@[ filePath ]];
+        NSString *sql = [NSString stringWithFormat:@"SELECT id, category FROM %@ WHERE path=?", _fileDB.filesTable ];
+        NSArray *result = [_fileDB performQuery:sql withParams:@[ filePath ]];
         if ([result count] > 0) {
             // File entry found in database; rewrite content path to a direct resource reference.
             NSDictionary *row = result[0];
@@ -202,13 +191,12 @@
     [super writeResponse:response forPath:path parameters:parameters];
 }
 
-#pragma mark - Private
-
-- (QPromise *)forceRefresh {
-    // Refresh content.
+- (QPromise *)syncContent {
     NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.authorityName];
-    return [self.provider.commandQueue clearPendingAndExecuteCommandWithName:cmd arguments:@[]];
+    return [self.provider.commandQueue queueCommandWithName:cmd arguments:@[]];
 }
+
+#pragma mark - Private
 
 #pragma mark - SCIOCObjectAware
 
@@ -234,7 +222,7 @@
     
     // Set file DB name and initial copy path.
     if (!_fileDB.name) {
-        _fileDB.name = [NSString stringWithFormat:@"%@.%@", _cms.account, _cms.repo ];
+        _fileDB.name = self.cms.authorityName;
     }
     if (!_fileDB.initialCopyPath) {
         NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];
@@ -244,8 +232,10 @@
     _authManager = [[LOCMSAuthenticationManager alloc] initWithCMSSettings:_cms];
     _httpClient = [[SCHTTPClient alloc] initWithNSURLSessionTaskDelegate:(id<NSURLSessionTaskDelegate>)_authManager];
     _commandProtocol = [[LOCMSCommandProtocol alloc] initWithRepository:self];
+    
     // Register command protocol with the scheduler, using the authority name as the command prefix.
     [_commandProtocol registerWithCommandQueue:self.provider.commandQueue];
+    
     // Refresh the app content on start.
     [self refreshContent];
 }
