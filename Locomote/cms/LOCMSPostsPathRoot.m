@@ -18,7 +18,6 @@
 
 #import "LOCMSPostsPathRoot.h"
 #import "LOCMSFileset.h"
-#import "LOCMSContentAuthority.h"
 #import "NSDictionary+SC.h"
 #import "GRMustache.h"
 #import "SCLogger.h"

@@ -96,7 +96,7 @@ typedef void (^LOStartCallbackBlock) (BOOL ok);
  * Load an image from a Locomote.sh path.
  * The image path has to include an authority name prefix.
  */
-+ (UIImage *)locoImageWithPath:(NSString *)path;
++ (UIImage *)locomoteImageWithPath:(NSString *)path;
 
 @end
 

@@ -104,8 +104,11 @@
     // request parameters in the compound URI format - i.e. +p1@v1+p2@v2 etc.
     SCCompoundURI *uri = [[SCCompoundURI alloc] initWithScheme:url.scheme name:url.path];
     
-    // TODO Where to find a URI handler...
-    NSDictionary *parameters = [self.uriHandler dereferenceParameters:uri];
+    // NOTE URI handler only available in content management SDK.
+    NSDictionary *parameters = @{};
+    if( self.uriHandler ) {
+        parameters = [self.uriHandler dereferenceParameters:uri];
+    }
     
     [self writeResponse:response
                 forPath:contentPath

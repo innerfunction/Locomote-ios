@@ -121,7 +121,7 @@ BOOL startAndWait(NSTimeInterval timeout) {
 
 @implementation UIImage (Locomote)
 
-+ (UIImage *)locoImageWithPath:(NSString *)path {
++ (UIImage *)locomoteImageWithPath:(NSString *)path {
     NSBundle *bundle = [Locomote bundle];
     return [UIImage imageNamed:path inBundle:bundle compatibleWithTraitCollection:nil];
 }

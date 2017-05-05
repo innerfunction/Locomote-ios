@@ -144,9 +144,9 @@
 #pragma mark - Properties
 
 - (void)setAuthorityName:(NSString *)authorityName {
-    // NOTE that slashes / in the name are replaced with underscore; this is to ensure that
+    // NOTE that slashes / in the name are replaced with dots; this is to ensure that
     // the authority name can take the place of a host name in a content: URL.
-    _authorityName = [authorityName stringByReplacingOccurrencesOfString:@"/" withString:@"_"];
+    _authorityName = [authorityName stringByReplacingOccurrencesOfString:@"/" withString:@"."];
 }
 
 #pragma mark - Private methods

@@ -17,21 +17,22 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Q.h"
 #import "LOCMSAuthenticationManager.h"
 #import "LOCMSSettings.h"
 #import "LOCMSFileDB.h"
 #import "LOCommandQueue.h"
 #import "SCHTTPClient.h"
+#import "Q.h"
 
 @class LOCMSRepository;
 
 @interface LOCMSCommandProtocol : NSObject {
     NSString *_logoutAction;
     QPromise *_promise;
-    NSString *_commandPrefix;
 }
 
+/** A name prefix used by the protocol's different commands. */
+@property (nonatomic, strong) NSString *commandPrefix;
 /** The content repository's settings. */
 @property (nonatomic, weak) LOCMSSettings *cms;
 /** The content repository's authentication manager. */

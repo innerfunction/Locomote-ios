@@ -55,7 +55,7 @@
 }
 
 /// Register a command name.
-- (void)registerCommand:(id<LOCommand>)command usingName:(NSString *)name;
+- (void)registerCommand:(id<LOCommand>)command;
 /// Create a command queue item from a command name and its arguments.
 - (LOCommandQueueItem *)makeQueueItemForCommandName:(NSString *)name arguments:(NSArray *)args;
 /**
@@ -64,10 +64,14 @@
  * with the same arguments doesn't already exist on the queue. The command will be
  * executed after all commands ahead of it are executed.
  * The method returns a deferred promise which resolves once the command, and any
- * follow on command it generates, have completed execution.
+ * follow on commands it generates, have completed execution.
  */
 - (QPromise *)queueCommand:(id<LOCommand>)command arguments:(NSArray *)args;
-/// Append a new command to the queue, by name.
+/**
+ * Append a new command to the queue, by name.
+ * This method looksup the command implementation and then calls the queueCommand:arguments:
+ * method.
+ */
 - (QPromise *)queueCommandWithName:(NSString *)name arguments:(NSArray *)args;
 /**
  * Clear all pending commands on the queue.

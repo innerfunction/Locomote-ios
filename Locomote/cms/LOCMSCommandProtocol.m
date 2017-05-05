@@ -27,6 +27,8 @@
 #define AcceptMIMETypes     (@"application/msgpack, application/json;q=0.9, */*;q=0.8")
 #define AcceptEncodings     (@"gzip")
 
+#define QualifiedCommandName(protocol, name)    ([NSString stringWithFormat:@"%@.%@", protocol.commandPrefix, name ])
+
 @interface LOCMSCommandProtocolRefresh : NSObject <LOCommand> {
     __weak LOCMSCommandProtocol *_protocol;
     QPromise *_promise;
@@ -49,22 +51,21 @@
 
 - (id)initWithRepository:(LOCMSRepository *)repository {
     self = [super init];
-    if (self) {
-        self.cms = repository.cms;
-        self.authManager = repository.authManager;
-        // Use a copy of the file DB to avoid problems with multi-thread access.
-        self.fileDB = [repository.fileDB newInstance];
-        self.httpClient = repository.httpClient;
-        _commandPrefix = repository.authorityName;
-    }
+    self.cms = repository.cms;
+    self.authManager = repository.authManager;
+    // Use a copy of the file DB to avoid problems with multi-thread access.
+    self.fileDB = [repository.fileDB newInstance];
+    self.httpClient = repository.httpClient;
+    self.commandPrefix = repository.authorityName;
     return self;
 }
 
 - (void)registerWithCommandQueue:(LOCommandQueue *)commandQueue {
+    // TODO: Can't the command queue read the command name from the command??
     LOCMSCommandProtocolRefresh *refresh = [[LOCMSCommandProtocolRefresh alloc] initWithCommandProtocol:self];
-    [commandQueue registerCommand:refresh usingName:@"refresh"];
-    NSString *commandName = [NSString stringWithFormat:@"%@.%@", _commandPrefix, @"download-fileset"];
-    [commandQueue registerCommand:[LOCMSCommandProtocolDownloadFileset new] usingName:commandName];
+    [commandQueue registerCommand:refresh];
+    LOCMSCommandProtocolDownloadFileset *downloadFileset = [LOCMSCommandProtocolDownloadFileset new];
+    [commandQueue registerCommand:downloadFileset];
 }
 
 @end
@@ -76,7 +77,7 @@
 - (id)initWithCommandProtocol:(LOCMSCommandProtocol *)protocol {
     self = [super init];
     if (self) {
-        _name = @"cms.refresh";
+        _name = QualifiedCommandName(protocol, @"refresh");
         _protocol = protocol;
     }
     return self;
@@ -248,7 +249,7 @@
             }
         
             // Queue downloads of updated category filesets.
-            NSString *command = [self qualifyName:@"download-fileset"];
+            NSString *command = QualifiedCommandName(_protocol, @"download-fileset");
             for (id category in [updatedCategories keyEnumerator]) {
                 id since = updatedCategories[category];
                 // Get cache location for fileset; if nil then don't download the fileset.
@@ -300,7 +301,7 @@
 - (id)initWithCommandProtocol:(LOCMSCommandProtocol *)protocol {
     self = [super init];
     if (self) {
-        _name = @"cms.refresh";
+        _name = QualifiedCommandName(protocol, @"download-fileset");
         _protocol = protocol;
     }
     return self;

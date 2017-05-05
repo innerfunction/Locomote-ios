@@ -104,7 +104,7 @@
             NSString *path = content[@"path"];
             NSString *ext = [path pathExtension];
             if (_fileset && [type isEqualToString:ext]) {
-                NSString *mimeType = [SCMIMETypes mimeTypeForType:type];
+                NSString *mimeType = [LOMIMETypes mimeTypeForType:type];
                 NSString *url = [_repository.cms urlForFile:path];
                 NSString *cachePath = [_fileDB cacheLocationForFile:content];
                 BOOL cachable = [self.fileset cachable];

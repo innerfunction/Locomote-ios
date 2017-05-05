@@ -21,7 +21,7 @@
 
 @protocol LOCommand <NSObject>
 
-/// A name for the command. Used for logging.
+/// A name for the command. Used for registration and logging.
 @property (nonatomic, readonly) NSString *name;
 
 /**

@@ -22,6 +22,7 @@
 #import "SCIOCConfigurationAware.h"
 #import "SCIOCTypeInspectable.h"
 #import "SCIOCProxyObject.h"
+#import "SCURIHandling.h"
 
 /**
  * An abstract content authority.
@@ -49,5 +50,7 @@
 @property (nonatomic, readonly) NSString *packagedContentPath;
 /// Interval between content refreshes; in minutes.
 @property (nonatomic, assign) CGFloat refreshInterval;
+/// An optional URL handler.
+@property (nonatomic, strong) id<SCURIHandler> uriHandler;
 
 @end

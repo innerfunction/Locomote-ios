@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		072C47901EB67673003222DD /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 072C475F1EB67673003222DD /* Info.plist */; };
 		072C47911EB67673003222DD /* Locomote.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C47601EB67673003222DD /* Locomote.h */; };
 		072C47921EB67673003222DD /* LOCMSAuthenticationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C47621EB67673003222DD /* LOCMSAuthenticationManager.h */; };
 		072C47931EB67673003222DD /* LOCMSAuthenticationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C47631EB67673003222DD /* LOCMSAuthenticationManager.m */; };
@@ -324,7 +323,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				072C47901EB67673003222DD /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,7 +490,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Locomote-ios/Info.plist";
+				INFOPLIST_FILE = Locomote/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = sh.locomote.Locomote;
@@ -509,7 +507,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Locomote-ios/Info.plist";
+				INFOPLIST_FILE = Locomote/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = sh.locomote.Locomote;

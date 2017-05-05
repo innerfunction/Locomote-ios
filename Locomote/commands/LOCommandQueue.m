@@ -82,8 +82,8 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
     return self;
 }
 
-- (void)registerCommand:(id<LOCommand>)command usingName:(NSString *)name {
-    _registeredCommands[name] = command;
+- (void)registerCommand:(id<LOCommand>)command {
+    _registeredCommands[command.name] = command;
 }
 
 - (LOCommandQueueItem *)makeQueueItemForCommandName:(NSString *)name arguments:(NSArray *)args {
@@ -189,12 +189,15 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                         [_queue removeObjectAtIndex:0];
                         // Add any follow-on commands to the end of the queue.
                         if ([followOns count] > 0) {
-                            for (LOCommandQueueItem *followOn in followOns) {
-                                if (![_queue containsObject:followOn]) {
-                                    [_queue addObject:followOn];
+                            for (NSDictionary *followOn in followOns) {
+                                NSString *command = followOn[@"command"];
+                                NSArray *args = followOn[@"arguments"];
+                                LOCommandQueueItem *followOnItem = [self makeQueueItemForCommandName:command arguments:args];
+                                if (![_queue containsObject:followOnItem]) {
+                                    [_queue addObject:followOnItem];
                                     // Give the follow-on the same runtime ID as
                                     // its parent command.
-                                    followOn.runTimeID = item.runTimeID;
+                                    followOnItem.runTimeID = item.runTimeID;
                                 }
                             }
                         }
