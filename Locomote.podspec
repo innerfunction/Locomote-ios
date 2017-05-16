@@ -25,36 +25,24 @@ iOS SDK for the Locomote.sh mobile asset and content management server.
 
     s.frameworks = "UIKit", "Foundation"
 
-    s.xcconfig = {
-      "HEADER_SEARCH_PATHS" => "$(SRCROOT)/**",
-      'CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES' => 'YES',
-    }
-
-    s.subspec 'Test' do |test|
-        test.source_files = 'Locomote/commands/LOTest.*';
-        test.requires_arc = true;
-        test.compiler_flags = '-w';
-        test.dependency 'Q';
+    s.subspec 'AM' do |am|
+        am.source_files = 'Locomote/commands/*.{h,m}', 'Locomote/content/*.{h,m}', 'Locomote/ams/*.{h,m}';
+        am.public_header_files = 'Locomote/commands/*.h', 'Locomote/content/*.h', 'Locomote/ams/*.h';
+        am.requires_arc = true;
+        am.compiler_flags = '-w';
+        am.dependency 'Q'
+        am.dependency 'SCFFLD/Core'
+        am.dependency 'SCFFLD/HTTP'
+        am.dependency 'SCFFLD/DB'
+        am.dependency 'GRMustache'
     end
 
-    #s.subspec 'AM' do |am|
-        #am.source_files = 'Locomote/commands/*.{h,m}', 'Locomote/content/*.{h,m}', 'Locomote/ams/*.{h,m}';
-        #am.public_header_files = 'Locomote/commands/*.h', 'Locomote/content/*.h', 'Locomote/ams/*.h';
-        #am.requires_arc = true;
-        #am.compiler_flags = '-w';
-        #am.dependency 'Q'
-        #am.dependency 'SCFFLD/Core'
-        #am.dependency 'SCFFLD/HTTP'
-        #am.dependency 'SCFFLD/DB'
-        #am.dependency 'GRMustache'
-    #end
-
-    #s.subspec 'CM' do |cm|
-        #cm.source_files = 'Locomote/cms/*.{h,m}';
-        #cm.public_header_files = 'Locomote/cms/*.h';
-        #cm.requires_arc = true;
-        #cm.compiler_flags = '-w';
-        #cm.dependency 'Locomote/AM';
-    #end
+    s.subspec 'CM' do |cm|
+        cm.source_files = 'Locomote/cms/*.{h,m}';
+        cm.public_header_files = 'Locomote/cms/*.h';
+        cm.requires_arc = true;
+        cm.compiler_flags = '-w';
+        cm.dependency 'Locomote/AM';
+    end
 
 end
