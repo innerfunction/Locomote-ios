@@ -4,17 +4,17 @@ PODS:
   - JRSwizzle (1.0)
   - MessagePack (1.0.0)
   - Q (0.9.0)
-  - SCFFLD/Core (0.9.5):
+  - SCFFLD/Core (0.9.6):
     - SCFFLD/NoArc
     - ZipArchive
-  - SCFFLD/DB (0.9.5):
+  - SCFFLD/DB (0.9.6):
     - SCFFLD/Core
-  - SCFFLD/HTTP (0.9.5):
+  - SCFFLD/HTTP (0.9.6):
     - MessagePack
     - Q
     - SCFFLD/Core
     - SSKeychain
-  - SCFFLD/NoArc (0.9.5)
+  - SCFFLD/NoArc (0.9.6)
   - SSKeychain (1.4.1)
   - ZipArchive (1.4.0)
 
@@ -30,7 +30,7 @@ SPEC CHECKSUMS:
   JRSwizzle: dd5ead5d913a0f29e7f558200165849f006bb1e3
   MessagePack: 6ef1d8f7c4b4021cf0b257d61ec5e8b4f3e9831c
   Q: 003eeabd4b114fbaeec65d4bd970174fc6f4c71b
-  SCFFLD: 03260a0555fcc8e177f824ab12e0221a6a7e88ce
+  SCFFLD: acaf4f42fd71523ea440cda49c120e0f800ce352
   SSKeychain: 55cc80f66f5c73da827e3077f02e43528897db41
   ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
 
