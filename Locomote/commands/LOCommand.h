@@ -17,7 +17,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <Q.h>
+#import "Q.h"
 
 @protocol LOCommand <NSObject>
 
