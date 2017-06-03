@@ -54,7 +54,26 @@
  * Returns nil if the file isn't locally cachable.
  */
 - (NSString *)cacheLocationForFileWithPath:(NSString *)path;
-
+/**
+ * Insert a DB reset record for the specified category with the specified client visible set.
+ */
+- (void)insertResetCVS:(NSString *)cvs forCategory:(NSString *)category;
+/**
+ * Read the reset CVS for a fileset category.
+ */
+- (NSString *)getResetCVSForCategory:(NSString *)category;
+/**
+ * Return a list of any in-progress file DB resets.
+ */
+- (NSArray *)getInProgressResetRecords;
+/**
+ * Delete a reset record from the database.
+ */
+- (void)deleteResetRecordForCategory:(NSString *)category;
+/**
+ * Delete all reset records from the database.
+ */
+- (void)deleteAllResetRecords;
 /// Return a new instance of this database.
 - (LOCMSFileDB *)newInstance;
 

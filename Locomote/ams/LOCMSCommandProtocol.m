@@ -29,6 +29,7 @@
 
 #define QualifiedCommandName(protocol, name)    ([NSString stringWithFormat:@"%@.%@", protocol.commandPrefix, name ])
 
+/// Refresh the file DB by pulling updates from the server.
 @interface LOCMSCommandProtocolRefresh : NSObject <LOCommand> {
     __weak LOCMSCommandProtocol *_protocol;
     QPromise *_promise;
@@ -38,12 +39,48 @@
 
 @end
 
+/// Perform a file DB reset.
+@interface LOCMSCommandProtocolResetDatabase : NSObject <LOCommand> {
+    __weak LOCMSCommandProtocol *_protocol;
+    QPromise *_promise;
+}
+
+- (id)initWithCommandProtocol:(LOCMSCommandProtocol *)protocol;
+
+/**
+ * Build a JSON document describing the client visible set for a fileset category.
+ * If the category name is nil then the set returned is for the entire file database.
+ * The client visible set describes what files are currently visible to the Locomote client.
+ * The JSON document is an object with a "cvs" property whose value is an array of ( file ID,
+ * file version ) tuples.
+ * The CVS is used by the server during a file db reset to work out what file updates the
+ * client needs to see.
+ */
+- (NSString *)buildClientVisibleSetForCategory:(NSString *)category;
+
+@end
+
+/// Download files in a fileset category.
 @interface LOCMSCommandProtocolDownloadFileset : NSObject <LOCommand> {
     __weak LOCMSCommandProtocol *_protocol;
     QPromise *_promise;
 }
 
 - (id)initWithCommandProtocol:(LOCMSCommandProtocol *)protocol;
+
+@end
+
+/// Download files as part of a fileset reset.
+@interface LOCMSCommandProtocolResetFileset : NSObject <LOCommand> {
+    __weak LOCMSCommandProtocol *_protocol;
+    QPromise *_promise;
+}
+
+- (id)initWithCommandProtocol:(LOCMSCommandProtocol *)protocol;
+
+@end
+
+@interface LOCMSCommandProtocol ()
 
 @end
 
@@ -61,11 +98,14 @@
 }
 
 - (void)registerWithCommandQueue:(LOCommandQueue *)commandQueue {
-    // TODO: Can't the command queue read the command name from the command??
     LOCMSCommandProtocolRefresh *refresh = [[LOCMSCommandProtocolRefresh alloc] initWithCommandProtocol:self];
     [commandQueue registerCommand:refresh];
+    LOCMSCommandProtocolResetDatabase *resetDatabase = [[LOCMSCommandProtocolResetDatabase alloc] initWithCommandProtocol:self];
+    [commandQueue registerCommand:resetDatabase];
     LOCMSCommandProtocolDownloadFileset *downloadFileset = [LOCMSCommandProtocolDownloadFileset new];
     [commandQueue registerCommand:downloadFileset];
+    LOCMSCommandProtocolResetFileset *resetFileset = [LOCMSCommandProtocolResetFileset new];
+    [commandQueue registerCommand:resetFileset];
 }
 
 @end
@@ -94,7 +134,7 @@
     NSMutableDictionary *params = [NSMutableDictionary new];
     params[@"secure"] = IsSecure;
     
-    // Read current group fingerprint.
+    // Read current ACM group fingerprint.
     NSDictionary *record = [_protocol.fileDB readRecordWithID:@"$group" fromTable:@"fingerprints"];
     if (record) {
         group = record[@"current"];
@@ -123,11 +163,21 @@
         LOCMSAuthenticationManager *authManager = _protocol.authManager;
         LOCMSFileDB *fileDB = _protocol.fileDB;
         
-        // Create list of follow up commands.
+        // A list of follow up commands.
         NSMutableArray *commands = [NSMutableArray new];
+        
+        // Check the response code.
         NSInteger responseCode = response.httpResponse.statusCode;
         if (responseCode == 401) {
             [authManager removeCredentials];
+            [_promise resolve:commands];
+            return nil;
+        }
+        
+        // LS-13: ACM group mismatch, perform a database reset.
+        if (responseCode == 205) {
+            NSString *command = QualifiedCommandName(_protocol, @"reset");
+            [commands addObject:@{ @"name": command, @"args": @[] }];
             [_promise resolve:commands];
             return nil;
         }
@@ -174,6 +224,7 @@
             [fileDB beginTransaction];
         
         
+            // TODO: LS-13 - remove following code
             // Check group fingerprint to see if a migration is needed.
             NSString *updateGroup = [updateData valueForKeyPath:@"repository.group"];
             BOOL migrate = ![group isEqualToString:updateGroup];
@@ -257,7 +308,6 @@
                 if (cacheLocation) {
                     NSMutableArray *args = [NSMutableArray new];
                     [args addObject:category];
-                    [args addObject:cacheLocation]; // Where to put the downloaded files.
                     if (since != [NSNull null]) {
                         [args addObject:since];
                     }
@@ -284,12 +334,176 @@
         return nil;
     })
     .fail(^(id error) {
-        NSString *msg = [NSString stringWithFormat:@"Updates download from %@ failed: %@", refreshURL, error];
+        NSString *msg = [NSString stringWithFormat:@"Updates download from %@ failed: %@", refreshURL, error ];
         [_promise reject:msg];
     });
     
     // Return deferred promise.
     return _promise;
+}
+
+@end
+
+@implementation LOCMSCommandProtocolResetDatabase
+
+@synthesize name=_name;
+
+- (id)initWithCommandProtocol:(LOCMSCommandProtocol *)protocol {
+    self = [super init];
+    if (self) {
+        _name = QualifiedCommandName(protocol, @"reset");
+        _protocol = protocol;
+    }
+    return self;
+}
+
+- (QPromise *)execute:(NSArray *)args {
+    _promise = [QPromise new];
+    
+    LOCMSFileDB *fileDB = _protocol.fileDB;
+    
+    // Delete all reset records
+    [fileDB deleteAllResetRecords];
+    
+    // Generate new reset records for each fileset category.
+    // Note that this has to be done /before/ updates are applied, to ensure that the client
+    // visible set reflects the state with the pre-updated ACM group ID.
+    NSArray *categories = [fileDB performQuery:@"SELECT category FROM fingerprints" withParams:@[]];
+    for (NSDictionary *record in categories) {
+        NSString *category = record[@"category"];
+        if ([@"$group" isEqualToString:category]) {
+            continue;
+        }
+        NSString *cvs = [self buildClientVisibleSetForCategory:category];
+        [fileDB insertResetCVS:cvs forCategory:category];
+    }
+    
+    // Read CVS for complete file DB
+    NSString *cvs = [self buildClientVisibleSetForCategory:nil];
+    
+    // Prepare URL, parameters and options for updates request.
+    NSString *refreshURL = [_protocol.cms urlForUpdates];
+    NSDictionary *params = @{
+        @"secure":  IsSecure,
+        @"cvs":     cvs
+    };
+
+    NSDictionary *options = @{
+        SCHTTPClientRequestOptionAccept:            AcceptMIMETypes,
+        SCHTTPClientRequestOptionAcceptEncoding:    AcceptEncodings
+    };
+    
+    // Fetch updates from the server.
+    [_protocol.httpClient post:refreshURL data:params options:options]
+    .then((id)^(SCHTTPClientResponse *response) {
+
+        LOCMSAuthenticationManager *authManager = _protocol.authManager;
+        LOCMSFileDB *fileDB = _protocol.fileDB;
+        
+        // A list of follow up commands.
+        NSMutableArray *commands = [NSMutableArray new];
+        
+        // Check the response code.
+        NSInteger responseCode = response.httpResponse.statusCode;
+        if (responseCode == 401) {
+            [authManager removeCredentials];
+            [_promise resolve:commands];
+            return nil;
+        }
+        
+        // Read the updates data.
+        id updateData = [response parseData];
+        if ([updateData isKindOfClass:[NSString class]]) {
+            // Indicates a server error
+            NSLog(@"%@ %@", response.httpResponse.URL, updateData);
+            [_promise resolve:commands];
+            return nil;
+        }
+        
+        // Write updates to database.
+        NSDictionary *updates = [updateData valueForKeyPath:@"db"];
+        if ([@0 isEqual:updates]) {
+            // This can happen no updates to report from the server; replace updates
+            // with an empty dictionary.
+            updates = @{};
+        }
+    
+        // Start a DB transaction.
+        [fileDB beginTransaction];
+        
+        // Shift current fileset fingerprints to previous.
+        [fileDB performUpdate:@"UPDATE filesets SET previous=current" withParams:@[]];
+
+        // Apply all downloaded updates to the database.
+        for (NSString *tableName in updates) {
+            NSArray *table = updates[tableName];
+            for (NSDictionary *values in table) {
+                [fileDB upsertValues:values intoTable:tableName];
+            }
+        }
+    
+        // Check for deleted files.
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        NSArray *deleted = [fileDB performQuery:@"SELECT id, path FROM files WHERE status='deleted'" withParams:@[]];
+        for (NSDictionary *record in deleted) {
+            // Delete cached file, if exists.
+            NSString *path = [fileDB cacheLocationForFile:record];
+            if (path && [fileManager fileExistsAtPath:path]) {
+                [fileManager removeItemAtPath:path error:nil];
+            }
+        }
+        
+        // Delete obsolete records.
+        [fileDB performUpdate:@"DELETE FROM files WHERE status='deleted'" withParams:@[]];
+
+        // Prune ORM related records.
+        [fileDB pruneRelatedValues];
+
+        // Commit the transaction.
+        [fileDB commitTransaction];
+        
+        // Read list of fileset category names and queue fileset reset commands.
+        // (Note that this is done after the updates, and not before, to ensure that any newly
+        // visible filesets also get downloaded).
+        NSString *command = QualifiedCommandName(_protocol, @"reset-fileset");
+        NSArray *rs = [fileDB performQuery:@"SELECT category FROM fingerprints" withParams:@[]];
+        for (NSDictionary *record in rs) {
+            NSString *category = record[@"category"];
+            if ([@"$group" isEqualToString:category]) {
+                // The ACM group fingerprint entry - skip.
+                continue;
+            }
+            [commands addObject:@{ @"name": command, @"args": @[ category ] }];
+        }
+            
+        [_promise resolve:commands];
+        return nil;
+    })
+    .fail(^(id error) {
+        NSString *msg = [NSString stringWithFormat:@"Reset download from %@ failed: %@", refreshURL, error ];
+        [_promise reject:msg];
+    });
+    
+    // Return deferred promise.
+    return _promise;
+}
+
+- (NSString *)buildClientVisibleSetForCategory:(NSString *)category {
+
+    NSMutableString *json = [NSMutableString new];
+    [json appendString:@"{"];
+    NSString *separator = @"";
+    
+    NSArray *records = (category == nil)
+        ? [_protocol.fileDB performQuery:@"SELECT id, version FROM files ORDER BY id" withParams:@[]]
+        : [_protocol.fileDB performQuery:@"SELECT id, version FROM files WHERE category=? ORDER BY id" withParams:@[ category ]];
+    
+    for (NSDictionary *record in records) {
+        [json appendFormat:@"%@\"%@\":\"%@\"", separator, record[@"id"], record[@"version"]];
+        separator = @",";
+    }
+    [json appendString:@"}"];
+    return json;
 }
 
 @end
@@ -312,28 +526,29 @@
     _promise = [QPromise new];
     
     id category = args[0];
-    id cachePath = args[1];
     
     // Build the fileset URL and query parameters.
     NSString *filesetURL = [_protocol.cms urlForFileset:category];
     NSMutableDictionary *data = [NSMutableDictionary new];
     data[@"secure"] = IsSecure;
-    if ([args count] > 2) {
-        data[@"since"] = args[2];
+    if ([args count] > 1) {
+        data[@"since"] = args[1];
     }
     
     // Download the fileset.
     [_protocol.httpClient getFile:filesetURL data:data]
     .then((id)^(SCHTTPClientResponse *response) {
+        LOCMSFileDB *fileDB = _protocol.fileDB;
         NSInteger responseCode = response.httpResponse.statusCode;
         if (responseCode == 200) {
             // Unzip downloaded file to content location.
             NSString *downloadPath = [response.downloadLocation path];
+            NSString *cachePath = [fileDB cacheLocationForFileset:category];
             [SCFileIO unzipFileAtPath:downloadPath toPath:cachePath overwrite:YES];
         }
         if (responseCode == 200 || responseCode == 204) {
             // Update the fileset's fingerprint.
-            [_protocol.fileDB performUpdate:@"UPDATE filesets SET current=latest WHERE category=?" withParams:@[ category ]];
+            [fileDB performUpdate:@"UPDATE filesets SET current=latest WHERE category=?" withParams:@[ category ]];
         }
         // Resolve empty list - no follow-on commands.
         [_promise resolve:@[]];
@@ -344,6 +559,77 @@
         [_promise reject:msg];
     });
 
+    // Return deferred promise.
+    return _promise;
+}
+
+@end
+
+
+@implementation LOCMSCommandProtocolResetFileset
+
+@synthesize name=_name;
+
+- (id)initWithCommandProtocol:(LOCMSCommandProtocol *)protocol {
+    self = [super init];
+    if (self) {
+        _name = QualifiedCommandName(protocol, @"reset-fileset");
+        _protocol = protocol;
+    }
+    return self;
+}
+
+- (QPromise *)execute:(NSArray *)args {
+    
+    _promise = [QPromise new];
+    
+    LOCMSFileDB *fileDB = _protocol.fileDB;
+    
+    NSString *category = args[0];
+    NSString *cvs = [fileDB getResetCVSForCategory:category];
+    
+    // If no CVS found then don't continue with this command, but issue a normal fileset
+    // download command in its place.
+    if (!cvs) {
+        id command = QualifiedCommandName(_protocol, @"download-fileset");
+        id args = @[ category ];
+        [_promise resolve:@[ @{ @"name": command, @"args": args } ]];
+    }
+    else {
+        // Otherwise continue with reset command.
+        
+        // Build the fileset URL and query parameters.
+        NSString *filesetURL = [_protocol.cms urlForFileset:category];
+        NSDictionary *data = @{
+            @"cvs":     cvs,
+            @"secure":  IsSecure
+        };
+        
+        // Download the fileset.
+        [_protocol.httpClient post:filesetURL data:data]
+        .then((id)^(SCHTTPClientResponse *response) {
+            NSInteger responseCode = response.httpResponse.statusCode;
+            if (responseCode == 200) {
+                // Unzip downloaded file to content location.
+                NSString *downloadPath = [response.downloadLocation path];
+                NSString *cachePath = [fileDB cacheLocationForFileset:category];
+                [SCFileIO unzipFileAtPath:downloadPath toPath:cachePath overwrite:YES];
+            }
+            if (responseCode == 200 || responseCode == 204) {
+                // Update the fileset's fingerprint and delete the fileset reset record
+                [fileDB performUpdate:@"UPDATE filesets SET current=latest WHERE category=?" withParams:@[ category ]];
+                [fileDB deleteResetRecordForCategory:category];
+            }
+            // Resolve empty list - no follow-on commands.
+            [_promise resolve:@[]];
+            return nil;
+        })
+        .fail(^(id error) {
+            NSString *msg = [NSString stringWithFormat:@"Fileset reset from %@ failed: %@", filesetURL, error];
+            [_promise reject:msg];
+        });
+    }
+    
     // Return deferred promise.
     return _promise;
 }

@@ -17,11 +17,22 @@
 //
 
 #import "LOCMSRepository.h"
+#import "Locomote.h"
 #import "LOCMSFileset.h"
 #import "LOCMSFilesetCategoryPathRoot.h"
 #import "LOContentProvider.h"
 
+#define SDKPlatform     (@"ios")
+
 @interface LOCMSRepository()
+
+/**
+ * Check if a file DB reset was in progress (and interrupted when the app was stopped); if so
+ * then issue commands to continue the reset.
+ */
+- (void)continueDBResetInProgress;
+/// Build the HTTP client user agent string.
+- (NSString *)buildHTTPUserAgent;
 
 @end
 
@@ -231,13 +242,41 @@
 
     _authManager = [[LOCMSAuthenticationManager alloc] initWithCMSSettings:_cms];
     _httpClient = [[SCHTTPClient alloc] initWithNSURLSessionTaskDelegate:(id<NSURLSessionTaskDelegate>)_authManager];
+    /* TODO
+    _httpClient.additionalHTTPHeaders = @{
+        @"User-Agent": [self buildHTTPUserAgent]
+    }
+    */
     _commandProtocol = [[LOCMSCommandProtocol alloc] initWithRepository:self];
     
     // Register command protocol with the scheduler, using the authority name as the command prefix.
     [_commandProtocol registerWithCommandQueue:self.provider.commandQueue];
     
+    // Check for an interrupted file db reset.
+    [self continueDBResetInProgress];
+    
     // Refresh the app content on start.
     [self refreshContent];
+}
+
+#pragma mark - Private
+
+- (void)continueDBResetInProgress {
+    NSString *command = [NSString stringWithFormat:@"%@.%@", self.authorityName, @"reset-fileset"];
+    LOCommandQueue *commandQueue = self.provider.commandQueue;
+    // Query the file DB for any outstanding fileset resets, and reissue a reset command for each one.
+    NSArray *fsresets = [_fileDB getInProgressResetRecords];
+    for (NSDictionary *reset in fsresets) {
+        NSString *category = reset[@"category"];
+        id cacheLocation = [_fileDB cacheLocationForFileset:category];
+        [commandQueue queueCommandWithName:command arguments:@[ category, cacheLocation, reset[@"cvs"] ]];
+    }
+}
+
+- (NSString *)buildHTTPUserAgent {
+    NSString *dpi = [NSString stringWithFormat:@"@%.fx", [UIScreen mainScreen].scale];
+    NSLocale *locale = [NSLocale autoupdatingCurrentLocale];
+    return [NSString stringWithFormat:@"Locomote/%s %@ (dpi=%@,locale=%@)", Locomote_iosVersionString, SDKPlatform, dpi, locale.localeIdentifier];
 }
 
 @end

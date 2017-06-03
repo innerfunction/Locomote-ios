@@ -20,6 +20,13 @@
 #import "LOCMSFileset.h"
 #import "LOCMSRepository.h"
 
+@interface LOCMSFileDB ()
+
+/// Create tables needed for DB resets, if not already in place.
+- (void)createDBResetTables;
+
+@end
+
 @implementation LOCMSFileDB
 
 - (id)initWithRepositry:(LOCMSRepository *)repository {
@@ -143,6 +150,32 @@
     return [rs count] > 0 ? [self cacheLocationForFile:rs[0]] : nil;
 }
 
+- (void)insertResetCVS:(NSString *)cvs forCategory:(NSString *)category {
+    [self performUpdate:@"INSERT INTO dbresets (category, cvs) VALUES (?,?)" withParams:@[ category, cvs ]];
+}
+
+- (NSString *)getResetCVSForCategory:(NSString *)category {
+    NSString *cvs = nil;
+    NSArray *rs = [self performQuery:@"SELECT cvs FROM dbresets WHERE category=?" withParams:@[ category ]];
+    if ([rs count] > 0) {
+        NSDictionary *record = rs[0];
+        cvs = record[@"cvs"];
+    }
+    return cvs;
+}
+
+- (NSArray *)getInProgressResetRecords {
+    return [self performQuery:@"SELECT category, cvs FROM dbresets" withParams:@[]];
+}
+
+- (void)deleteResetRecordForCategory:(NSString *)category {
+    [self performUpdate:@"DELETE FROM dbresets WHERE category=?" withParams:@[ category ]];
+}
+
+- (void)deleteAllResetRecords {
+    [self performUpdate:@"DELETE FROM dbresets WHERE 1=1" withParams:@[]];
+}
+
 - (LOCMSFileDB *)newInstance {
     LOCMSFileDB *db = [[LOCMSFileDB alloc] initWithCMSFileDB:self];
     [db startService];
@@ -155,6 +188,19 @@
     return @{
         @"filesets": [LOCMSFileset class]
     };
+}
+
+#pragma mark - Overrides
+
+- (void)startService {
+    [super startService];
+    [self createDBResetTables];
+}
+
+#pragma mark - Private
+
+- (void)createDBResetTables {
+    [self performUpdate:@"CREATE TABLE IF NOT EXISTS dbresets (category TEXT, cvs TEXT)" withParams:@[]];
 }
 
 @end
