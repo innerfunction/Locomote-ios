@@ -6,5 +6,6 @@ target 'Locomote' do
     pod 'SCFFLD/Core'
     pod 'SCFFLD/HTTP'
     pod 'SCFFLD/DB'
+    pod 'FilePathPattern'
     pod 'GRMustache'
 end

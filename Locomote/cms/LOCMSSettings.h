@@ -17,7 +17,7 @@
 
 #import <Foundation/Foundation.h>
 
-/// A class representing a Smokestack content repository's settings.
+/// A class representing a Locomote content repository's settings.
 @interface LOCMSSettings : NSObject
 
 /// The CMS host name.

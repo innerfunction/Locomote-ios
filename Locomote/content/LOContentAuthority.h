@@ -18,64 +18,15 @@
 
 #import <Foundation/Foundation.h>
 #import "LOContentPath.h"
+#import "LOContentResponse.h"
 #import "Q.h"
 
 @class LOContentProvider;
-@protocol LOContentAuthority;
-
-/**
- * A class providing functionality for writing responses to content URL and URI requests.
- */
-@protocol LOContentAuthorityResponse <NSObject>
-
-/**
- * Respond with content data.
- * Writes the response data in full and then ends the response.
- */
-- (void)respondWithData:(NSData *)data mimeType:(NSString *)mimeType cachePolicy:(NSURLCacheStoragePolicy)policy;
-/// Start a content response. Note that the [done] method must be called on completion.
-- (void)respondWithMimeType:(NSString *)mimeType cacheStoragePolicy:(NSURLCacheStoragePolicy)policy;
-/**
- * Write content data to the response.
- * The response must be started with a call to the [respondWithMimeType: cacheStoragePolicy:] method before
- * this method is called. This method may then be called as many times as necessary to write the content data
- * in full. The [done] method must be called once all data is written.
- */
-- (void)sendData:(NSData *)data;
-/// End a content response.
-- (void)done;
-/// Respond with string data of the specified MIME type.
-- (void)respondWithStringData:(NSString *)data mimeType:(NSString *)mimeType cachePolicy:(NSURLCacheStoragePolicy)cachePolicy;
-/// Respond with JSON data.
-- (void)respondWithJSONData:(id)data cachePolicy:(NSURLCacheStoragePolicy)cachePolicy;
-/// Respond with file data of the specified MIME type.
-- (void)respondWithFileData:(NSString *)filepath mimeType:(NSString *)mimeType cachePolicy:(NSURLCacheStoragePolicy)cachePolicy;
-/**
- * Respond with an error indicating why the request couldn't be resolved.
- * This method should be called instead of one of the respondWithMimeType* methods defined on this protocol, whenever
- * an error occurs that prevents the request data from being resolved. Calling this method completes the response.
- */
-- (void)respondWithError:(NSError *)error;
-
-@end
-
-@protocol LOContentAuthorityPathRoot <NSObject>
-
-/**
- * Resolve content data for the specified authority, path and parameters, and write the result to the provided
- * response object.
- */
-- (void)writeResponse:(id<LOContentAuthorityResponse>)response
-         forAuthority:(id<LOContentAuthority>)authority
-                 path:(LOContentPath *)path
-           parameters:(NSDictionary *)parameters;
-
-@end
 
 /**
  * A protocol to be implemented by containers which are capable of providing data to content URIs and URLs.
  */
-@protocol LOContentAuthority
+@protocol LOContentAuthority <NSObject>
 
 /// The content provider the authority belongs to.
 @property (nonatomic, weak) LOContentProvider *provider;
@@ -87,15 +38,15 @@
 /// Test if the authority has content for the specified path.
 - (BOOL)hasContentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters;
 /// Return the local cache location of the content with the specified path.
-- (NSString *)localCacheLocationOfPath:(LOContentPath *)path paremeters:(NSDictionary *)parameters;
+- (NSString *)localCacheLocationOfPath:(LOContentPath *)path parameters:(NSDictionary *)parameters;
 /// Return content for an internal content URI.
-- (id)contentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters;
+- (id)contentForPath:(NSString *)path parameters:(NSDictionary *)parameters;
 /// Write a content reponse for the specified path.
-- (void)writeResponse:(id<LOContentAuthorityResponse>)response
+- (void)writeResponse:(id<LOContentResponse>)response
               forPath:(LOContentPath *)path
            parameters:(NSDictionary *)parameters;
 /**
- * Synchronize the authoritie's content with its source.
+ * Synchronize the authority's content with its source.
  * Returns a deferred promise which resolves once the synchronize operation is complete.
  */
 - (QPromise *)syncContent;

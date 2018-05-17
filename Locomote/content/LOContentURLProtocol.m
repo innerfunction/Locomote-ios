@@ -41,7 +41,6 @@
     }
     else {
         NSString *description = [NSString stringWithFormat:@"Content authority %@ not found", authorityName];
-        // See http://nshipster.com/nserror/
         NSError *error = [NSError errorWithDomain:NSURLErrorDomain
                                              code:NSURLErrorCannotFindHost
                                          userInfo:@{ NSLocalizedDescriptionKey: description }];

@@ -105,7 +105,7 @@
     NSString *authorityName = [contentPath head];
     id<LOContentAuthority> authority = [self contentAuthorityForName:authorityName];
     if (authority) {
-        return [authority localCacheLocationOfPath:[contentPath rest] paremeters:@{}];
+        return [authority localCacheLocationOfPath:[contentPath rest] parameters:@{}];
     }
     return nil;
 }

@@ -80,6 +80,15 @@
 
 @end
 
+/// Remove files marked as deleted in the file database.
+@interface LOCMSCommandProtocolFileGC : NSObject <LOCommand> {
+    __weak LOCMSCommandProtocol *_protocol;
+}
+
+- (id)initWithCommandProtocol:(LOCMSCommandProtocol *)protocol;
+
+@end
+
 @interface LOCMSCommandProtocol ()
 
 @end
@@ -102,10 +111,12 @@
     [commandQueue registerCommand:refresh];
     LOCMSCommandProtocolResetDatabase *resetDatabase = [[LOCMSCommandProtocolResetDatabase alloc] initWithCommandProtocol:self];
     [commandQueue registerCommand:resetDatabase];
-    LOCMSCommandProtocolDownloadFileset *downloadFileset = [LOCMSCommandProtocolDownloadFileset new];
+    LOCMSCommandProtocolDownloadFileset *downloadFileset = [[LOCMSCommandProtocolDownloadFileset alloc] initWithCommandProtocol:self];
     [commandQueue registerCommand:downloadFileset];
-    LOCMSCommandProtocolResetFileset *resetFileset = [LOCMSCommandProtocolResetFileset new];
+    LOCMSCommandProtocolResetFileset *resetFileset = [[LOCMSCommandProtocolResetFileset alloc] initWithCommandProtocol:self];
     [commandQueue registerCommand:resetFileset];
+    LOCMSCommandProtocolFileGC *fileGC = [[LOCMSCommandProtocolFileGC alloc] initWithCommandProtocol:self];
+    [commandQueue registerCommand:fileGC];
 }
 
 @end
@@ -163,22 +174,18 @@
         LOCMSAuthenticationManager *authManager = _protocol.authManager;
         LOCMSFileDB *fileDB = _protocol.fileDB;
         
-        // A list of follow up commands.
-        NSMutableArray *commands = [NSMutableArray new];
-        
         // Check the response code.
         NSInteger responseCode = response.httpResponse.statusCode;
         if (responseCode == 401) {
             [authManager removeCredentials];
-            [_promise resolve:commands];
+            [_promise resolve:@[]];
             return nil;
         }
         
         // LS-13: ACM group mismatch, perform a database reset.
         if (responseCode == 205) {
             NSString *command = QualifiedCommandName(_protocol, @"reset");
-            [commands addObject:@{ @"name": command, @"args": @[] }];
-            [_promise resolve:commands];
+            [_promise resolve:@[ @{ @"name": command, @"args": @[] } ]];
             return nil;
         }
         
@@ -187,7 +194,7 @@
         if ([updateData isKindOfClass:[NSString class]]) {
             // Indicates a server error
             NSLog(@"%@ %@", response.httpResponse.URL, updateData);
-            [_promise resolve:commands];
+            [_promise resolve:@[]];
             return nil;
         }
 
@@ -223,17 +230,6 @@
             // Start a DB transaction.
             [fileDB beginTransaction];
         
-        
-            // TODO: LS-13 - remove following code
-            // Check group fingerprint to see if a migration is needed.
-            NSString *updateGroup = [updateData valueForKeyPath:@"repository.group"];
-            BOOL migrate = ![group isEqualToString:updateGroup];
-            if (migrate) {
-                // Performing a migration due to an ACM group ID change; mark all files as
-                // provisionaly deleted.
-                [fileDB performUpdate:@"UPDATE files SET status='deleted'" withParams:@[]];
-            }
-        
             // TODO filesets : previous / current / latest - need to work out details of operation.
             // For example, following statement may not be needed if using current + latest to
             // track downloaded version of filesets.
@@ -268,24 +264,16 @@
                     }
                 }
             }
-        
-            // Check for deleted files.
-            NSFileManager *fileManager = [NSFileManager defaultManager];
-            NSArray *deleted = [fileDB performQuery:@"SELECT id, path FROM files WHERE status='deleted'" withParams:@[]];
-            for (NSDictionary *record in deleted) {
-                // Delete cached file, if exists.
-                NSString *path = [fileDB cacheLocationForFile:record];
-                if (path && [fileManager fileExistsAtPath:path]) {
-                    [fileManager removeItemAtPath:path error:nil];
-                }
-            }
-        
-            // Delete obsolete records.
-            [fileDB performUpdate:@"DELETE FROM files WHERE status='deleted'" withParams:@[]];
 
             // Prune ORM related records.
             [fileDB pruneRelatedValues];
         
+            // A list of follow up commands.
+            NSMutableArray *commands = [NSMutableArray new];
+
+            // Queue command to delete unused files.
+            [commands addObject:@{ @"name": QualifiedCommandName(_protocol, @"file-gc"), @"args": @[] }];
+
             // Read list of fileset names with modified fingerprints.
             NSArray *rows = [fileDB performQuery:@"SELECT category FROM fingerprints WHERE current != previous" withParams:@[]];
             for (NSDictionary *row in rows) {
@@ -320,12 +308,17 @@
             
             // QUESTIONS ABOUT THE CODE ABOVE
             // 1. How does the code perform if the procedure above is interrupted before completion?
+            //    > DB changes won't be applied unless transaction is committed
+            //    > Some deleted files may be deleted from the filesystem whilst record remains - this is ok.
             // 2. How is app performance affected if the procedure above is continually interrupted?
             //    (e.g. due to repeated short-duration app starts).
+            //    > Updates never show. This is an edge case, unlikely to be a problem.
             // 3. Are there ways (on iOS and Android) to run tasks like this with completion guarantees?
             //    e.g. the scheduler could register as a background task when app is put into the background;
             //    the task compeletes when the currently executing command completes.
             //    See https://developer.apple.com/library/content/documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/BackgroundExecution/BackgroundExecution.html
+            //    > Fast completion of downloads is probably more important. In above code, perhaps concentrate
+            //      on completing the update first, perform file deletions after, separately?
             
         /* -- end of else after db version check
         }
@@ -400,14 +393,11 @@
         LOCMSAuthenticationManager *authManager = _protocol.authManager;
         LOCMSFileDB *fileDB = _protocol.fileDB;
         
-        // A list of follow up commands.
-        NSMutableArray *commands = [NSMutableArray new];
-        
         // Check the response code.
         NSInteger responseCode = response.httpResponse.statusCode;
         if (responseCode == 401) {
             [authManager removeCredentials];
-            [_promise resolve:commands];
+            [_promise resolve:@[]];
             return nil;
         }
         
@@ -416,7 +406,7 @@
         if ([updateData isKindOfClass:[NSString class]]) {
             // Indicates a server error
             NSLog(@"%@ %@", response.httpResponse.URL, updateData);
-            [_promise resolve:commands];
+            [_promise resolve:@[]];
             return nil;
         }
         
@@ -442,25 +432,17 @@
             }
         }
     
-        // Check for deleted files.
-        NSFileManager *fileManager = [NSFileManager defaultManager];
-        NSArray *deleted = [fileDB performQuery:@"SELECT id, path FROM files WHERE status='deleted'" withParams:@[]];
-        for (NSDictionary *record in deleted) {
-            // Delete cached file, if exists.
-            NSString *path = [fileDB cacheLocationForFile:record];
-            if (path && [fileManager fileExistsAtPath:path]) {
-                [fileManager removeItemAtPath:path error:nil];
-            }
-        }
-        
-        // Delete obsolete records.
-        [fileDB performUpdate:@"DELETE FROM files WHERE status='deleted'" withParams:@[]];
-
         // Prune ORM related records.
         [fileDB pruneRelatedValues];
 
         // Commit the transaction.
         [fileDB commitTransaction];
+                
+        // A list of follow up commands.
+        NSMutableArray *commands = [NSMutableArray new];
+
+        // Queue command to delete unused files.
+        [commands addObject:@{ @"name": QualifiedCommandName(_protocol, @"file-gc"), @"args": @[] }];
         
         // Read list of fileset category names and queue fileset reset commands.
         // (Note that this is done after the updates, and not before, to ensure that any newly
@@ -565,7 +547,6 @@
 
 @end
 
-
 @implementation LOCMSCommandProtocolResetFileset
 
 @synthesize name=_name;
@@ -617,8 +598,10 @@
             }
             if (responseCode == 200 || responseCode == 204) {
                 // Update the fileset's fingerprint and delete the fileset reset record
+                [fileDB beginTransaction];
                 [fileDB performUpdate:@"UPDATE filesets SET current=latest WHERE category=?" withParams:@[ category ]];
                 [fileDB deleteResetRecordForCategory:category];
+                [fileDB commitTransaction];
             }
             // Resolve empty list - no follow-on commands.
             [_promise resolve:@[]];
@@ -635,3 +618,41 @@
 }
 
 @end
+
+@implementation LOCMSCommandProtocolFileGC
+
+@synthesize name=_name;
+
+- (id)initWithCommandProtocol:(LOCMSCommandProtocol *)protocol {
+    self = [super init];
+    if (self) {
+        _name = QualifiedCommandName(protocol, @"file-gc");
+        _protocol = protocol;
+    }
+    return self;
+}
+
+- (QPromise *)execute:(NSArray *)args {
+
+    LOCMSFileDB *fileDB = _protocol.fileDB;
+
+    // Remove all files marked as deleted in the file DB.
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSArray *deleted = [fileDB performQuery:@"SELECT id, path FROM files WHERE status='deleted'" withParams:@[]];
+    for (NSDictionary *record in deleted) {
+        // Delete cached file, if exists.
+        NSString *path = [fileDB cacheLocationForFile:record];
+        if (path && [fileManager fileExistsAtPath:path]) {
+            [fileManager removeItemAtPath:path error:nil];
+        }
+    }
+    
+    // Delete obsolete records.
+    [fileDB performUpdate:@"DELETE FROM files WHERE status='deleted'" withParams:@[]];
+
+    // Return empty command list.
+    return [Q resolve:@[]];
+}
+
+@end
+

@@ -19,6 +19,7 @@
 #import <Foundation/Foundation.h>
 #import "LOContentAuthority.h"
 #import "LOCommandQueue.h"
+#import "LOLocalCachePaths.h"
 #import "SCIOCTypeInspectable.h"
 #import "SCIOCSingleton.h"
 #import "SCService.h"
@@ -37,14 +38,8 @@
 @property (nonatomic, strong) NSDictionary *authorities;
 /// A command queue for executing commands for the different content authorities.
 @property (nonatomic, strong) LOCommandQueue *commandQueue;
-/// A path for temporarily staging downloaded content.
-@property (nonatomic, strong) NSString *stagingPath;
-/// A path for caching app content.
-@property (nonatomic, strong) NSString *appCachePath;
-/// A path for caching downloaded content.
-@property (nonatomic, strong) NSString *contentCachePath;
-/// A path for app packaged content.
-@property (nonatomic, strong) NSString *packagedContentPath;
+/// Path settings for locally cached content.
+@property (nonatomic, strong) LOLocalCachePaths *localCachePaths;
 
 /// Add a content authority.
 - (void)setContentAuthority:(id<LOContentAuthority>)authority withName:(NSString *)name;

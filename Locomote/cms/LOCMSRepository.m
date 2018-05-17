@@ -167,7 +167,7 @@
     return [result count];
 }
 
-- (NSString *)localCacheLocationOfPath:(LOContentPath *)path paremeters:(NSDictionary *)parameters {
+- (NSString *)localCacheLocationOfPath:(LOContentPath *)path parameters:(NSDictionary *)parameters {
     NSString *filePath = [path relativePath];
     return [_fileDB cacheLocationForFileWithPath:filePath];
 }

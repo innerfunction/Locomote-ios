@@ -1,4 +1,4 @@
-// Copyright 2017 InnerFunction Ltd.
+// Copyright 2018 InnerFunction Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  Created by Julian Goacher on 07/09/2016.
-//  Copyright © 2016 InnerFunction. All rights reserved.
+//  Created by Julian Goacher on 17/05/2018.
+//  Copyright © 2018 Locomote.sh. All rights reserved.
 //
 
-#import "LOAbstractContentAuthority.h"
+#import "LOCMSContentAuthority.h"
 #import "LOContentProvider.h"
 #import "SCResource.h"
-#import "NSArray+SC.h"
-#import "SCCompoundURI.h"
 
-@interface LONSURLProtocolResponse : NSObject <LOContentAuthorityResponse> {
+@interface LOCMSContentRequest : NSObject <LOContentRequest>
+
+- (id)initWithAuthority:(LOCMSContentAuthority *)authority path:(LOContentPath *)path parameters:(NSDictionary *)parameters;
+
+@end
+
+@interface LONSURLProtocolResponse : NSObject <LOContentResponse> {
     __weak NSMutableSet *_liveResponses;
     NSURLProtocol *_protocol;
 }
@@ -31,43 +35,23 @@
 
 @end
 
-@interface LOSchemeHandlerResponse : SCResource <LOContentAuthorityResponse> {
+@interface LOSchemeHandlerResponse : SCResource <LOContentResponse> {
     NSMutableData *_buffer;
 }
 
 @end
 
-@implementation LOAbstractContentAuthority
+@implementation LOCMSContentAuthority
 
-@synthesize provider;
+@synthesize provider=_provider, requestHandlers=_requestHandlers;
 
 - (id)init {
     self = [super init];
     if (self) {
         _liveResponses = [NSMutableSet new];
-        _pathRoots = [NSMutableDictionary new];
+        _dispatcher = [[LORequestDispatcher alloc] initWithHost:self];
     }
     return self;
-}
-
-- (NSString *)stagingPath {
-    return [self.provider.stagingPath stringByAppendingPathComponent:_authorityName];
-}
-
-- (NSString *)appCachePath {
-    return [self.provider.appCachePath stringByAppendingPathComponent:_authorityName];
-}
-
-- (NSString *)contentCachePath {
-    return [self.provider.contentCachePath stringByAppendingPathComponent:_authorityName];
-}
-
-- (NSString *)packagedContentPath {
-    return [self.provider.packagedContentPath stringByAppendingPathComponent:_authorityName];
-}
-
-- (QPromise *)syncContent {
-    return [Q resolve:[NSNumber numberWithBool:YES]];
 }
 
 #pragma mark - SCService
@@ -87,11 +71,18 @@
 
 - (NSDictionary *)collectionMemberTypeInfo {
     return @{
-        @"pathRoots": @protocol(LOContentAuthorityPathRoot)
+        @"requestHandlers": [LORequestHandlerMapping class]
     };
 }
 
 #pragma mark - LOContentAuthority
+
+- (void)setProvider:(LOContentProvider *)provider {
+    _provider = provider;
+    // TODO - what if authorityName isn't set at this point?
+    self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:provider.localCachePaths
+                                                         authorityName:self.authorityName];
+}
 
 - (void)handleURLProtocolRequest:(NSURLProtocol *)protocol {
     [_liveResponses addObject:protocol];
@@ -124,7 +115,7 @@
     return NO;
 }
 
-- (NSString *)localCacheLocationOfPath:(LOContentPath *)path paremeters:(NSDictionary *)parameters {
+- (NSString *)localCacheLocationOfPath:(LOContentPath *)path parameters:(NSDictionary *)parameters {
     // Subclass should override this with an appropriate implementation.
     return nil;
 }
@@ -138,27 +129,34 @@
     return response;
 }
 
-- (void)writeResponse:(id<LOContentAuthorityResponse>)response
+- (void)writeResponse:(id<LOContentResponse>)response
               forPath:(LOContentPath *)path
            parameters:(NSDictionary *)parameters {
     
-    // Look-up a path root for the first path component, and if one is found then delegate the request to it.
-    NSString *root = [path head];
-    id<LOContentAuthorityPathRoot> pathRoot = _pathRoots[root];
-    if (pathRoot) {
-        // The path root only sees the rest of the path.
-        path = [path rest];
-        // Delegate the request.
-        [pathRoot writeResponse:response
-                   forAuthority:self
-                           path:path
-                     parameters:parameters];
-    }
-    else {
-        // Path not found, respond with error.
-        NSError *error = makePathNotFoundResponseError([path fullPath]);
-        [response respondWithError:error];
-    }
+    id<LOContentRequest> request = [[LOCMSContentRequest alloc] initWithAuthority:self
+                                                                             path:path
+                                                                       parameters:parameters];
+    [_dispatcher dispatchRequest:request response:response];
+}
+
+- (QPromise *)syncContent {
+    // TODO
+    return nil;
+}
+
+@end
+
+@implementation LOCMSContentRequest
+
+@synthesize authority=_authority, path=_path, parameters=_parameters, pathParameters=_pathParameters;
+
+- (id)initWithAuthority:(LOCMSContentAuthority *)authority path:(LOContentPath *)path parameters:(NSDictionary *)parameters {
+    self = [super init];
+    self.authority = authority;
+    self.path = path;
+    self.parameters = parameters;
+    self.pathParameters = [NSDictionary new];
+    return self;
 }
 
 @end
