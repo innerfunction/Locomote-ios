@@ -21,6 +21,7 @@
 
 /**
  * A protocol implemented by classes which can convert content data to some output format.
+ * @deprecated
  */
 @protocol LOContentTypeConverter <NSObject>
 

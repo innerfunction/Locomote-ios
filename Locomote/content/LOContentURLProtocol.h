@@ -21,7 +21,7 @@
 
 /**
  * A content URL protocol handler.
- * Content URLs follow closely the pattern used for Android content URIs
+ * Content URLs closely follow the pattern used for Android content URIs
  * (@see https://developer.android.com/reference/android/content/ContentUris.html)
  * The basic format of a content URL is:
  * 

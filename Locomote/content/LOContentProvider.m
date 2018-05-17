@@ -45,21 +45,24 @@
         // * https://developer.apple.com/library/ios/#documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/PerformanceTuning/PerformanceTuning.html#//apple_ref/doc/uid/TP40007072-CH8-SW8
         //
         
+        self.localCachePaths = [LOLocalCachePaths new];
+        
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
         NSString *cachePath = [paths objectAtIndex:0];
         NSString *dirName = [NSString stringWithFormat:@"%@.staging", NamePrefix];
-        _stagingPath = [cachePath stringByAppendingPathComponent:dirName];
+        _localCachePaths.stagingPath = [cachePath stringByAppendingPathComponent:dirName];
         dirName = [NSString stringWithFormat:@"%@.app", NamePrefix];
-        _appCachePath = [cachePath stringByAppendingPathComponent:dirName];
+        _localCachePaths.appCachePath = [cachePath stringByAppendingPathComponent:dirName];
         
         // Switch cache path for content location.
         paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
         cachePath = [paths objectAtIndex:0];
         dirName = [NSString stringWithFormat:@"%@.content", NamePrefix];
-        _contentCachePath = [cachePath stringByAppendingPathComponent:dirName];
+        _localCachePaths.contentCachePath = [cachePath stringByAppendingPathComponent:dirName];
 
         // Packaged content stored in a folder named 'packaged-content'.
-        _packagedContentPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"packaged-content"];
+        _localCachePaths.packagedContentPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"packaged-content"];
+        
     }
     return self;
 }

@@ -17,17 +17,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LORequestDispatcher.h"
-#import "LOCMSFileDB.h"
-#import "LOCMSFileset.h"
+#import "LOCMSRequestHandler.m"
 
-@class LOCMSRepoRequestHandler;
-
-@interface LOCMSFileListHandler : NSObject <LORequestHandler>
-
-/// The file database.
-@property (nonatomic, weak) LOCMSFileDB *fileDB;
-/// The filesets defined for the content repository.
-@property (nonatomic, strong, readonly) NSDictionary<NSString *, LOCMSFileset *> *filesets;
+/**
+ * A request handler for file list requests.
+ */
+@interface LOCMSFileListHandler : LOCMSRequestHandler
 
 @end

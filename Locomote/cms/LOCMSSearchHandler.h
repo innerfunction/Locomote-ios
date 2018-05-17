@@ -17,8 +17,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LORequestDispatcher.h"
+#import "LOCMSRequestHandler.m"
 
-@interface LOCMSSearchHandler : NSObject <LORequestHandler>
+/**
+ * A request handler for performing full-text searches.
+ */
+@interface LOCMSSearchHandler : LOCMSRequestHandler
+
+/// The maximum number of search results to return.
+@property (nonatomic, assign) NSInteger searchResultLimit;
 
 @end

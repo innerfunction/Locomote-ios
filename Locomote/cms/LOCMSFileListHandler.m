@@ -39,9 +39,8 @@
     // If a file ID is specified then read a reference file path from the file record.
     if (fid) {
         // Read the file path.
-        NSArray *result = [_fileDB.orm selectWhere:@"id = ?" values:@[ fid ] mappings:mappings];
-        if ([result count] > 0) {
-            NSDictionary *row = result[0];
+        NSDictionary *row = [self readFileRecordByID:fid];
+        if (row) {
             refPath = (NSString *)row[@"path"];
         }
         else {
@@ -53,14 +52,14 @@
     
     // If category specified then include fileset bindings.
     if (category) {
-        LOCMSFileset *fileset = _filesets[category];
+        LOCMSFileset *fileset = self.filesets[category];
         if (!fileset) {
             // Fileset category not found.
             [response respondWithError:makePathNotFoundResponseError(request.path.fullPath)];
             return;
         }
         // Note that category field is qualifed by source table name.
-        [wheres addObject:[NSString stringWithFormat:@"%@.category = ?", _fileDB.orm.source]];
+        [wheres addObject:[NSString stringWithFormat:@"%@.category = ?", self.fileDB.orm.source]];
         [values addObject:category];
         mappings = fileset.mappings;
     }

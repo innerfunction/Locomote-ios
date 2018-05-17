@@ -35,7 +35,7 @@
  * to multiple content repositories. For example, if configured to use the standard
  * Locomote host name (locomote.sh), then the authority may potentially map to any
  * content repo hosted on that domain, and individual repositories are supported by
- * providing a {account}/{repo} or {account}/{repo}/{branch} handler mapping. Alternatively,
+ * providing an {account}/{repo} or {account}/{repo}/{branch} handler mapping. Alternatively,
  * if a custom domain is used which is mapped to a specific account and repository then
  * the entire authority is mapped to just that repo. The authority's 'setting' property
  * is used to configure the default mapping details.
