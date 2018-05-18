@@ -22,10 +22,8 @@
 
 - (id)initWithRepository:(LOCMSRepository *)repository {
     self = [super init];
-    if (self) {
-        _fileDB = repository.fileDB;
-        _filesets = repository.filesets;
-    }
+    self.fileDB = repository.fileDB;
+    self.filesets = repository.filesets;
     return self;
 }
 

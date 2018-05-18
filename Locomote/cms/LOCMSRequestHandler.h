@@ -25,12 +25,14 @@
 /**
  * A superclass for all CMS request handlers.
  */
-@interface LOCMSRequestHandler : NSObject <LORequestHandler> {
-    LOCMSFileDB *_fileDB;
-    NSDictionary<NSString *, LOCMSFileset *> *_filesets;
-}
+@interface LOCMSRequestHandler : NSObject <LORequestHandler>
 
 - (id)initWithRepository:(LOCMSRepository *)repository;
+
+/// The file database.
+@property (nonatomic, strong) LOCMSFileDB *fileDB;
+/// A map of filesets keyed by category name.
+@property (nonatomic, strong) NSDictionary<NSString *, LOCMSFileset *> *filesets;
 
 /// Read a file record by file ID.
 - (NSDictionary *)readFileRecordByID:(NSString *)fileID;

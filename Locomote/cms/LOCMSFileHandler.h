@@ -19,9 +19,13 @@
 #import <Foundation/Foundation.h>
 #import "LOCMSRequestHandler.m"
 
+@class LOCMSRepository;
+
 /**
  * A request handler for file record and content requests.
  */
-@interface LOCMSFileHandler : LOCMSRequestHandler
+@interface LOCMSFileHandler : LOCMSRequestHandler {
+    LOCMSRepository *_repository;
+}
 
 @end

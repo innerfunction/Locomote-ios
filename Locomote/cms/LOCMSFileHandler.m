@@ -17,8 +17,34 @@
 //
 
 #import "LOCMSFileHandler.h"
+#import "LOMIMETypes.h"
+#import "GRMustache.h"
+#import "SCLogger.h"
+
+static SCLogger *Logger;
+
+@interface LOCMSFileHandler ()
+
+/// Render a page's content.
+- (NSString *)renderPageContent:(NSDictionary *)pageData;
+/// Write a file's content to a response.
+- (void)writeFileContent:(NSDictionary *)record toResponse:(id<LOContentResponse>)response;
+
+@end
 
 @implementation LOCMSFileHandler
+
++ (void)initialize {
+    Logger = [[SCLogger alloc] initWithTag:@"LOCMSFileHandler"];
+}
+
+- (id)initWithRepository:(LOCMSRepository *)repository {
+    self = [super initWithRepository:repository];
+    if (self) {
+        _repository = repository;
+    }
+    return self;
+}
 
 - (void)handleRequest:(id<LOContentRequest>)request response:(id<LOContentResponse>)response {
 
@@ -57,12 +83,131 @@
         [response respondWithJSONData:record cachePolicy:NSURLCacheStorageNotAllowed];
     }
     else if ([@"content" isEqualToString:mode]) {
-        // TODO Resolve file content from appropriate cache, apply any content processing and return result.
-        // Logic in [LOCMSPostsPathRoot renderPostContent:] can be used more or less as-is to render pages
-        // (except for renames post -> page); question is how to identify what content to render this way.
-        // Maybe simply test for presence of 'page.type' and 'page.content' in document record?
+        // If the file data has 'pages.type' and 'pages.content' fields then page file type and
+        // render the file's contents using a client template.
+        if (record[@"pages.type"] && record[@"pages.content"]) {
+            NSString *content = [self renderPageContent:record];
+            // Note for now the assumption that all page content is HTML.
+            [response respondWithStringData:content mimeType:@"text/html" cachePolicy:NSURLCacheStorageNotAllowed];
+        }
+        else {
+            [self writeFileContent:record toResponse:response];
+        }
     }
+}
 
+- (NSString *)renderPageContent:(NSDictionary *)pageData {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *pageType = pageData[@"pages.type"];
+    NSString *pageHTML;
+    // Resolve the client template to use to render the post.
+    NSString *templateFilename = [NSString stringWithFormat:@"_templates/page-%@.html", pageType];
+    NSString *templatePath = [self.fileDB cacheLocationForFileWithPath:templateFilename];
+    if (![fileManager fileExistsAtPath:templatePath]) {
+        templatePath = [self.fileDB cacheLocationForFileWithPath:@"_templates/page.html"];
+        if (![fileManager fileExistsAtPath:templatePath]) {
+            [Logger warn:@"Client template not found for page type %@", pageType];
+            templatePath = nil;
+        }
+    }
+    // If template found then use to render the page content.
+    if (templatePath) {
+        // Load the template and render the post.
+        NSString *template = [NSString stringWithContentsOfFile:templatePath encoding:NSUTF8StringEncoding error:nil];
+        NSError *error;
+        // TODO: Investigate using template repositories to load templates
+        // https://github.com/groue/GRMustache/blob/master/Guides/template_repositories.md
+        // as they should allow partials to be used within templates, whilst supporting the two
+        // use cases of loading templates from file (i.e. for full post html) or evaluating
+        // a template from a string (i.e. for post content only).
+        pageHTML = [GRMustacheTemplate renderObject:pageData fromString:template error:&error];
+        if (error) {
+            [Logger error:@"Rendering %@: %@", templatePath, error];
+        }
+    }
+    // If no page content yet then just wrap what we have in <html> tags.
+    if (!pageHTML) {
+        // If failed to render content then return a default rendering of the post body.
+        NSString *pageContent = pageData[@"pages.content"];
+        pageHTML = [NSString stringWithFormat:@"<html>%@</html>", pageContent];
+    }
+    return pageHTML;
+}
+
+- (void)writeFileContent:(NSDictionary *)record toResponse:(id<LOContentResponse>)response {
+    // Read the fileset.
+    NSString *category = record[@"files.category"];
+    LOCMSFileset *fileset = self.filesets[category];
+    if (!fileset) {
+        // TODO review this error
+        [response respondWithError:makeUnsupportedTypeResponseError(category)];
+        return;
+    }
+    // Check if the file is cacheable.
+    BOOL cachable       = [fileset cachable];
+    // Read the file type from it's file extension.
+    NSString *path      = record[@"files.path"];
+    NSString *ext       = [path pathExtension];
+    NSString *mimeType  = [LOMIMETypes mimeTypeForType:ext];
+    // Read the file URL and cache location.
+    // TODO: Need to review the code used to generate the URL.
+    NSString *url       = [_repository.cms urlForFile:path];
+    NSString *cachePath = [self.fileDB cacheLocationForFile:record];
+    // Check if a local copy of the file exists in the cache.
+    if (cachable && [[NSFileManager defaultManager] fileExistsAtPath:cachePath]) {
+        // Local copy found, respond with contents.
+        [response respondWithFileData:cachePath
+                             mimeType:mimeType
+                          cachePolicy:NSURLCacheStorageNotAllowed];
+        return;
+    }
+    // No local copy found, download from server.
+    SCHTTPClient *httpClient = _repository.httpClient;
+    [httpClient getFile:url]
+    .then((id)^(SCHTTPClientResponse *httpResponse) {
+        NSString *downloadPath = [httpResponse.downloadLocation path];
+        NSError *error = nil;
+        // If cachable then move file to cache.
+        if (cachable) {
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            // Ensure that the target directory exists.
+            NSString *cacheDir = [cachePath stringByDeletingLastPathComponent];
+            [fileManager createDirectoryAtPath:cacheDir
+                   withIntermediateDirectories:YES
+                                    attributes:nil
+                                         error:&error];
+            if (!error) {
+                [fileManager moveItemAtPath:downloadPath
+                                     toPath:cachePath
+                                      error:&error];
+            }
+        }
+        if (error) {
+            [response respondWithError:error];
+        }
+        else {
+            // Respond with file contents.
+            NSString *contentPath = cachable ? cachePath : downloadPath;
+            [response respondWithFileData:contentPath
+                                 mimeType:mimeType
+                              cachePolicy:NSURLCacheStorageNotAllowed];
+        }
+        return nil;
+    })
+    .fail(^(id err) {
+        // HTTP request failed, package error and send to response.
+        NSError *error;
+        if ([err isKindOfClass:[NSError class]]) {
+            error = (NSError *)err;
+        }
+        else {
+            NSString *description = [err description];
+            error = [NSError errorWithDomain:NSURLErrorDomain
+                                        code:NSURLErrorResourceUnavailable
+                                    userInfo:@{ NSLocalizedDescriptionKey: description }];
+        }
+        [response respondWithError:error];
+    });
 }
 
 @end
