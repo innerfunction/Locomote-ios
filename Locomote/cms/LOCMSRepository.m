@@ -18,11 +18,11 @@
 
 #import "LOCMSRepository.h"
 #import "Locomote.h"
+#import "LOCMSContentAuthority.h"
 #import "LOCMSFileset.h"
-#import "LOCMSFilesetCategoryPathRoot.h"
 #import "LOContentProvider.h"
 
-#define SDKPlatform     (@"ios")
+#define SDKPlatform (@"ios")
 
 @interface LOCMSRepository()
 
@@ -41,7 +41,7 @@
 - (id)init {
     self = [super init];
     if (self) {
-        _fileDB = [[LOCMSFileDB alloc] initWithRepositry:self];
+        _fileDB = [[LOCMSFileDB alloc] initWithRepository:self];
         _fileDB.version = @1;
         _fileDB.tables = @{
             @"files": @{
@@ -53,19 +53,17 @@
                     @"commit":      @{ @"type": @"STRING",  @"tag": @"version" }
                 }
             },
-            /*
-            @"posts": @{
+            @"pages": @{
                 @"columns": @{
                     @"id":          @{ @"type": @"INTEGER", @"tag": @"id" },
                     @"type":        @{ @"type": @"STRING" },
                     @"title":       @{ @"type": @"STRING" },
-                    @"body":        @{ @"type": @"STRING" },
+                    @"content":     @{ @"type": @"STRING" },
                     @"image":       @{ @"type": @"INTEGER" },
                     @"commit":      @{ @"type": @"STRING",  @"tag": @"version" }
 
                 }
             },
-            */
             @"commits": @{
                 @"columns": @{
                     @"commit":      @{ @"type": @"STRING",  @"tag": @"id" },
@@ -95,58 +93,20 @@
         };
     
         _fileDB.orm = [SCDBORM ormWithSource:@"files" mappings:@{
-//            @"post":    [SCDBORMMapping mappingWithRelation:@"object" table:@"posts"],
-            @"commit":  [SCDBORMMapping mappingWithRelation:@"shared-object" table:@"commits"] //,
-//            @"meta":    [SCDBORMMapping mappingWithRelation:@"map" table:@"meta"]
+            @"page":    [SCDBORMMapping mappingWithRelation:@"object"        table:@"pages"],
+            @"commit":  [SCDBORMMapping mappingWithRelation:@"shared-object" table:@"commits"],
+            @"meta":    [SCDBORMMapping mappingWithRelation:@"map"           table:@"meta"]
         }];
-/*
+        
         _fileDB.filesets = @{
-            @"posts":       [LOCMSFileset filesetWithCache:@"none" mappings:@[ @"commit", @"meta", @"post" ]],
-            @"pages":       [LOCMSFileset filesetWithCache:@"none" mappings:@[ @"commit", @"meta" ]],
+            @"pages":       [LOCMSFileset filesetWithCache:@"none"    mappings:@[ @"commit", @"meta", @"page" ]],
             @"images":      [LOCMSFileset filesetWithCache:@"content" mappings:@[ @"commit", @"meta" ]],
             @"assets":      [LOCMSFileset filesetWithCache:@"content" mappings:@[ @"commit" ]],
-            @"templates":   [LOCMSFileset filesetWithCache:@"app" mappings:@[ @"commit" ]]
+            @"templates":   [LOCMSFileset filesetWithCache:@"app"     mappings:@[ @"commit" ]]
         };
-*/
-/*
-        self.pathRoots = [[LOJSONObject alloc] initWithDictionary:@{
-            @"~posts":                  @"$postsPathRoot",
-            @"~pages":                  @"$postsPathRoot",
-            @"~files": @{
-                @"@class":              @"LOCMSFilesetCategoryPathRoot"
-            }
-        }];
-        self.refreshInterval = 1.0f; // Refresh once per minute.
-*/
-/*
-    // Ensure a path root exists for each fileset, and is associated with the fileset.
-    NSDictionary *filesets = fileDB.filesets;
-    for (NSString *category in [filesets keyEnumerator]) {
-        LOCMSFileset *fileset = filesets[category];
-        // Note that fileset category path roots are prefixed with a tilde.
-        NSString *pathRootName = [@"~" stringByAppendingString:category];
-        id pathRoot = self.pathRoots[pathRootName];
-        if (pathRoot == nil) {
-            // Create a default path root for the current category.
-            pathRoot = [[LOCMSFilesetCategoryPathRoot alloc] initWithFileset:fileset authority:authority];
-            authority.pathRoots[pathRootName] = pathRoot;
-        }
-        else if ([pathRoot isKindOfClass:[LOCMSFilesetCategoryPathRoot class]]) {
-            // Path root for category found, match it up with its fileset and the authority.
-            ((LOCMSFilesetCategoryPathRoot *)pathRoot).fileset = fileset;
-            ((LOCMSFilesetCategoryPathRoot *)pathRoot).authority = authority;
-        }
+        
+        self.requestHandler = [[LOCMSRepoRequestHandler alloc] initWithRepository:self];
     }
-*/
-        // TODO Record types (posts/pages): dbjson, html, webview
-        // TODO Query types: dbjson, tableview
-    }
-    return self;
-}
-
-- (id)initWithSettings:(LOCMSSettings *)settings {
-    self = [self init];
-    self.cms = settings;
     return self;
 }
 
@@ -154,67 +114,55 @@
     return _fileDB.filesets;
 }
 
+- (void)setBasePath:(NSString *)basePath {
+    // Ensure that the path has a trailing slash.
+    if (![basePath hasSuffix:@"/"]) {
+        basePath = [basePath stringByAppendingString:@"/"];
+    }
+    // Assign to the property.
+    _basePath = basePath;
+}
+
+- (void)setAuthority:(LOCMSContentAuthority *)authority {
+    _authority = authority;
+    // Derive settings from the authority's settings.
+    _cms = [[LOCMSSettings alloc] initWithSettings:authority.settings.xxx];
+}
+
 - (QPromise *)refreshContent {
     return [self syncContent];
 }
 
-#pragma mark - LOAbstractContentAuthority overrides
-
-- (BOOL)hasContentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters {
-    NSString *filePath = [path relativePath];
+- (BOOL)hasContentForPath:(NSString *)path parameters:(NSDictionary *)parameters {
     NSString *sql = [NSString stringWithFormat:@"SELECT id FROM %@ WHERE path=?", _fileDB.filesTable ];
-    NSArray *result = [_fileDB performQuery:sql withParams:@[ filePath ]];
+    NSArray *result = [_fileDB performQuery:sql withParams:@[ path ]];
     return [result count];
 }
 
-- (NSString *)localCacheLocationOfPath:(LOContentPath *)path parameters:(NSDictionary *)parameters {
-    NSString *filePath = [path relativePath];
-    return [_fileDB cacheLocationForFileWithPath:filePath];
-}
-
-- (void)writeResponse:(id<LOContentAuthorityResponse>)response
-              forPath:(LOContentPath *)path
-           parameters:(NSDictionary *)parameters {
-    
-    // A tilde at the start of a path indicates a fileset category reference; so any path which
-    // doesn't start with tilde is a direct reference to a file by its path. Convert the reference
-    // to a fileset reference by looking up the file ID and category for the path.
-    NSString *root = [path head];
-    if (![root hasPrefix:@"~"]) {
-        // Lookup file entry by path.
-        NSString *filePath = [path fullPath];
-        NSString *sql = [NSString stringWithFormat:@"SELECT id, category FROM %@ WHERE path=?", _fileDB.filesTable ];
-        NSArray *result = [_fileDB performQuery:sql withParams:@[ filePath ]];
-        if ([result count] > 0) {
-            // File entry found in database; rewrite content path to a direct resource reference.
-            NSDictionary *row = result[0];
-            NSString *fileID = row[@"id"];
-            NSString *category = row[@"category"];
-            NSString *resourcePath = [NSString stringWithFormat:@"~%@/$%@", category, fileID];
-            NSString *ext = [path ext];
-            if (ext) {
-                resourcePath = [resourcePath stringByAppendingPathExtension:ext];
-            }
-            path = [[LOContentPath alloc] initWithPath:resourcePath];
-        }
-    }
-    // Continue with standard response behaviour.
-    [super writeResponse:response forPath:path parameters:parameters];
+- (NSString *)localCacheLocationOfPath:(NSString *)path parameters:(NSDictionary *)parameters {
+    return [_fileDB cacheLocationForFileWithPath:path];
 }
 
 - (QPromise *)syncContent {
-    NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.authorityName];
-    return [self.provider.commandQueue queueCommandWithName:cmd arguments:@[]];
+    NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.basePath];
+    return [self.authority.commandQueue queueCommandWithName:cmd arguments:@[]];
 }
 
-#pragma mark - Private
+#pragma mark - LORequestHandler
+
+- (void)handleRequest:(id<LOContentRequest>)request response:(id<LOContentResponse>)response {
+    // Strip the base path from the start of the request path before forwarding to
+    // the registered request handlers.
+    request.path = [request.path substringFromIndex:[_basePath length]];
+    [_requestHandler handleRequest:request response:response];
+}
 
 #pragma mark - SCIOCObjectAware
 
 - (void)notifyIOCObject:(id)object propertyName:(NSString *)propertyName {
     // When the repo is configured as an authority within a content provider, use the name
-    // is is mapped under as the authority name.
-    self.cms.authorityName = propertyName;
+    // is is mapped under as the base path.
+    self.basePath = propertyName;
 }
 
 #pragma mark - SCMessageReceiver
@@ -230,10 +178,26 @@
 #pragma mark - SCService
 
 - (void)startService {
-    
+
+    // Extract account / repo / branch info from the path.
+    NSArray *components = [_basePath componentsSeparatedByString:@"/"];
+    switch ([_basePath length]) {
+        case 3:
+            _cms.branch  = components[2];
+        case 2:
+            _cms.repo    = components[1];
+        case 1:
+            _cms.account = components[0];
+            break;
+        default:
+            // TODO: Should be an error?
+            break;
+    }
+
     // Set file DB name and initial copy path.
     if (!_fileDB.name) {
-        _fileDB.name = self.cms.authorityName;
+        NSString *authorityName = self.authority.authorityName;
+        _fileDB.name = [NSString stringWithFormat:@"%@/%@/%@_%@", authorityName, self.cms.account, self.cms.repo, self.cms.branch];
     }
     if (!_fileDB.initialCopyPath) {
         NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];
@@ -250,7 +214,7 @@
     _commandProtocol = [[LOCMSCommandProtocol alloc] initWithRepository:self];
     
     // Register command protocol with the scheduler, using the authority name as the command prefix.
-    [_commandProtocol registerWithCommandQueue:self.provider.commandQueue];
+    [_commandProtocol registerWithCommandQueue:self.authority.commandQueue];
     
     // Check for an interrupted file db reset.
     [self continueDBResetInProgress];
@@ -262,8 +226,8 @@
 #pragma mark - Private
 
 - (void)continueDBResetInProgress {
-    NSString *command = [NSString stringWithFormat:@"%@.%@", self.authorityName, @"reset-fileset"];
-    LOCommandQueue *commandQueue = self.provider.commandQueue;
+    NSString *command = [NSString stringWithFormat:@"%@.%@", self.authority.authorityName, @"reset-fileset"];
+    LOCommandQueue *commandQueue = self.authority.commandQueue;
     // Query the file DB for any outstanding fileset resets, and reissue a reset command for each one.
     NSArray *fsresets = [_fileDB getInProgressResetRecords];
     for (NSDictionary *reset in fsresets) {
@@ -276,7 +240,8 @@
 - (NSString *)buildHTTPUserAgent {
     NSString *dpi = [NSString stringWithFormat:@"@%.fx", [UIScreen mainScreen].scale];
     NSLocale *locale = [NSLocale autoupdatingCurrentLocale];
-    return [NSString stringWithFormat:@"Locomote/%s %@ (dpi=%@,locale=%@)", Locomote_iosVersionString, SDKPlatform, dpi, locale.localeIdentifier];
+    return [NSString stringWithFormat:@"Locomote/%s %@ (dpi=%@,locale=%@)",
+            Locomote_iosVersionString, SDKPlatform, dpi, locale.localeIdentifier];
 }
 
 @end

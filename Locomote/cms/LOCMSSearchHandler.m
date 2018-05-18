@@ -20,24 +20,33 @@
 #import "LOContentAuthority.h"
 #import "NSDictionary+SC.h"
 
+#define PAGE_TABLE (@"pages")
+
 @implementation LOCMSSearchHandler
 
 - (void)handleRequest:(id<LOContentRequest>)request response:(id<LOContentResponse>)response {
     
-    NSString *text = request.parameters[@"text"];
-    NSString *mode = request.parameters[@"mode"];
-    NSString *types = request.parameters[@"types"];
-    
+    // The text being searched for.
+    NSString *text    = request.parameters[@"text"];
+    // The search mode - exact, any or all.
+    NSString *mode    = request.parameters[@"mode"];
+    // The file types to include in the search.
+    NSString *types   = request.parameters[@"types"];
+    // An optional search scope; if specified then only descendents of the specified file
+    // are searched; file descendents are any file whose path has the reference file's
+    // directory path as a prefix.
     NSString *scopeID = request.pathParameters[@"id"];
     
-    NSString *tables = self.fileDB.orm.source;
-    NSString *where = nil;
+    // Two main tables are the source table (e.g. 'files') and the page table (e.g. 'pages').
+    // Note that page table names are currently hardcoded.
+    NSArray *tables = @[ self.fileDB.orm.source, PAGE_TABLE ];
+    NSArray *wheres = @[ [NSString stringWithFormat:@"%@.id = %@.id", self.fileDB.orm.source, PAGE_TABLE ]];
     
     NSMutableArray *params = [NSMutableArray new];
     NSString *term = [NSString stringWithFormat:@"%%%@%%", text];
-    // TODO 'content' will be on a separate table, how do we know its name?
     if ([@"exact" isEqualToString:mode]) {
-        where = @"title LIKE ? OR content LIKE ?";
+        NSString * where = [NSString stringWithFormat:@"%@.title LIKE ? OR %@.content LIKE ?", PAGE_TABLE, PAGE_TABLE];
+        wheres = [wheres arrayByAddingObject:where];
         [params addObject:term];
         [params addObject:term];
     }
@@ -45,38 +54,35 @@
         NSMutableArray *terms = [NSMutableArray new];
         NSArray *tokens = [term componentsSeparatedByString:@" "];
         for (NSString *token in tokens) {
+            NSString *term = [NSString stringWithFormat:@"(%@.title LIKE ? OR %@.content LIKE ?)", PAGE_TABLE, PAGE_TABLE];
+            [terms addObject:term];
             // TODO: Trim the token, check for empty tokens.
             NSString *param = [NSString stringWithFormat:@"%%%@%%", token];
-            [terms addObject:@"(title LIKE ? OR content LIKE ?)"];
             [params addObject:param];
             [params addObject:param];
         }
+        NSString *where;
         if ([@"any" isEqualToString:mode]) {
             where = [terms componentsJoinedByString:@" OR "];
         }
         else if ([@"all" isEqualToString:mode]) {
             where = [terms componentsJoinedByString:@" AND "];
         }
+        wheres = [wheres arrayByAddingObject:where];
     }
+    
     if (types) {
         NSArray *typeList = [types componentsSeparatedByString:@","];
         NSString *typeClause;
         if ([typeList count] == 1) {
-            typeClause = [NSString stringWithFormat:@"type='%@'", [typeList firstObject]];
+            typeClause = [NSString stringWithFormat:@"%@.type='%@'", PAGE_TABLE, [typeList firstObject]];
         }
         else {
-            typeClause = [NSString stringWithFormat:@"type IN ('%@')", [typeList componentsJoinedByString:@"','"]];
+            typeClause = [NSString stringWithFormat:@"%@.type IN ('%@')", PAGE_TABLE, [typeList componentsJoinedByString:@"','"]];
         }
-        if (where) {
-            where = [NSString stringWithFormat:@"(%@) AND %@", where, typeClause];
-        }
-        else {
-            where = typeClause;
-        }
+        wheres = [wheres arrayByAddingObject:typeClause];
     }
-    if( !where ) {
-        where = @"1=1";
-    }
+    
     if (scopeID) {
         NSString *scopePath;
         NSDictionary *row = [self readFileRecordByID:scopeID];
@@ -88,18 +94,19 @@
             [response respondWithError:makePathNotFoundResponseError(request.path.fullPath)];
             return;
         }
-
         // Get the path of the directory containing the scoping file.
         scopePath = [scopePath stringByDeletingLastPathComponent];
         // Append a where clause to only include files whose path has the scope path
         // as a prefix.
-        NSString *pathWhere = [NSString stringWithFormat:@" AND %@.path LIKE ?", self.fileDB.orm.source];
-        NSString *pathParam = [NSString stringWithFormat:@"%%%@", scopePath];
-        where = [where stringByAppendingString:pathWhere];
-        [params addObject:pathParam];
-        //tables = [tables stringByAppendingString:@", closures"];
+        NSString *where = [NSString stringWithFormat:@" AND %@.path LIKE ?", self.fileDB.orm.source];
+        NSString *param = [NSString stringWithFormat:@"%%%@", scopePath];
+        wheres = [wheres arrayByAddingObject:where];
+        [params addObject:param];
     }
-    NSString *sql = [NSString stringWithFormat:@"SELECT posts.* FROM %@ WHERE %@ LIMIT %ld", tables, where, (long)_searchResultLimit];
+    
+    NSString *where = [wheres componentsJoinedByString:@") AND ("];
+    NSString *_tables = [tables componentsJoinedByString:@","];
+    NSString *sql = [NSString stringWithFormat:@"SELECT %@.* FROM %@ WHERE (%@) LIMIT %ld", PAGE_TABLE, _tables, where, (long)_searchResultLimit];
     NSArray *rows = [self.fileDB performQuery:sql withParams:params];
     // Add search information to each result item.
     NSMutableArray *result = [NSMutableArray new];

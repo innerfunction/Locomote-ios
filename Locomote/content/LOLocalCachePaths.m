@@ -22,9 +22,9 @@
 
 - (id)initWithSettings:(LOLocalCachePaths *)settings authorityName:(NSString *)authorityName {
     self = [super init];
-    self.stagingPath = [settings.stagingPath stringByAppendingPathComponent:authorityName];
-    self.appCachePath = [settings.appCachePath stringByAppendingPathComponent:authorityName];
-    self.contentCachePath = [settings.contentCachePath stringByAppendingPathComponent:authorityName];
+    self.stagingPath         = [settings.stagingPath         stringByAppendingPathComponent:authorityName];
+    self.appCachePath        = [settings.appCachePath        stringByAppendingPathComponent:authorityName];
+    self.contentCachePath    = [settings.contentCachePath    stringByAppendingPathComponent:authorityName];
     self.packagedContentPath = [settings.packagedContentPath stringByAppendingPathComponent:authorityName];
     return self;
 }

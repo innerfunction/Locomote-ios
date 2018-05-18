@@ -20,6 +20,7 @@
 #import "LOCMSFileListHandler.h"
 #import "LOCMSFileHandler.h"
 #import "LOCMSSearchHandler.h"
+#import "LOCMSRepository.h"
 
 #define RequestMapping(_path,_handler) ([[LORequestHandlerMapping alloc] initWithPath:_path handler:_handler])
 
@@ -27,12 +28,12 @@
 
 @synthesize requestHandlers=_requestHandlers;
 
-- (id)init {
+- (id)initWithRepository:(LOCMSRepository *)repository {
     self = [super init];
     if (self) {
-        LOCMSFileHandler *fileHandler = [[LOCMSFileHandler alloc] init];
-        LOCMSFileListHandler *fileListHandler = [[LOCMSFileListHandler alloc] init];
-        LOCMSSearchHandler *searchHandler = [[LOCMSSearchHandler alloc] init];
+        LOCMSFileHandler *fileHandler = [[LOCMSFileHandler alloc] initWithRepository:repository];
+        LOCMSFileListHandler *fileListHandler = [[LOCMSFileListHandler alloc] initWithRepository:repository];
+        LOCMSSearchHandler *searchHandler = [[LOCMSSearchHandler alloc] initWithRepository:repository];
         self.requestHandlers = @[
             // Read file contents.
             RequestMapping(@"files.api/{id}(/{mode:content})?", fileHandler ),

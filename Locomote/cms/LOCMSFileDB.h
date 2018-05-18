@@ -30,7 +30,7 @@
 /// The name of the files table. Defaults to 'files'.
 @property (nonatomic, strong) NSString *filesTable;
 
-- (id)initWithRepositry:(LOCMSRepository *)repository;
+- (id)initWithRepository:(LOCMSRepository *)repository;
 - (id)initWithCMSFileDB:(LOCMSFileDB *)cmsFileDB;
 
 /**

@@ -20,7 +20,7 @@
 
 #define DefaultAPIVersion   (@"0.2")
 #define DefaultAPIRoot      (@"cms")
-#define DefaultAPIProtocol  (@"http")
+#define DefaultAPIProtocol  (@"https")
 #define AuthRealmPrefix     (@"sh.locomote")
 
 @interface LOCMSSettings()
@@ -45,7 +45,7 @@
 - (id)initWithRef:(NSString *)ref {
 
     // Ref is a whole or partial, absolute or relative URL which is resolved against
-    // the default repository base URL as defined in this class (e.g. http://locomote.sh/cms/0.2/).
+    // the default repository base URL as defined in this class (e.g. https://locomote.sh/cms/0.2/).
     NSURL *baseURL = [NSURL URLWithString:[self urlForPath:@"/"]];
     NSURL *repoURL = [NSURL URLWithString:ref relativeToURL:baseURL];
     

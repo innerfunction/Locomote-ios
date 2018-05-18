@@ -28,7 +28,7 @@
     NSArray *mappings = @[];
 
     // A reference file ID.
-    NSString *fid = request.pathParameters[@"id"];
+    NSString *fileID = request.pathParameters[@"id"];
     // A fileset category.
     NSString *category = request.pathParameters[@"category"];
     // A file relation - sibling, child or descendent.
@@ -37,9 +37,9 @@
     NSString *refPath = @"";
     
     // If a file ID is specified then read a reference file path from the file record.
-    if (fid) {
+    if (fileID) {
         // Read the file path.
-        NSDictionary *row = [self readFileRecordByID:fid];
+        NSDictionary *row = [self readFileRecordByID:fileID];
         if (row) {
             refPath = (NSString *)row[@"path"];
         }
@@ -48,6 +48,8 @@
             [response respondWithError:makePathNotFoundResponseError(request.path.fullPath)];
             return;
         }
+        // Get the path to the directory containing the reference file.
+        refPath = [refPath stringByDeletingLastPathComponent];
     }
     
     // If category specified then include fileset bindings.
@@ -76,12 +78,13 @@
     NSString *where = [wheres componentsJoinedByString:@" AND "];
     // Execute query.
     NSArray *result = [self.fileDB.orm selectWhere:where values:values mappings:mappings];
+    
     // Apply relation filter.
     if ([@"siblings" isEqualToString:relation]) {
         result = [result filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings) {
             NSDictionary *row = (NSDictionary *)item;
-            id rid = row[@"id"];
-            if ([fid isEqualToString:rid]) {
+            id rowID = row[@"id"];
+            if ([fileID isEqualToString:rowID]) {
                 // Reference file can't be its own sibling.
                 return NO;
             }
@@ -93,19 +96,18 @@
     }
     else if ([@"children" isEqualToString:relation]) {
         result = [result filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings) {
-            NSDictionary *row   = (NSDictionary *)item;
-            NSString *itemPath  = (NSString *)row[@"path"];
-            NSString *parentDir = [[itemPath stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
-            // File is a child if its parent directory of its direcoty is the
-            // same reference path (i.e. directory) as the reference file.
-            return [refPath isEqualToString:parentDir];
+            NSDictionary *row  = (NSDictionary *)item;
+            NSString *itemPath = (NSString *)row[@"path"];
+            NSString *gpDir    = [[itemPath stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
+            // File is a child if the path of its grand-parent directory is the same as the reference path.
+            return [refPath isEqualToString:gpDir];
         }]];
     }
     else if ([@"descendents" isEqualToString:relation]) {
         result = [result filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings) {
             NSDictionary *row = (NSDictionary *)item;
-            id rid = row[@"id"];
-            if ([fid isEqualToString:rid]) {
+            id rowID = row[@"id"];
+            if ([fileID isEqualToString:rowID]) {
                 // Reference file can't be its own descendent.
                 return NO;
             }

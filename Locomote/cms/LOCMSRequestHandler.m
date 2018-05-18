@@ -20,6 +20,15 @@
 
 @implementation LOCMSRequestHandler
 
+- (id)initWithRepository:(LOCMSRepository *)repository {
+    self = [super init];
+    if (self) {
+        _fileDB = repository.fileDB;
+        _filesets = repository.filesets;
+    }
+    return self;
+}
+
 - (NSDictionary *)readFileRecordByID:(NSString *)fileID {
     return [self readFileRecordByID:fileID inCategory:nil];
 }
@@ -35,7 +44,7 @@
     
     // If category specified then include fileset mappings.
     if (category) {
-        fileset = _filesets[category];
+        LOCMSFileset *fileset = _filesets[category];
         if (!fileset) {
             return nil;
         }
@@ -58,7 +67,7 @@
 - (NSDictionary *)readFileRecordByPath:(NSString *)path {
     
     NSString *where = [NSString stringWithFormat:@"%@.path = ?", _fileDB.orm.source];
-    NSString *values = @[ request.path.fullPath ];
+    NSArray *values = @[ path ];
     
     NSArray *result = [_fileDB.orm selectWhere:where values:values mappings:@[]];
     if ([result count] > 0) {
@@ -72,7 +81,7 @@
 #pragma mark - LOCMSRequestHandler
 
 - (void)handleRequest:(id<LOContentRequest>)request response:(id<LOContentResponse>)response {
-    // Do-nothing implementation.
+    // Do-nothing implementation - this class should be sub-classed.
 }
 
 @end

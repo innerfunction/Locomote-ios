@@ -18,7 +18,6 @@
 
 #import <Foundation/Foundation.h>
 
-@class LOContentPath;
 @protocol LOContentAuthority;
 
 /**
@@ -29,11 +28,11 @@
 /// The content authority the request is being made to.
 @property (nonatomic, weak) id<LOContentAuthority> authority;
 /// The request path.
-@property (nonatomic, strong) LOContentPath *path;
+@property (nonatomic, strong) NSString *path;
 /// The request parameters.
-@property (nonatomic, strong) NSDictionary *parameters;
+@property (nonatomic, strong) NSDictionary<NSString *, NSString *> *parameters;
 /// Parameters extracted from the request path.
-@property (nonatomic, strong) NSDictionary *pathParameters;
+@property (nonatomic, strong) NSDictionary<NSString *, NSString *> *pathParameters;
 
 @end
 

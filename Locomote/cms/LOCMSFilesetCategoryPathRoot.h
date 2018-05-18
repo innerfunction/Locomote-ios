@@ -25,6 +25,7 @@
 
 /**
  * A default path root implementation for access to a single category of fileset contents.
+ * @deprecated
  */
 @interface LOCMSFilesetCategoryPathRoot : NSObject <LOContentAuthorityPathRoot>
 

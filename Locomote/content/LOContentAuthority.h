@@ -17,7 +17,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LOContentPath.h"
 #import "LOContentResponse.h"
 #import "Q.h"
 
@@ -36,15 +35,11 @@
 /// Cancel an NSURLProtocol request currently being processed by the container.
 - (void)cancelURLProtocolRequest:(NSURLProtocol *)protocol;
 /// Test if the authority has content for the specified path.
-- (BOOL)hasContentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters;
+- (BOOL)hasContentForPath:(NSString *)path parameters:(NSDictionary *)parameters;
 /// Return the local cache location of the content with the specified path.
-- (NSString *)localCacheLocationOfPath:(LOContentPath *)path parameters:(NSDictionary *)parameters;
+- (NSString *)localCacheLocationOfPath:(NSString *)path parameters:(NSDictionary *)parameters;
 /// Return content for an internal content URI.
 - (id)contentForPath:(NSString *)path parameters:(NSDictionary *)parameters;
-/// Write a content reponse for the specified path.
-- (void)writeResponse:(id<LOContentResponse>)response
-              forPath:(LOContentPath *)path
-           parameters:(NSDictionary *)parameters;
 /**
  * Synchronize the authority's content with its source.
  * Returns a deferred promise which resolves once the synchronize operation is complete.
@@ -52,10 +47,4 @@
 - (QPromise *)syncContent;
 
 @end
-
-NSError *makePathNotFoundResponseError(NSString *path);
-
-NSError *makeInvalidPathResponseError(NSString *path);
-
-NSError *makeUnsupportedTypeResponseError(NSString *type);
 

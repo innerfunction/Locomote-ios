@@ -20,6 +20,7 @@
 #import "LOContentTypeConverter.h"
 
 /// A content type converter instance which returns its input unchanged.
+/// @deprecated
 @interface LOPlainContentTypeConverter : NSObject <LOContentTypeConverter>
 
 @end

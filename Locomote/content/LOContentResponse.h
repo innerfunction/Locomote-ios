@@ -53,3 +53,12 @@
 - (void)respondWithError:(NSError *)error;
 
 @end
+
+/// Make a file not found response error.
+NSError *makePathNotFoundResponseError(NSString *path);
+
+/// Make an invalid request path error.
+NSError *makeInvalidPathResponseError(NSString *path);
+
+/// Make an unsupported type error.
+NSError *makeUnsupportedTypeResponseError(NSString *type);

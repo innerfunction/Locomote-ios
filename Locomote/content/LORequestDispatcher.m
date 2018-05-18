@@ -17,7 +17,6 @@
 //
 
 #import "LORequestDispatcher.h"
-#import "LOContentPath.h"
 #import "LOContentAuthority.h"
 #import "IFFilePathPattern.h"
 #import "NSDictionary+SC.h"
@@ -44,12 +43,11 @@
 }
 
 - (void)dispatchRequest:(id<LOContentRequest>)request response:(id<LOContentResponse>)response {
-    NSString *path = [request.path fullPath];
     NSArray<LORequestHandlerMapping *> *mappings = _host.requestHandlers;
     // Iterate over the request handler mappings.
     for (LORequestHandlerMapping *mapping in mappings) {
         // Test the mapping path against the current path.
-        NSDictionary *matches = [IFFilePathPattern matchPath:path usingPattern:mapping.path];
+        NSDictionary *matches = [IFFilePathPattern matchPath:request.path usingPattern:mapping.path];
         if (matches) {
             // Match found, update the path parameters and dispatch the request.
             request.pathParameters = [request.pathParameters extendWith:matches];
@@ -58,7 +56,7 @@
         }
     }
     // No mapping found, return with path not found error.
-    [response respondWithError:makePathNotFoundResponseError(path)];
+    [response respondWithError:makePathNotFoundResponseError(request.path)];
 }
 
 @end

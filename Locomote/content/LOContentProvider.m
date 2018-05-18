@@ -23,13 +23,17 @@
 
 #define NamePrefix (@"locomote")
 
+@interface LOContentProvider ()
+
+- (NSDictionary *)parseContentPath:(NSString *)path;
+
+@end
+
 @implementation LOContentProvider
 
 - (id)init {
     self = [super init];
     if (self) {
-        _commandQueue = [LOCommandQueue new];
-        
         // NOTES on staging and cache paths:
         // * Freshly downloaded content is stored under the staging path until the download is complete,
         //   after which it is deployed to the appropriate cache path and deleted from the staging location.
@@ -94,21 +98,19 @@
 }
 
 - (BOOL)hasContentForPath:(NSString *)path {
-    LOContentPath *contentPath = [[LOContentPath alloc] initWithPath:path];
-    NSString *authorityName = [contentPath head];
-    id<LOContentAuthority> authority = [self contentAuthorityForName:authorityName];
+    NSDictionary *parts = [self parseContentPath:path];
+    id<LOContentAuthority> authority = [self contentAuthorityForName:parts[@"authority"]];
     if (authority) {
-        return [authority hasContentForPath:[contentPath rest] parameters:@{}];
+        return [authority hasContentForPath:parts[@"part"] parameters:@{}];
     }
     return NO;
 }
 
 - (NSString *)localCacheLocationOfPath:(NSString *)path {
-    LOContentPath *contentPath = [[LOContentPath alloc] initWithPath:path];
-    NSString *authorityName = [contentPath head];
-    id<LOContentAuthority> authority = [self contentAuthorityForName:authorityName];
+    NSDictionary *parts = [self parseContentPath:path];
+    id<LOContentAuthority> authority = [self contentAuthorityForName:parts[@"authority"]];
     if (authority) {
-        return [authority localCacheLocationOfPath:[contentPath rest] parameters:@{}];
+        return [authority localCacheLocationOfPath:parts[@"part"] parameters:@{}];
     }
     return nil;
 }
@@ -153,13 +155,25 @@
 
 - (void)startService {
     [NSURLProtocol registerClass:[LOContentURLProtocol class]];
-    [_commandQueue startService];
 }
 
 #pragma mark - SCIOCSingleton
 
 + (id)iocSingleton {
     return [LOContentProvider getInstance];
+}
+
+#pragma mark - private
+
+- (NSDictionary *)parseContentPath:(NSString *)path {
+    NSRange range = [path rangeOfString:@"/"];
+    if (range.location != NSNotFound) {
+        return @{
+            @"authority":   [path substringToIndex:range.location],
+            @"path":        [path substringFromIndex:range.location + 1]
+         };
+    }
+    return @{ @"authority": path };
 }
 
 @end

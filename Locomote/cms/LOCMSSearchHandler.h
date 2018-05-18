@@ -21,6 +21,11 @@
 
 /**
  * A request handler for performing full-text searches.
+ *
+ * Implementation note: Searches can only be performed on pages, which are a file
+ * type whose content is stored within the file database. Specifically, the file
+ * content must be stored in a table named 'pages' which has 'title' and 'content'
+ * fields, and these names are currently hardcoded.
  */
 @interface LOCMSSearchHandler : LOCMSRequestHandler
 

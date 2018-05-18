@@ -20,6 +20,7 @@
 #import "LOCMSFilesetCategoryPathRoot.h"
 
 /// A path root providing post content.
+/// @deprecated
 @interface LOCMSPostsPathRoot : LOCMSFilesetCategoryPathRoot
 
 /**

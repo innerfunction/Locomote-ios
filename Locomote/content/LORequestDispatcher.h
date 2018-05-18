@@ -22,6 +22,7 @@
 
 /**
  * A content URL request handler.
+ * Generates response content for a content request.
  */
 @protocol LORequestHandler <NSObject>
 

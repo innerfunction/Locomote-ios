@@ -22,9 +22,7 @@
 		072C47AD1EB67673003222DD /* LOUnzipCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C477E1EB67673003222DD /* LOUnzipCommand.h */; };
 		072C47AE1EB67673003222DD /* LOUnzipCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C477F1EB67673003222DD /* LOUnzipCommand.m */; };
 		072C47B11EB67673003222DD /* LOContentAuthority.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C47831EB67673003222DD /* LOContentAuthority.h */; };
-		072C47B21EB67673003222DD /* LOContentAuthority.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C47841EB67673003222DD /* LOContentAuthority.m */; };
-		072C47B31EB67673003222DD /* LOContentPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C47851EB67673003222DD /* LOContentPath.h */; };
-		072C47B41EB67673003222DD /* LOContentPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C47861EB67673003222DD /* LOContentPath.m */; };
+		072C47B21EB67673003222DD /* LOContentResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C47841EB67673003222DD /* LOContentResponse.m */; };
 		072C47B51EB67673003222DD /* LOContentProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C47871EB67673003222DD /* LOContentProvider.h */; };
 		072C47B61EB67673003222DD /* LOContentProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C47881EB67673003222DD /* LOContentProvider.m */; };
 		072C47B71EB67673003222DD /* LOContentTypeConverter.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C47891EB67673003222DD /* LOContentTypeConverter.h */; };
@@ -90,9 +88,7 @@
 		072C477E1EB67673003222DD /* LOUnzipCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOUnzipCommand.h; sourceTree = "<group>"; };
 		072C477F1EB67673003222DD /* LOUnzipCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOUnzipCommand.m; sourceTree = "<group>"; };
 		072C47831EB67673003222DD /* LOContentAuthority.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOContentAuthority.h; sourceTree = "<group>"; };
-		072C47841EB67673003222DD /* LOContentAuthority.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOContentAuthority.m; sourceTree = "<group>"; };
-		072C47851EB67673003222DD /* LOContentPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOContentPath.h; sourceTree = "<group>"; };
-		072C47861EB67673003222DD /* LOContentPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOContentPath.m; sourceTree = "<group>"; };
+		072C47841EB67673003222DD /* LOContentResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOContentResponse.m; sourceTree = "<group>"; };
 		072C47871EB67673003222DD /* LOContentProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOContentProvider.h; sourceTree = "<group>"; };
 		072C47881EB67673003222DD /* LOContentProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOContentProvider.m; sourceTree = "<group>"; };
 		072C47891EB67673003222DD /* LOContentTypeConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOContentTypeConverter.h; sourceTree = "<group>"; };
@@ -163,30 +159,30 @@
 				0768132220AD8B5F00A686F7 /* LOCMSAuthenticationManager.m */,
 				0768131D20AD8B5E00A686F7 /* LOCMSCommandProtocol.h */,
 				0768132720AD8B5F00A686F7 /* LOCMSCommandProtocol.m */,
+				0768133920AD90A100A686F7 /* LOCMSContentAuthority.h */,
+				0768133A20AD90A100A686F7 /* LOCMSContentAuthority.m */,
 				0768132820AD8B5F00A686F7 /* LOCMSFileDB.h */,
 				0768132920AD8B5F00A686F7 /* LOCMSFileDB.m */,
+				07E7BA1220ADD0C500554B64 /* LOCMSFileHandler.h */,
+				07E7BA1320ADD0C500554B64 /* LOCMSFileHandler.m */,
+				07E7BA0E20ADD0A800554B64 /* LOCMSFileListHandler.h */,
+				07E7BA0F20ADD0A800554B64 /* LOCMSFileListHandler.m */,
 				0768132A20AD8B5F00A686F7 /* LOCMSFileset.h */,
 				0768131F20AD8B5F00A686F7 /* LOCMSFileset.m */,
 				0768132120AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.h */,
 				0768132420AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.m */,
-				0768132620AD8B5F00A686F7 /* LOCMSRepository.h */,
-				0768132520AD8B5F00A686F7 /* LOCMSRepository.m */,
-				0768131E20AD8B5F00A686F7 /* LOCMSSettings.h */,
-				0768132020AD8B5F00A686F7 /* LOCMSSettings.m */,
 				072C476C1EB67673003222DD /* LOCMSPostsPathRoot.h */,
 				072C476D1EB67673003222DD /* LOCMSPostsPathRoot.m */,
-				0768133920AD90A100A686F7 /* LOCMSContentAuthority.h */,
-				0768133A20AD90A100A686F7 /* LOCMSContentAuthority.m */,
 				0768134120AD9B9E00A686F7 /* LOCMSRepoRequestHandler.h */,
 				0768134220AD9B9E00A686F7 /* LOCMSRepoRequestHandler.m */,
-				07E7BA0E20ADD0A800554B64 /* LOCMSFileListHandler.h */,
-				07E7BA0F20ADD0A800554B64 /* LOCMSFileListHandler.m */,
-				07E7BA1220ADD0C500554B64 /* LOCMSFileHandler.h */,
-				07E7BA1320ADD0C500554B64 /* LOCMSFileHandler.m */,
-				07E7BA1620ADD0EA00554B64 /* LOCMSSearchHandler.h */,
-				07E7BA1720ADD0EA00554B64 /* LOCMSSearchHandler.m */,
+				0768132620AD8B5F00A686F7 /* LOCMSRepository.h */,
+				0768132520AD8B5F00A686F7 /* LOCMSRepository.m */,
 				07E7BA1C20AE1C7200554B64 /* LOCMSRequestHandler.h */,
 				07E7BA1D20AE1C7200554B64 /* LOCMSRequestHandler.m */,
+				07E7BA1620ADD0EA00554B64 /* LOCMSSearchHandler.h */,
+				07E7BA1720ADD0EA00554B64 /* LOCMSSearchHandler.m */,
+				0768131E20AD8B5F00A686F7 /* LOCMSSettings.h */,
+				0768132020AD8B5F00A686F7 /* LOCMSSettings.m */,
 			);
 			name = cms;
 			path = Locomote/cms;
@@ -217,24 +213,22 @@
 				07BD90251EB9295B0067B24C /* LOBundle.h */,
 				07BD90261EB9295B0067B24C /* LOBundle.m */,
 				072C47831EB67673003222DD /* LOContentAuthority.h */,
-				072C47841EB67673003222DD /* LOContentAuthority.m */,
-				072C47851EB67673003222DD /* LOContentPath.h */,
-				072C47861EB67673003222DD /* LOContentPath.m */,
 				072C47871EB67673003222DD /* LOContentProvider.h */,
 				072C47881EB67673003222DD /* LOContentProvider.m */,
+				0768134920AD9D9700A686F7 /* LOContentRequest.h */,
+				0768134D20AD9E1200A686F7 /* LOContentResponse.h */,
+				072C47841EB67673003222DD /* LOContentResponse.m */,
 				072C47891EB67673003222DD /* LOContentTypeConverter.h */,
 				072C478A1EB67673003222DD /* LOContentURLProtocol.h */,
 				072C478B1EB67673003222DD /* LOContentURLProtocol.m */,
+				0768133D20AD997000A686F7 /* LOLocalCachePaths.h */,
+				0768133E20AD997000A686F7 /* LOLocalCachePaths.m */,
 				072C478C1EB67673003222DD /* LOMIMETypes.h */,
 				072C478D1EB67673003222DD /* LOMIMETypes.m */,
 				072C478E1EB67673003222DD /* LOPlainContentTypeConverter.h */,
 				072C478F1EB67673003222DD /* LOPlainContentTypeConverter.m */,
-				0768133D20AD997000A686F7 /* LOLocalCachePaths.h */,
-				0768133E20AD997000A686F7 /* LOLocalCachePaths.m */,
 				0768134520AD9D2900A686F7 /* LORequestDispatcher.h */,
 				0768134620AD9D2900A686F7 /* LORequestDispatcher.m */,
-				0768134920AD9D9700A686F7 /* LOContentRequest.h */,
-				0768134D20AD9E1200A686F7 /* LOContentResponse.h */,
 			);
 			name = content;
 			path = Locomote/content;
@@ -320,7 +314,6 @@
 				07E7BA1820ADD0EA00554B64 /* LOCMSSearchHandler.h in Headers */,
 				0768133620AD8B5F00A686F7 /* LOCMSFileDB.h in Headers */,
 				0768133820AD8B5F00A686F7 /* LOCMSFileset.h in Headers */,
-				072C47B31EB67673003222DD /* LOContentPath.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -455,11 +448,10 @@
 				072C47AA1EB67673003222DD /* LOMvFileCommand.m in Sources */,
 				0768133320AD8B5F00A686F7 /* LOCMSRepository.m in Sources */,
 				0768134020AD997000A686F7 /* LOLocalCachePaths.m in Sources */,
-				072C47B41EB67673003222DD /* LOContentPath.m in Sources */,
 				072C47BB1EB67673003222DD /* LOMIMETypes.m in Sources */,
 				0768133520AD8B5F00A686F7 /* LOCMSCommandProtocol.m in Sources */,
 				0768133C20AD90A100A686F7 /* LOCMSContentAuthority.m in Sources */,
-				072C47B21EB67673003222DD /* LOContentAuthority.m in Sources */,
+				072C47B21EB67673003222DD /* LOContentResponse.m in Sources */,
 				0768133020AD8B5F00A686F7 /* LOCMSAuthenticationManager.m in Sources */,
 				07BD90281EB9295B0067B24C /* LOBundle.m in Sources */,
 			);

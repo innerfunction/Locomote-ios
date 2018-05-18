@@ -20,16 +20,17 @@
 #import "LORequestDispatcher.h"
 #import "LOCMSFileDB.h"
 #import "LOCMSFileset.h"
+#import "LOCMSRepository.h"
 
 /**
  * A superclass for all CMS request handlers.
  */
-@interface LOCMSRequestHandler : NSObject <LORequestHandler>
+@interface LOCMSRequestHandler : NSObject <LORequestHandler> {
+    LOCMSFileDB *_fileDB;
+    NSDictionary<NSString *, LOCMSFileset *> *_filesets;
+}
 
-/// The file database.
-@property (nonatomic, weak) LOCMSFileDB *fileDB;
-/// The filesets defined for the content repository.
-@property (nonatomic, strong, readonly) NSDictionary<NSString *, LOCMSFileset *> *filesets;
+- (id)initWithRepository:(LOCMSRepository *)repository;
 
 /// Read a file record by file ID.
 - (NSDictionary *)readFileRecordByID:(NSString *)fileID;

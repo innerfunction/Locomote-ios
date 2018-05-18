@@ -18,11 +18,13 @@
 
 #import "LOCMSContentAuthority.h"
 #import "LOContentProvider.h"
+#import "LOContentRequest.h"
+#import "LOContentResponse.h"
 #import "SCResource.h"
 
 @interface LOCMSContentRequest : NSObject <LOContentRequest>
 
-- (id)initWithAuthority:(LOCMSContentAuthority *)authority path:(LOContentPath *)path parameters:(NSDictionary *)parameters;
+- (id)initWithAuthority:(LOCMSContentAuthority *)authority path:(NSString *)path parameters:(NSDictionary *)parameters;
 
 @end
 
@@ -41,6 +43,15 @@
 
 @end
 
+@interface LOCMSContentAuthority ()
+
+/// Write a content reponse for the specified path.
+- (void)writeResponse:(id<LOContentResponse>)response
+              forPath:(NSString *)path
+           parameters:(NSDictionary *)parameters;
+
+@end
+
 @implementation LOCMSContentAuthority
 
 @synthesize provider=_provider, requestHandlers=_requestHandlers;
@@ -49,7 +60,8 @@
     self = [super init];
     if (self) {
         _liveResponses = [NSMutableSet new];
-        _dispatcher = [[LORequestDispatcher alloc] initWithHost:self];
+        _dispatcher    = [[LORequestDispatcher alloc] initWithHost:self];
+        _commandQueue  = [LOCommandQueue new];
     }
     return self;
 }
@@ -57,6 +69,35 @@
 #pragma mark - SCService
 
 - (void)startService {
+    // Set cache paths using the configured authority name.
+    self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:self.provider.localCachePaths
+                                                     authorityName:self.authorityName];
+
+    // Each repository key specifies the base path the repository is mounted under.
+    // Generate a list of repo keys ordered longest to shortest, before generating a request
+    // handler mapping for each repository based on its base path. (Keys are ordered longest
+    // first so that more specific repo paths take precedence over less specific paths).
+    NSArray *keys = [_repositories keysSortedByValueUsingComparator:^NSComparisonResult(NSString *key1, NSString *key2) {
+        NSUInteger len1 = [key1 length], len2 = [key2 length];
+        return (len1 < len2) ? NSOrderedDescending : ((len1 > len2) ? NSOrderedAscending : NSOrderedSame);
+    }];
+    // Generate request handler mappings.
+    NSMutableArray *mappings = [NSMutableArray new];
+    for (id key in keys) {
+        // Read the repository.
+        LOCMSRepository *repository = _repositories[key];
+        // Generate a file path pattern using the repo base path (note that this will have a
+        // trailing slash).
+        NSString *path = [NSString stringWithFormat:@"%@**", repository.basePath];
+        // Create the mapping and add to the list.
+        LORequestHandlerMapping *mapping = [[LORequestHandlerMapping alloc] initWithPath:path handler:repository];
+        [mappings addObject:mapping];
+    }
+    // Set the request handler mappings.
+    self.requestHandlers = mappings;
+
+    // Start the command queue.
+    [_commandQueue startService];
     // Schedule content refreshes.
     if (_refreshInterval > 0) {
         [NSTimer scheduledTimerWithTimeInterval:(_refreshInterval * 60.0f)
@@ -77,19 +118,13 @@
 
 #pragma mark - LOContentAuthority
 
-- (void)setProvider:(LOContentProvider *)provider {
-    _provider = provider;
-    // TODO - what if authorityName isn't set at this point?
-    self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:provider.localCachePaths
-                                                         authorityName:self.authorityName];
-}
-
 - (void)handleURLProtocolRequest:(NSURLProtocol *)protocol {
     [_liveResponses addObject:protocol];
     LONSURLProtocolResponse *response = [[LONSURLProtocolResponse alloc] initWithNSURLProtocol:protocol
                                                                                  liveResponses:_liveResponses];
     NSURL *url = protocol.request.URL;
-    LOContentPath *contentPath = [[LOContentPath alloc] initWithURL:url];
+    // Use the URL path without the leading slash.
+    NSString *contentPath = [url.path substringFromIndex:1];
     
     // Parse the URL's scheme and path parts as a compound URI; this is to allow encoding of
     // request parameters in the compound URI format - i.e. +p1@v1+p2@v2 etc.
@@ -110,27 +145,26 @@
     [_liveResponses removeObject:protocol];
 }
 
-- (BOOL)hasContentForPath:(LOContentPath *)path parameters:(NSDictionary *)parameters {
-    // Subclass should override this with an appropriate implementation.
+- (BOOL)hasContentForPath:(NSString *)path parameters:(NSDictionary *)parameters {
+    // (TODO: Find the LOCMSRepository handling the path and delegate to it)
     return NO;
 }
 
-- (NSString *)localCacheLocationOfPath:(LOContentPath *)path parameters:(NSDictionary *)parameters {
-    // Subclass should override this with an appropriate implementation.
+- (NSString *)localCacheLocationOfPath:(NSString *)path parameters:(NSDictionary *)parameters {
+    // (TODO: Find the LOCMSRepository handling the path and delegate to it)
     return nil;
 }
 
 - (id)contentForPath:(NSString *)path parameters:(NSDictionary *)parameters {
     LOSchemeHandlerResponse *response = [LOSchemeHandlerResponse new];
-    LOContentPath *contentPath = [[LOContentPath alloc] initWithPath:path];
     [self writeResponse:response
-                forPath:contentPath
+                forPath:path
              parameters:parameters];
     return response;
 }
 
 - (void)writeResponse:(id<LOContentResponse>)response
-              forPath:(LOContentPath *)path
+              forPath:(NSString *)path
            parameters:(NSDictionary *)parameters {
     
     id<LOContentRequest> request = [[LOCMSContentRequest alloc] initWithAuthority:self
@@ -140,8 +174,12 @@
 }
 
 - (QPromise *)syncContent {
-    // TODO
-    return nil;
+    NSMutableArray *promises = [NSMutableArray new];
+    for (id key in _repositories) {
+        LOCMSRepository *repository = _repositories[key];
+        [promises addObject:[repository syncContent]];
+    }
+    return [Q all:promises];
 }
 
 @end
@@ -150,7 +188,7 @@
 
 @synthesize authority=_authority, path=_path, parameters=_parameters, pathParameters=_pathParameters;
 
-- (id)initWithAuthority:(LOCMSContentAuthority *)authority path:(LOContentPath *)path parameters:(NSDictionary *)parameters {
+- (id)initWithAuthority:(LOCMSContentAuthority *)authority path:(NSString *)path parameters:(NSDictionary *)parameters {
     self = [super init];
     self.authority = authority;
     self.path = path;

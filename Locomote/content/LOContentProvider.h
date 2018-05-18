@@ -18,7 +18,6 @@
 
 #import <Foundation/Foundation.h>
 #import "LOContentAuthority.h"
-#import "LOCommandQueue.h"
 #import "LOLocalCachePaths.h"
 #import "SCIOCTypeInspectable.h"
 #import "SCIOCSingleton.h"
@@ -35,9 +34,7 @@
 @interface LOContentProvider : NSObject <SCIOCSingleton, SCIOCTypeInspectable, SCService, SCMessageRouter, SCMessageReceiver>
 
 /// A map of content authority instances keyed by authority name.
-@property (nonatomic, strong) NSDictionary *authorities;
-/// A command queue for executing commands for the different content authorities.
-@property (nonatomic, strong) LOCommandQueue *commandQueue;
+@property (nonatomic, strong) NSDictionary<NSString *, id<LOContentAuthority>> *authorities;
 /// Path settings for locally cached content.
 @property (nonatomic, strong) LOLocalCachePaths *localCachePaths;
 

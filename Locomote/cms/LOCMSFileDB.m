@@ -29,7 +29,7 @@
 
 @implementation LOCMSFileDB
 
-- (id)initWithRepositry:(LOCMSRepository *)repository {
+- (id)initWithRepository:(LOCMSRepository *)repository {
     self = [super init];
     self.repository = repository;
     self.filesTable = @"files";

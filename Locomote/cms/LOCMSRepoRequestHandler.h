@@ -22,6 +22,8 @@
 #import "LOCMSSettings.h"
 #import "LOCMSFileset.h"
 
+@class LOCMSRepository;
+
 /**
  * A request handler that serves content from a single Locomote content repository.
  * In a typical setup, a file within a specific repository can be referenced using a content
@@ -51,6 +53,7 @@
  * > files.api/{id}/descendents
  *      Return a list of all descendents of a file. These are all files that are in a path
  *      directory below the reference file.
+ * (TODO: Document fileset.api)
  * > search.api
  *      Perform a full-text search of page content.
  */
@@ -66,5 +69,7 @@
 /// then make a property of this class; this class should pass the repository through to
 /// each of its handlers when the repo property is set.
 @property (nonatomic, strong, readonly) NSDictionary<NSString *, LOCMSFileset *> *filesets;
+
+- (id)initWithRepository:(LOCMSRepository *)repository;
 
 @end

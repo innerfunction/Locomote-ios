@@ -17,9 +17,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LOAbstractContentAuthority.h"
+#import "LORequestDispatcher.h"
+#import "LOCMSRepoRequestHandler.h"
 #import "LOCMSFileDB.h"
-#import "LOCMSFilesetCategoryPathRoot.h"
 #import "LOCMSCommandProtocol.h"
 #import "LOCMSSettings.h"
 #import "LOCMSAuthenticationManager.h"
@@ -30,11 +30,15 @@
 #import "SCMessageReceiver.h"
 #import "Q.h"
 
+@class LOCMSContentAuthority;
+
 /**
  * A content authority which sources its content from a Locomote.sh content repository.
  */
-@interface LOCMSRepository : LOAbstractContentAuthority <SCService, SCIOCObjectAware>
+@interface LOCMSRepository : NSObject <LORequestHandler, SCService, SCIOCObjectAware>
 
+/// The path this repository is mounted under; i.e. a path in the form account/repo/~branch.
+@property (nonatomic, strong) NSString *basePath;
 /// The file database.
 @property (nonatomic, strong) LOCMSFileDB *fileDB;
 /// The HTTP client used for server requests.
@@ -45,14 +49,15 @@
 @property (nonatomic, strong, readonly) NSDictionary *filesets;
 /// The CMS settings (host / account / repo).
 @property (nonatomic, strong) LOCMSSettings *cms;
-/// A map of available content record type converters.
-@property (nonatomic, strong) NSDictionary *recordTypes;
-/// A map of available content query type converters.
-@property (nonatomic, strong) NSDictionary *queryTypes;
 /// The authority's scheduled command protocol.
 @property (nonatomic, strong) LOCMSCommandProtocol *commandProtocol;
+/// Repository content request handler.
+@property (nonatomic, strong) LOCMSRepoRequestHandler *requestHandler;
+/// The content authority this repository belongs to.
+@property (nonatomic, strong) LOCMSContentAuthority *authority;
 
-- (id)initWithSettings:(LOCMSSettings *)settings;
+/// Synchronize the repository's content by downloading updates from the server.
+- (QPromise *)syncContent;
 
 @end
 

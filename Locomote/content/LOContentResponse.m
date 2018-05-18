@@ -16,7 +16,7 @@
 //  Copyright © 2016 InnerFunction. All rights reserved.
 //
 
-#import "LOContentAuthority.h"
+#import "LOContentResponse.h"
 
 NSError *makePathNotFoundResponseError(NSString *path) {
     NSString *description = [NSString stringWithFormat:@"Path not found: %@", path];
