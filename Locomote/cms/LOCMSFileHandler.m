@@ -57,11 +57,11 @@ static SCLogger *Logger;
     }
     // A reference file ID.
     NSString *fileID = request.pathParameters[@"id"];
-    
+    // Check whether to qualify by fileset category.
+    NSString *category = request.pathParameters[@"category"];
+
     // If a file ID specified then read the file record using it.
     if (fileID) {
-        // Check whether to qualify by fileset category.
-        NSString *category = request.pathParameters[@"category"];
         // Read the file record.
         record = [self readFileRecordByID:fileID inCategory:category];
     }
@@ -77,7 +77,13 @@ static SCLogger *Logger;
         // File not found.
         [response respondWithError:makePathNotFoundResponseError(request.path)];
     }
-    
+    // Check if we have the file category - if not then we need to reload the file
+    // record so that fileset mappings are included.
+    if (!category) {
+        category = record[@"category"];
+        record = [self readFileRecordByID:fileID inCategory:category];
+    }
+
     // Send the response.
     if ([@"record" isEqualToString:mode]) {
         [response respondWithJSONData:record cachePolicy:NSURLCacheStorageNotAllowed];
@@ -88,7 +94,9 @@ static SCLogger *Logger;
         if (record[@"pages.type"] && record[@"pages.content"]) {
             NSString *content = [self renderPageContent:record];
             // Note for now the assumption that all page content is HTML.
-            [response respondWithStringData:content mimeType:@"text/html" cachePolicy:NSURLCacheStorageNotAllowed];
+            [response respondWithStringData:content
+                                   mimeType:@"text/html"
+                                cachePolicy:NSURLCacheStorageNotAllowed];
         }
         else {
             [self writeFileContent:record toResponse:response];
@@ -101,6 +109,8 @@ static SCLogger *Logger;
     NSString *pageType = pageData[@"pages.type"];
     NSString *pageHTML;
     // Resolve the client template to use to render the post.
+    // TODO: Note that the following code assumes the page templates are avaiable in the app
+    // cache; consider whether to instead load templates via the content: URL.
     NSString *templateFilename = [NSString stringWithFormat:@"_templates/page-%@.html", pageType];
     NSString *templatePath = [self.fileDB cacheLocationForFileWithPath:templateFilename];
     if (![fileManager fileExistsAtPath:templatePath]) {
@@ -112,15 +122,21 @@ static SCLogger *Logger;
     }
     // If template found then use to render the page content.
     if (templatePath) {
-        // Load the template and render the post.
-        NSString *template = [NSString stringWithContentsOfFile:templatePath encoding:NSUTF8StringEncoding error:nil];
         NSError *error;
-        // TODO: Investigate using template repositories to load templates
-        // https://github.com/groue/GRMustache/blob/master/Guides/template_repositories.md
-        // as they should allow partials to be used within templates, whilst supporting the two
-        // use cases of loading templates from file (i.e. for full post html) or evaluating
-        // a template from a string (i.e. for post content only).
-        pageHTML = [GRMustacheTemplate renderObject:pageData fromString:template error:&error];
+        // Load the template and render the post.
+        NSString *template = [NSString stringWithContentsOfFile:templatePath
+                                                       encoding:NSUTF8StringEncoding
+                                                          error:&error];
+        if (!error) {
+            // TODO: Investigate using template repositories to load templates
+            // https://github.com/groue/GRMustache/blob/master/Guides/template_repositories.md
+            // as they should allow partials to be used within templates, whilst supporting the two
+            // use cases of loading templates from file (i.e. for full post html) or evaluating
+            // a template from a string (i.e. for post content only).
+            pageHTML = [GRMustacheTemplate renderObject:pageData
+                                             fromString:template
+                                                  error:&error];
+        }
         if (error) {
             [Logger error:@"Rendering %@: %@", templatePath, error];
         }
