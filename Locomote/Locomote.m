@@ -95,28 +95,39 @@ BOOL startAndWait(NSTimeInterval timeout);
 @end
 
 BOOL startAndWait(NSTimeInterval timeout) {
-    __block BOOL result = NO;
+    __block NSNumber *result = nil;
     NSCondition *checkpoint = [NSCondition new];
     LOContentProvider *provider = [LOContentProvider getInstance];
     [provider syncAuthorities]
     .then( (id)^(NSNumber *ok) {
-        result = [ok boolValue];
+        // Signal the result.
+        [checkpoint lock];
+        result = ok;
         [checkpoint signal];
+        [checkpoint unlock];
         return nil;
     })
     .fail( ^(id error) {
-        result = NO;
+        // Signal a startup error.
+        [checkpoint lock];
+        result = [NSNumber numberWithBool:NO];
         [checkpoint signal];
+        [checkpoint unlock];
         NSLog(@"ERROR: Locomote start failure %@", error );
     });
-    if (timeout > 0) {
-        NSDate *until = [NSDate dateWithTimeIntervalSinceNow:timeout];
-        [checkpoint waitUntilDate:until];
+    // Wait for the result if none already.
+    [checkpoint lock];
+    if (result == nil) {
+        if (timeout > 0) {
+            NSDate *until = [NSDate dateWithTimeIntervalSinceNow:timeout];
+            [checkpoint waitUntilDate:until];
+        }
+        else {
+            [checkpoint wait];
+        }
     }
-    else {
-        [checkpoint wait];
-    }
-    return result;
+    [checkpoint unlock];
+    return [result boolValue];
 }
 
 @implementation UIImage (Locomote)

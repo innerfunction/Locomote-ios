@@ -220,12 +220,14 @@
     [self continueDBResetInProgress];
     
     // Refresh the app content on start.
+    // TODO Check should this be done here - Locomote.m also initiates a refresh on start.
     [self refreshContent];
 }
 
 #pragma mark - Private
 
 - (void)continueDBResetInProgress {
+    // TODO Modify command queue api to accept authority name - it can then do the following line.
     NSString *command = [NSString stringWithFormat:@"%@.%@", self.authority.authorityName, @"reset-fileset"];
     LOCommandQueue *commandQueue = self.authority.commandQueue;
     // Query the file DB for any outstanding fileset resets, and reissue a reset command for each one.

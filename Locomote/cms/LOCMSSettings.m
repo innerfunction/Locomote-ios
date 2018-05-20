@@ -18,10 +18,12 @@
 
 #import "LOCMSSettings.h"
 
+#define DefaultAPIProtocol  (@"https")
+#define DefaultAPIHost      (@"locomote.sh")
 #define DefaultAPIVersion   (@"0.2")
 #define DefaultAPIRoot      (@"cms")
-#define DefaultAPIProtocol  (@"https")
 #define AuthRealmPrefix     (@"sh.locomote")
+#define DefaultBaseURL      ([NSString stringWithFormat:@"%@://%@/%@/%@", DefaultAPIProtocol, DefaultAPIHost, DefaultAPIRoot, DefaultAPIVersion])
 
 @interface LOCMSSettings()
 
@@ -34,11 +36,10 @@
 
 - (id)init {
     self = [super init];
-    if (self) {
-        self.pathRoot = [DefaultAPIRoot stringByAppendingPathComponent:DefaultAPIVersion];
-        self.protocol = DefaultAPIProtocol;
-        self.port = 0;
-    }
+    self.protocol = DefaultAPIProtocol;
+    self.host     = DefaultAPIHost;
+    self.pathRoot = [DefaultAPIRoot stringByAppendingPathComponent:DefaultAPIVersion];
+    self.port = 0;
     return self;
 }
 
@@ -46,7 +47,7 @@
 
     // Ref is a whole or partial, absolute or relative URL which is resolved against
     // the default repository base URL as defined in this class (e.g. https://locomote.sh/cms/0.2/).
-    NSURL *baseURL = [NSURL URLWithString:[self urlForPath:@"/"]];
+    NSURL *baseURL = [NSURL URLWithString:DefaultBaseURL];
     NSURL *repoURL = [NSURL URLWithString:ref relativeToURL:baseURL];
     
     // Extract core properties from the URL and use to initialize the settings object.
@@ -54,7 +55,7 @@
     if ([repoURL.pathComponents count] > 3) {
         // First two components are API root & version, e.g. 'cms' & '0.2'
         account = repoURL.pathComponents[2];
-        repo = repoURL.pathComponents[3];
+        repo    = repoURL.pathComponents[3];
     }
     self = [self initWithHost:repoURL.host
                       account:account
@@ -71,6 +72,7 @@
     }
     
     // Allow the URL fragment to override the default authority name.
+    // TODO Review the need for this.
     if (repoURL.fragment) {
         self.authorityName = repoURL.fragment;
     }
@@ -104,9 +106,9 @@
 
 - (id)initWithHost:(NSString *)host account:(NSString *)account repository:(NSString *)repo username:(NSString *)username password:(NSString *)password {
     self = [self init];
-    self.host = host;
-    self.account = account;
-    self.repo = repo;
+    self.host     = host;
+    self.account  = account;
+    self.repo     = repo;
     self.username = username;
     self.password = password;
     self.authorityName = [NSString stringWithFormat:@"%@.%@", account, repo ];
@@ -115,6 +117,7 @@
 
 - (NSString *)authRealm {
     if (!_authRealm) {
+        // TODO - is branch necessary here?
         NSString *branch = _branch ? _branch : @"master";
         _authRealm = [NSString stringWithFormat:@"%@/%@/%@/%@", AuthRealmPrefix, _account, _repo, branch];
     }
@@ -122,19 +125,19 @@
 }
 
 - (NSString *)urlForAuthentication {
-    return [self urlForPath:[self pathForResource:@"authenticate" trailing:nil]];
+    return [self urlForPath:[self pathForResource:@"authenticate.api" trailing:nil]];
 }
 
 - (NSString *)urlForUpdates {
-    return [self urlForPath:[self pathForResource:@"updates" trailing:nil]];
+    return [self urlForPath:[self pathForResource:@"updates.api" trailing:nil]];
 }
 
 - (NSString *)urlForFileset:(NSString *)category {
-    return [self urlForPath:[self pathForResource:@"filesets" trailing:category]];
+    return [self urlForPath:[self pathForResource:@"filesets.api" trailing:category]];
 }
 
 - (NSString *)urlForFile:(NSString *)path {
-    return [self urlForPath:[self pathForResource:@"files" trailing:path]];
+    return [self urlForPath:[self pathForResource:@"files.api" trailing:path]];
 }
 
 - (NSString *)apiBaseURL {

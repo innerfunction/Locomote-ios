@@ -57,7 +57,7 @@
 /// Path settings for locally cached content.
 @property (nonatomic, strong) LOLocalCachePaths *localCachePaths;
 /// Interval between content refreshes; in minutes.
-@property (nonatomic, assign) CGFloat refreshInterval;
+@property (nonatomic, assign) float refreshInterval;
 /// An optional URL handler.
 @property (nonatomic, strong) id<SCURIHandler> uriHandler;
 /// A command queue for executing content related commands.

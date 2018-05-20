@@ -45,7 +45,7 @@
         }
         else {
             // File not found.
-            [response respondWithError:makePathNotFoundResponseError(request.path.fullPath)];
+            [response respondWithError:makePathNotFoundResponseError(request.path)];
             return;
         }
         // Get the path to the directory containing the reference file.
@@ -57,7 +57,7 @@
         LOCMSFileset *fileset = self.filesets[category];
         if (!fileset) {
             // Fileset category not found.
-            [response respondWithError:makePathNotFoundResponseError(request.path.fullPath)];
+            [response respondWithError:makePathNotFoundResponseError(request.path)];
             return;
         }
         // Note that category field is qualifed by source table name.
