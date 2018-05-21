@@ -18,7 +18,6 @@
 
 #import <Foundation/Foundation.h>
 #import "LOContentAuthority.h"
-#import "LOCMSRepository.h"
 #import "LORequestDispatcher.h"
 #import "LOCMSSettings.h"
 #import "LOLocalCachePaths.h"
@@ -26,6 +25,8 @@
 #import "SCIOCTypeInspectable.h"
 #import "SCService.h"
 #import "SCURIHandling.h"
+
+@class LOCMSRepository;
 
 /**
  * A content authority backed by a Locomote content repository.
@@ -44,6 +45,8 @@
     LORequestDispatcher *_dispatcher;
 }
 
+/// The content provider.
+@property (nonatomic, weak) LOContentProvider *provider;
 /// The name of the authority that the class instance is bound to, e.g. the server host name.
 @property (nonatomic, strong) NSString *authorityName;
 /// A map of content repositories, keyed by account/repo or account/repo/branch.
@@ -62,5 +65,8 @@
 @property (nonatomic, strong) id<SCURIHandler> uriHandler;
 /// A command queue for executing content related commands.
 @property (nonatomic, strong) LOCommandQueue *commandQueue;
+
+/// Add a content repository to this authority.
+- (void)addRepository:(LOCMSRepository *)repository;
 
 @end

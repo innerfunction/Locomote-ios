@@ -33,9 +33,9 @@ typedef void (^LOStartCallbackBlock) (BOOL ok);
 
 /**
  * Add the configuration for a content repository to the list of sources used by the Locomote content provider.
- * @param config    A content repository configuration. Can be specified as a string or an object literal.
+ * @param ref   A content repository reference; either a full or partial URL.
  */
-+ (void)addRepository:(id)config;
++ (void)addRepository:(NSString *)ref;
 /**
  * Start the Locomote content provider.
  * Starting the provider will cause it to synchronize each source content repository with the remote server.

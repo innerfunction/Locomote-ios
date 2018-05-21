@@ -20,21 +20,15 @@
 /// A class representing a Locomote content repository's settings.
 @interface LOCMSSettings : NSObject
 
-/// The CMS host name.
+/// The server host name.
 @property (nonatomic, strong) NSString *host;
-/// The CMS port name.
+/// The server port number.
 @property (nonatomic, assign) NSInteger port;
-/// The CMS account name.
-@property (nonatomic, strong) NSString *account;
-/// The CMS repo name.
-@property (nonatomic, strong) NSString *repo;
-/// The CMS branch name.
-@property (nonatomic, strong) NSString *branch;
-/// The CMS HTTP authentication realm.
+/// The base path on the server for accessing the CMS.
+@property (nonatomic, strong) NSString *basePath;
+/// The  HTTP authentication realm.
 @property (nonatomic, strong) NSString *authRealm;
-/// The CMS path root;
-@property (nonatomic, strong) NSString *pathRoot;
-/// The CMS protocol, e.g. HTTP or HTTPS.
+/// The server protocol, e.g. HTTP or HTTPS.
 @property (nonatomic, strong) NSString *protocol;
 /// A username for accessing the CMS.
 @property (nonatomic, strong) NSString *username;
@@ -45,16 +39,18 @@
 
 /**
  * Initialize settings with a string reference.
- * The string ref can be a full or partial URL or path, specifing some or all of different
- * setting fields.
+ * The string ref can be a full or partial URL or path, specifing some or all of different setting fields.
  * The reference takes the following format:
+ *
  *      (protocol:)?(username : password @)?((host (: port)? /)? account / repo (/ branch)?
+ *
+ * Examples of possible valid references are:
+ *  - https://locomote.sh/cms/2.0/account/repo  Full URL form.
+ *  - account/repo:         Connect to account and repo on locomote.sh; equivalent to previous example.
+ *  - account/repo/branch:  Connect to account, repo and branch on locomote.sh
+ *  - domain.sh/repo        Connect to repo hosted under custom domain.
  */
 - (id)initWithRef:(NSString *)ref;
-/// Initialize settings with a dictionary of values.
-- (id)initWithSettings:(NSDictionary *)settings;
-/// Initialize settings with the specified values.
-- (id)initWithHost:(NSString *)host account:(NSString *)account repository:(NSString *)narepome username:(NSString *)username password:(NSString *)password;
 
 /// Return the URL for login authentication.
 - (NSString *)urlForAuthentication;

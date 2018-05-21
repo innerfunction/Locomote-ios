@@ -20,12 +20,12 @@
 
 @implementation LOLocalCachePaths
 
-- (id)initWithSettings:(LOLocalCachePaths *)settings authorityName:(NSString *)authorityName {
+- (id)initWithSettings:(LOLocalCachePaths *)settings suffix:(NSString *)suffix {
     self = [super init];
-    self.stagingPath         = [settings.stagingPath         stringByAppendingPathComponent:authorityName];
-    self.appCachePath        = [settings.appCachePath        stringByAppendingPathComponent:authorityName];
-    self.contentCachePath    = [settings.contentCachePath    stringByAppendingPathComponent:authorityName];
-    self.packagedContentPath = [settings.packagedContentPath stringByAppendingPathComponent:authorityName];
+    self.stagingPath         = [settings.stagingPath         stringByAppendingPathComponent:suffix];
+    self.appCachePath        = [settings.appCachePath        stringByAppendingPathComponent:suffix];
+    self.contentCachePath    = [settings.contentCachePath    stringByAppendingPathComponent:suffix];
+    self.packagedContentPath = [settings.packagedContentPath stringByAppendingPathComponent:suffix];
     return self;
 }
 

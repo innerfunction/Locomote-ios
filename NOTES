@@ -50,3 +50,18 @@ Content URLs:
 * content:search.api
 
 > Look at app bundles e.g. for downloading after installation
+
+
+Repository configuration:
+* By code - [Locomote addRepository:@"account/repo"]
+* By config, via a container:
+    "authorities": {
+        "locomote.sh": {
+            "account/repo": {
+            }
+        }
+    }
+
+}
+}
+}

@@ -32,23 +32,21 @@ BOOL startAndWait(NSTimeInterval timeout);
 
 @implementation Locomote
 
-+ (void)addRepository:(id)config {
-    LOCMSSettings *settings = nil;
-    if ([config isKindOfClass:[NSString class]]) {
-        settings = [[LOCMSSettings alloc] initWithRef:(NSString *)config];
++ (void)addRepository:(NSString *)ref {
+    // Create repo settings using the ref.
+    LOCMSSettings *settings = [[LOCMSSettings alloc] initWithRef:ref];
+    // Create repo using the settings.
+    LOCMSRepository *repo   = [[LOCMSRepository alloc] initWithSettings:settings];
+    // Check whether the content provider has a content authority for the repo.
+    LOContentProvider *provider = [LOContentProvider getInstance];
+    id<LOContentAuthority> authority = [provider contentAuthorityForName:settings.authorityName];
+    if (!authority) {
+        // No matching content authority found, create a new one and add to the provider.
+        authority = [LOCMSContentAuthority new];
+        [provider setContentAuthority:authority withName:settings.authorityName];
     }
-    else if ([config isKindOfClass:[NSDictionary class]]) {
-        settings = [[LOCMSSettings alloc] initWithSettings:(NSDictionary *)config];
-    }
-    if (settings) {
-        LOCMSRepository *repo = [[LOCMSRepository alloc] initWithSettings:settings];
-        LOContentProvider *provider = [LOContentProvider getInstance];
-        [provider setContentAuthority:repo withName:settings.authorityName];
-    }
-    else {
-        // Invalid repository config.
-        NSLog(@"ERROR: Locomote repository config must be NSString or NSDictionary type; %@ provided", [config class]);
-    }
+    // Add the repository to the content authority.
+    [(LOCMSContentAuthority *)authority addRepository:repo];
 }
 
 + (QPromise *)start {
@@ -121,6 +119,11 @@ BOOL startAndWait(NSTimeInterval timeout) {
         if (timeout > 0) {
             NSDate *until = [NSDate dateWithTimeIntervalSinceNow:timeout];
             [checkpoint waitUntilDate:until];
+            // Timeout could complete before result has been generated, in
+            // which case default to start failure.
+            if (result == nil) {
+                result = [NSNumber numberWithBool:NO];
+            }
         }
         else {
             [checkpoint wait];

@@ -110,23 +110,24 @@
     return self;
 }
 
+- (id)initWithSettings:(LOCMSSettings *)settings {
+    self = [self init];
+    self.cms = settings;
+    return self;
+}
+
 - (NSDictionary *)filesets {
     return _fileDB.filesets;
 }
 
-- (void)setBasePath:(NSString *)basePath {
-    // Ensure that the path has a trailing slash.
-    if (![basePath hasSuffix:@"/"]) {
-        basePath = [basePath stringByAppendingString:@"/"];
-    }
-    // Assign to the property.
-    _basePath = basePath;
+- (void)setCms:(LOCMSSettings *)cms {
+    _cms = cms;
+    self.basePath = cms.basePath;
 }
 
 - (void)setAuthority:(LOCMSContentAuthority *)authority {
     _authority = authority;
-    // Derive settings from the authority's settings.
-    _cms = [[LOCMSSettings alloc] initWithSettings:authority.settings.xxx];
+    self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:authority.localCachePaths suffix:_basePath];
 }
 
 - (QPromise *)refreshContent {
@@ -179,25 +180,10 @@
 
 - (void)startService {
 
-    // Extract account / repo / branch info from the path.
-    NSArray *components = [_basePath componentsSeparatedByString:@"/"];
-    switch ([_basePath length]) {
-        case 3:
-            _cms.branch  = components[2];
-        case 2:
-            _cms.repo    = components[1];
-        case 1:
-            _cms.account = components[0];
-            break;
-        default:
-            // TODO: Should be an error?
-            break;
-    }
-
     // Set file DB name and initial copy path.
     if (!_fileDB.name) {
         NSString *authorityName = self.authority.authorityName;
-        _fileDB.name = [NSString stringWithFormat:@"%@/%@/%@_%@", authorityName, self.cms.account, self.cms.repo, self.cms.branch];
+        _fileDB.name = [NSString stringWithFormat:@"%@/%@", authorityName, self.basePath];
     }
     if (!_fileDB.initialCopyPath) {
         NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];

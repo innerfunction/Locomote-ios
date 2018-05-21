@@ -131,7 +131,7 @@
     NSString *category = fileRecord[@"category"];
     if ([@"packaged" isEqualToString:status]) {
         // Packaged content is distributed with the app, under a folder with the content authority name.
-        path = _repository.packagedContentPath;
+        path = _repository.localCachePaths.packagedContentPath;
         path = [path stringByAppendingPathComponent:fileRecord[@"path"]];
     }
     else {

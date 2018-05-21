@@ -102,7 +102,7 @@
     // Use a copy of the file DB to avoid problems with multi-thread access.
     self.fileDB = [repository.fileDB newInstance];
     self.httpClient = repository.httpClient;
-    self.commandPrefix = repository.authorityName;
+    self.commandPrefix = repository.authority.authorityName;
     return self;
 }
 

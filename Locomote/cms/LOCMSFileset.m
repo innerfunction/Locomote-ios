@@ -29,11 +29,12 @@
 
 - (NSString *)cachePath:(LOCMSRepository *)repository {
     NSString *path = nil;
+    LOLocalCachePaths *cachePaths = repository.localCachePaths;
     if ([@"content" isEqualToString:_cache]) {
-        path = [repository.contentCachePath stringByAppendingString:CacheDirName];
+        path = [cachePaths.contentCachePath stringByAppendingString:CacheDirName];
     }
     else if ([@"app" isEqualToString:_cache]) {
-        path = [repository.appCachePath stringByAppendingString:CacheDirName];
+        path = [cachePaths.appCachePath stringByAppendingString:CacheDirName];
     }
     return path;
 }

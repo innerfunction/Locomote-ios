@@ -17,10 +17,12 @@
 //
 
 #import "LOCMSContentAuthority.h"
+#import "LOCMSRepository.h"
 #import "LOContentProvider.h"
 #import "LOContentRequest.h"
 #import "LOContentResponse.h"
 #import "SCResource.h"
+#import "NSDictionary+SC.h"
 
 @interface LOCMSContentRequest : NSObject <LOContentRequest>
 
@@ -54,7 +56,7 @@
 
 @implementation LOCMSContentAuthority
 
-@synthesize provider=_provider, requestHandlers=_requestHandlers;
+@synthesize requestHandlers=_requestHandlers;
 
 - (id)init {
     self = [super init];
@@ -66,12 +68,18 @@
     return self;
 }
 
+- (void)addRepository:(LOCMSRepository *)repository {
+    _repositories = [_repositories dictionaryWithAddedObject:repository forKey:repository.basePath];
+}
+
+- (void)setProvider:(LOContentProvider *)provider {
+    _provider = provider;
+    self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:provider.localCachePaths suffix:_authorityName];
+}
+
 #pragma mark - SCService
 
 - (void)startService {
-    // Set cache paths using the configured authority name.
-    self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:self.provider.localCachePaths
-                                                     authorityName:self.authorityName];
 
     // Each repository key specifies the base path the repository is mounted under.
     // Generate a list of repo keys ordered longest to shortest, before generating a request
@@ -86,12 +94,14 @@
     for (id key in keys) {
         // Read the repository.
         LOCMSRepository *repository = _repositories[key];
-        // Generate a file path pattern using the repo base path (note that this will have a
+        // Generate a file path pattern using the repo base path (note that base path will have a
         // trailing slash).
         NSString *path = [NSString stringWithFormat:@"%@**", repository.basePath];
         // Create the mapping and add to the list.
         LORequestHandlerMapping *mapping = [[LORequestHandlerMapping alloc] initWithPath:path handler:repository];
         [mappings addObject:mapping];
+        // Pass a reference to this authority to the repository.
+        repository.authority = self;
     }
     // Set the request handler mappings.
     self.requestHandlers = mappings;

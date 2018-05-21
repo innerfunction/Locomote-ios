@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		072C47911EB67673003222DD /* Locomote.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C47601EB67673003222DD /* Locomote.h */; };
-		072C479C1EB67673003222DD /* LOCMSPostsPathRoot.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C476C1EB67673003222DD /* LOCMSPostsPathRoot.h */; };
-		072C479D1EB67673003222DD /* LOCMSPostsPathRoot.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C476D1EB67673003222DD /* LOCMSPostsPathRoot.m */; };
 		072C47A41EB67673003222DD /* LOCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C47751EB67673003222DD /* LOCommand.h */; };
 		072C47A51EB67673003222DD /* LOCommandQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 072C47761EB67673003222DD /* LOCommandQueue.h */; };
 		072C47A61EB67673003222DD /* LOCommandQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 072C47771EB67673003222DD /* LOCommandQueue.m */; };
@@ -37,10 +35,8 @@
 		0768132C20AD8B5F00A686F7 /* LOCMSSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = 0768131E20AD8B5F00A686F7 /* LOCMSSettings.h */; };
 		0768132D20AD8B5F00A686F7 /* LOCMSFileset.m in Sources */ = {isa = PBXBuildFile; fileRef = 0768131F20AD8B5F00A686F7 /* LOCMSFileset.m */; };
 		0768132E20AD8B5F00A686F7 /* LOCMSSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 0768132020AD8B5F00A686F7 /* LOCMSSettings.m */; };
-		0768132F20AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.h in Headers */ = {isa = PBXBuildFile; fileRef = 0768132120AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.h */; };
 		0768133020AD8B5F00A686F7 /* LOCMSAuthenticationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0768132220AD8B5F00A686F7 /* LOCMSAuthenticationManager.m */; };
 		0768133120AD8B5F00A686F7 /* LOCMSAuthenticationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 0768132320AD8B5F00A686F7 /* LOCMSAuthenticationManager.h */; };
-		0768133220AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.m in Sources */ = {isa = PBXBuildFile; fileRef = 0768132420AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.m */; };
 		0768133320AD8B5F00A686F7 /* LOCMSRepository.m in Sources */ = {isa = PBXBuildFile; fileRef = 0768132520AD8B5F00A686F7 /* LOCMSRepository.m */; };
 		0768133420AD8B5F00A686F7 /* LOCMSRepository.h in Headers */ = {isa = PBXBuildFile; fileRef = 0768132620AD8B5F00A686F7 /* LOCMSRepository.h */; };
 		0768133520AD8B5F00A686F7 /* LOCMSCommandProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 0768132720AD8B5F00A686F7 /* LOCMSCommandProtocol.m */; };
@@ -74,8 +70,6 @@
 /* Begin PBXFileReference section */
 		072C475F1EB67673003222DD /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Locomote/Info.plist; sourceTree = "<group>"; };
 		072C47601EB67673003222DD /* Locomote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Locomote.h; path = Locomote/Locomote.h; sourceTree = "<group>"; };
-		072C476C1EB67673003222DD /* LOCMSPostsPathRoot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOCMSPostsPathRoot.h; sourceTree = "<group>"; };
-		072C476D1EB67673003222DD /* LOCMSPostsPathRoot.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOCMSPostsPathRoot.m; sourceTree = "<group>"; };
 		072C47751EB67673003222DD /* LOCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOCommand.h; sourceTree = "<group>"; };
 		072C47761EB67673003222DD /* LOCommandQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOCommandQueue.h; sourceTree = "<group>"; };
 		072C47771EB67673003222DD /* LOCommandQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOCommandQueue.m; sourceTree = "<group>"; };
@@ -103,10 +97,8 @@
 		0768131E20AD8B5F00A686F7 /* LOCMSSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOCMSSettings.h; sourceTree = "<group>"; };
 		0768131F20AD8B5F00A686F7 /* LOCMSFileset.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOCMSFileset.m; sourceTree = "<group>"; };
 		0768132020AD8B5F00A686F7 /* LOCMSSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOCMSSettings.m; sourceTree = "<group>"; };
-		0768132120AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOCMSFilesetCategoryPathRoot.h; sourceTree = "<group>"; };
 		0768132220AD8B5F00A686F7 /* LOCMSAuthenticationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOCMSAuthenticationManager.m; sourceTree = "<group>"; };
 		0768132320AD8B5F00A686F7 /* LOCMSAuthenticationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOCMSAuthenticationManager.h; sourceTree = "<group>"; };
-		0768132420AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOCMSFilesetCategoryPathRoot.m; sourceTree = "<group>"; };
 		0768132520AD8B5F00A686F7 /* LOCMSRepository.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOCMSRepository.m; sourceTree = "<group>"; };
 		0768132620AD8B5F00A686F7 /* LOCMSRepository.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOCMSRepository.h; sourceTree = "<group>"; };
 		0768132720AD8B5F00A686F7 /* LOCMSCommandProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOCMSCommandProtocol.m; sourceTree = "<group>"; };
@@ -169,10 +161,6 @@
 				07E7BA0F20ADD0A800554B64 /* LOCMSFileListHandler.m */,
 				0768132A20AD8B5F00A686F7 /* LOCMSFileset.h */,
 				0768131F20AD8B5F00A686F7 /* LOCMSFileset.m */,
-				0768132120AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.h */,
-				0768132420AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.m */,
-				072C476C1EB67673003222DD /* LOCMSPostsPathRoot.h */,
-				072C476D1EB67673003222DD /* LOCMSPostsPathRoot.m */,
 				0768134120AD9B9E00A686F7 /* LOCMSRepoRequestHandler.h */,
 				0768134220AD9B9E00A686F7 /* LOCMSRepoRequestHandler.m */,
 				0768132620AD8B5F00A686F7 /* LOCMSRepository.h */,
@@ -285,7 +273,6 @@
 				072C47911EB67673003222DD /* Locomote.h in Headers */,
 				0768133F20AD997000A686F7 /* LOLocalCachePaths.h in Headers */,
 				0768134720AD9D2900A686F7 /* LORequestDispatcher.h in Headers */,
-				0768132F20AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.h in Headers */,
 				0768134B20AD9D9700A686F7 /* LOContentRequest.h in Headers */,
 				072C47B11EB67673003222DD /* LOContentAuthority.h in Headers */,
 				072C47B51EB67673003222DD /* LOContentProvider.h in Headers */,
@@ -295,7 +282,6 @@
 				072C47BA1EB67673003222DD /* LOMIMETypes.h in Headers */,
 				072C47AD1EB67673003222DD /* LOUnzipCommand.h in Headers */,
 				072C47AB1EB67673003222DD /* LORmFileCommand.h in Headers */,
-				072C479C1EB67673003222DD /* LOCMSPostsPathRoot.h in Headers */,
 				0768134320AD9B9E00A686F7 /* LOCMSRepoRequestHandler.h in Headers */,
 				0768134E20AD9E1200A686F7 /* LOContentResponse.h in Headers */,
 				072C47BC1EB67673003222DD /* LOPlainContentTypeConverter.h in Headers */,
@@ -435,10 +421,8 @@
 				07E7BA1120ADD0A800554B64 /* LOCMSFileListHandler.m in Sources */,
 				072C47AE1EB67673003222DD /* LOUnzipCommand.m in Sources */,
 				0768133720AD8B5F00A686F7 /* LOCMSFileDB.m in Sources */,
-				0768133220AD8B5F00A686F7 /* LOCMSFilesetCategoryPathRoot.m in Sources */,
 				0768134420AD9B9E00A686F7 /* LOCMSRepoRequestHandler.m in Sources */,
 				0768132E20AD8B5F00A686F7 /* LOCMSSettings.m in Sources */,
-				072C479D1EB67673003222DD /* LOCMSPostsPathRoot.m in Sources */,
 				0768134820AD9D2900A686F7 /* LORequestDispatcher.m in Sources */,
 				07E7BA1F20AE1C7200554B64 /* LOCMSRequestHandler.m in Sources */,
 				072C47B91EB67673003222DD /* LOContentURLProtocol.m in Sources */,

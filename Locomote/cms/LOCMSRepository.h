@@ -18,6 +18,7 @@
 
 #import <Foundation/Foundation.h>
 #import "LORequestDispatcher.h"
+#import "LOLocalCachePaths.h"
 #import "LOCMSRepoRequestHandler.h"
 #import "LOCMSFileDB.h"
 #import "LOCMSCommandProtocol.h"
@@ -54,8 +55,12 @@
 /// Repository content request handler.
 @property (nonatomic, strong) LOCMSRepoRequestHandler *requestHandler;
 /// The content authority this repository belongs to.
-@property (nonatomic, strong) LOCMSContentAuthority *authority;
+@property (nonatomic, weak) LOCMSContentAuthority *authority;
+/// Path settings for locally cached content.
+@property (nonatomic, strong) LOLocalCachePaths *localCachePaths;
 
+/// Initialize a repository with the provided settings.
+- (id)initWithSettings:(LOCMSSettings *)settings;
 /// Synchronize the repository's content by downloading updates from the server.
 - (QPromise *)syncContent;
 

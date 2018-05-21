@@ -23,8 +23,8 @@
  */
 @interface LOLocalCachePaths : NSObject
 
-/// Initialize with settings and an authority name.
-- (id)initWithSettings:(LOLocalCachePaths *)settings authorityName:(NSString *)authorityName;
+/// Initialize with settings and an additional suffix.
+- (id)initWithSettings:(LOLocalCachePaths *)settings suffix:(NSString *)suffix;
 
 /// A path for temporarily staging downloaded content.
 @property (nonatomic, strong) NSString *stagingPath;
