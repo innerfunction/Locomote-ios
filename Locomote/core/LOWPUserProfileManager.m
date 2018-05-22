@@ -16,9 +16,10 @@
 //  Copyright © 2018 Locomote.sh. All rights reserved.
 //
 
-#import "LOWPUserAccountManager.h"
+#import "LOWPUserProfileManager.h"
+#import "SSKeychain.h"
 
-@implementation LOWPUserAccountManager
+@implementation LOWPUserProfileManager
 
 @synthesize profileFieldNames=_profileFieldNames,
             standardFieldNames=_standardFieldNames,
@@ -29,54 +30,24 @@
     self.userDefaults = [NSUserDefaults standardUserDefaults];
     self.profileFieldNames = @[@"ID", @"first_name", @"last_name", @"user_email"];
     self.standardFieldNames = @{
-        LOUserAccountFirstName:     @"first_name",
-        LOUserAccountLastName:      @"last_name",
-        LOUserAccountEMail:         @"user_email",
-        LOUserAccountUsername:      @"user_login",
-        LOUserAccountPassword:      @"user_pass",
-        LOUserAccountConfirmPW:     @"confirm_pass",
-        LOUserAccountProfileID:     @"ID"
+        LOUserProfileFirstName:     @"first_name",
+        LOUserProfileLastName:      @"last_name",
+        LOUserProfileEMail:         @"user_email",
+        LOUserProfileUsername:      @"user_login",
+        LOUserProfilePassword:      @"user_pass",
+        LOUserProfileConfirmPW:     @"confirm_pass",
+        LOUserProfileProfileID:     @"ID"
     };
     return self;
 }
 
-- (NSString *)authenticationURL {
-    return AppendPathToURL(_container.feedURL, @"account/login");
-}
-
-- (NSString *)newAccountURL {
-    return AppendPathToURL(_container.feedURL, @"account/create");
-}
-
-- (NSString *)accountProfileURL {
-    return AppendPathToURL(_container.feedURL, @"account/profile");
-}
-
-- (BOOL)isAuthenticated {
-    NSString *key = [NSString stringWithFormat:@"%@/%@", _realmName, @"logged-in"];
-    return [_userDefaults boolForKey:key];
-}
-
-- (void)storeUserCredentials:(NSDictionary *)values {
-    NSString *username = values[@"user_login"];
-    NSString *password = values[@"user_pass"];
-    // NOTE this will work for all forms - login, create account + update profile. In the latter case, if the
-    // password is not updated then password will be empty and the keystore won't be updated.
-    if ([username length] > 0 && [password length] > 0) {
-        [SSKeychain setPassword:password forService:_container.wpRealm account:username];
-        NSString *key = [NSString stringWithFormat:@"%@/%@", _realmName, @"logged-in"];
-        [_userDefaults setValue:@YES forKey:key];
-        // TODO: Need to review whether this is best practice.
-        key = [NSString stringWithFormat:@"%@/%@", _realmName, @"user_login"];
-        [_userDefaults setValue:username forKey:key];
-    }
-}
-
 - (void)storeUserProfile:(NSDictionary *)values {
+    // Read profile data from a 'profile' property in the data values.
+    NSDictionary *profile = values[@"profile"];
     // Store standard profile values.
     for (NSString *field in _profileFieldNames) {
         NSString *key = [NSString stringWithFormat:@"%@/%@", _realmName, field];
-        id value = values[field];
+        id value = profile[field];
         if (value) {
             [_userDefaults setValue:value forKey:key];
         }
@@ -85,7 +56,7 @@
     NSMutableArray *metaKeys = [NSMutableArray new];
     for (NSString *key in [values keyEnumerator]) {
         if ([key hasPrefix:@"meta_"]) {
-            id value = values[key];
+            id value = profile[key];
             NSString *storageKey = [NSString stringWithFormat:@"%@/%@", _realmName, key];
             if (value != [NSNull null]) {
                 [_userDefaults setValue:value forKey:storageKey];
@@ -128,19 +99,22 @@
     return values;
 }
 
-- (NSString *)getUsername {
-    NSString *storageKey = [NSString stringWithFormat:@"%@/%@", _realmName, @"user_login"];
-    return [_userDefaults stringForKey:storageKey];
+- (NSString *)authenticationURL {
+    return [_baseURL stringByAppendingPathComponent:@"account/login"];
 }
 
-- (void)logout {
-    NSString *key = [NSString stringWithFormat:@"%@/%@", _realmName, @"logged-in"];
-    [_userDefaults setValue:@NO forKey:key];
+- (NSString *)newAccountURL {
+    return [_baseURL stringByAppendingPathComponent:@"account/create"];
+}
+
+- (NSString *)accountProfileURL {
+    return [_baseURL stringByAppendingPathComponent:@"account/profile"];
 }
 
 - (void)showPasswordReminder {
     // Fetch the password reminder URL from the server.
-    NSString *url = [_container.feedURL stringByAppendingPathComponent:@"account/password-reminder"];
+    NSString *url = [_baseURL stringByAppendingPathComponent:@"account/password-reminder"];
+    /* TODO: Why is this two-part request needed? Can't this URL ^^^ just do a redirect?
     [_container.httpClient get:url]
     .then((id)^(IFHTTPClientResponse *response) {
         id data = [response parseData];
@@ -151,6 +125,7 @@
         }
         return nil;
     });
+    */
 }
 
 @end

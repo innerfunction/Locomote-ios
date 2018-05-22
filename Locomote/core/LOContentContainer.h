@@ -18,21 +18,28 @@
 
 #import <Foundation/Foundation.h>
 #import "SCService.h"
+#import "SCMessageReceiver.h"
 #import "SCIOCTypeInspectable.h"
 #import "Q.h"
 
-@protocol LOUserAccountManager;
-@class LOAccountFormFactory;
+// TODO: Content container should also be responsible for handling events/messages like 'logout' and 'password reminder'
+
+@protocol LOUserProfileManager;
+@class LOCMSAccountFormFactory, LOCMSRepository;
 
 /// A content source, i.e. a content repository.
-@interface LOContentSource : NSObject
+@interface LOContentSource : NSObject <SCMessageReceiver> {
+    LOCMSRepository *_repository;
+}
 
 /// A reference to the source's content repository.
 @property (nonatomic, strong) NSString *ref;
 /// The user account manager to use with this content source.
-@property (nonatomic, strong) id<LOUserAccountManager> userAccountManager;
+@property (nonatomic, strong) id<LOUserProfileManager> userProfileManager;
 /// The source's form factory.
-@property (nonatomic, strong) LOAccountFormFactory *accountFormFactory;
+@property (nonatomic, strong) LOCMSAccountFormFactory *accountFormFactory;
+/// An action message for displaying the login form.
+@property (nonatomic, strong) NSString *showLoginAction;
 
 /// Setup the content repository associated with this source.
 - (void)setup;
@@ -46,7 +53,7 @@
  * A map to the different content sources contained by this container.
  * A map of content names to content sources.
  */
-@property (nonatomic, strong) NSDictionary<NSString *, LOContentSource *> *content;
+@property (nonatomic, strong) NSDictionary<NSString *, LOContentSource *> *sources;
 
 - (void)addRepository:(NSString *)ref;
 - (void)setup;

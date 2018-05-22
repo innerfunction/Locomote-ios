@@ -61,8 +61,8 @@
 		07E7BA1920ADD0EA00554B64 /* LOCMSSearchHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E7BA1720ADD0EA00554B64 /* LOCMSSearchHandler.m */; };
 		07E7BA1E20AE1C7200554B64 /* LOCMSRequestHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 07E7BA1C20AE1C7200554B64 /* LOCMSRequestHandler.h */; };
 		07E7BA1F20AE1C7200554B64 /* LOCMSRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 07E7BA1D20AE1C7200554B64 /* LOCMSRequestHandler.m */; };
-		07FCD2D820B42868002A6582 /* LOAccountFormFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD2D620B42868002A6582 /* LOAccountFormFactory.h */; };
-		07FCD2D920B42868002A6582 /* LOAccountFormFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FCD2D720B42868002A6582 /* LOAccountFormFactory.m */; };
+		07FCD2D820B42868002A6582 /* LOCMSAccountFormFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD2D620B42868002A6582 /* LOCMSAccountFormFactory.h */; };
+		07FCD2D920B42868002A6582 /* LOCMSAccountFormFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FCD2D720B42868002A6582 /* LOCMSAccountFormFactory.m */; };
 		07FCD2EC20B42F5C002A6582 /* LOFormSelectField.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FCD2DA20B42F59002A6582 /* LOFormSelectField.m */; };
 		07FCD2ED20B42F5C002A6582 /* LOFormView.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD2DB20B42F5A002A6582 /* LOFormView.h */; };
 		07FCD2EE20B42F5C002A6582 /* LOFormOptionField.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD2DC20B42F5A002A6582 /* LOFormOptionField.h */; };
@@ -81,11 +81,11 @@
 		07FCD2FB20B42F5C002A6582 /* LOFormImageField.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD2E920B42F5B002A6582 /* LOFormImageField.h */; };
 		07FCD2FC20B42F5C002A6582 /* LOFormTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FCD2EA20B42F5C002A6582 /* LOFormTextField.m */; };
 		07FCD2FD20B42F5C002A6582 /* LOFormHiddenField.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD2EB20B42F5C002A6582 /* LOFormHiddenField.h */; };
-		07FCD2FF20B45B2B002A6582 /* LOUserAccountManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD2FE20B45B2B002A6582 /* LOUserAccountManager.h */; };
+		07FCD2FF20B45B2B002A6582 /* LOUserProfileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD2FE20B45B2B002A6582 /* LOUserProfileManager.h */; };
 		07FCD30220B4683E002A6582 /* LOContentContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD30020B4683E002A6582 /* LOContentContainer.h */; };
 		07FCD30320B4683E002A6582 /* LOContentContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FCD30120B4683E002A6582 /* LOContentContainer.m */; };
-		07FCD30820B49646002A6582 /* LOWPUserAccountManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD30620B49646002A6582 /* LOWPUserAccountManager.h */; };
-		07FCD30920B49646002A6582 /* LOWPUserAccountManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FCD30720B49646002A6582 /* LOWPUserAccountManager.m */; };
+		07FCD30820B49646002A6582 /* LOWPUserProfileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 07FCD30620B49646002A6582 /* LOWPUserProfileManager.h */; };
+		07FCD30920B49646002A6582 /* LOWPUserProfileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 07FCD30720B49646002A6582 /* LOWPUserProfileManager.m */; };
 		388326C21FE761492DBDAEB2 /* libPods-Locomote.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 17D50A5BA576A82BED4E1CD0 /* libPods-Locomote.a */; };
 /* End PBXBuildFile section */
 
@@ -146,8 +146,8 @@
 		07E7BA1720ADD0EA00554B64 /* LOCMSSearchHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LOCMSSearchHandler.m; sourceTree = "<group>"; };
 		07E7BA1C20AE1C7200554B64 /* LOCMSRequestHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LOCMSRequestHandler.h; sourceTree = "<group>"; };
 		07E7BA1D20AE1C7200554B64 /* LOCMSRequestHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LOCMSRequestHandler.m; sourceTree = "<group>"; };
-		07FCD2D620B42868002A6582 /* LOAccountFormFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LOAccountFormFactory.h; sourceTree = "<group>"; };
-		07FCD2D720B42868002A6582 /* LOAccountFormFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LOAccountFormFactory.m; sourceTree = "<group>"; };
+		07FCD2D620B42868002A6582 /* LOCMSAccountFormFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LOCMSAccountFormFactory.h; sourceTree = "<group>"; };
+		07FCD2D720B42868002A6582 /* LOCMSAccountFormFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LOCMSAccountFormFactory.m; sourceTree = "<group>"; };
 		07FCD2DA20B42F59002A6582 /* LOFormSelectField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOFormSelectField.m; sourceTree = "<group>"; };
 		07FCD2DB20B42F5A002A6582 /* LOFormView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOFormView.h; sourceTree = "<group>"; };
 		07FCD2DC20B42F5A002A6582 /* LOFormOptionField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOFormOptionField.h; sourceTree = "<group>"; };
@@ -166,11 +166,11 @@
 		07FCD2E920B42F5B002A6582 /* LOFormImageField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOFormImageField.h; sourceTree = "<group>"; };
 		07FCD2EA20B42F5C002A6582 /* LOFormTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOFormTextField.m; sourceTree = "<group>"; };
 		07FCD2EB20B42F5C002A6582 /* LOFormHiddenField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LOFormHiddenField.h; sourceTree = "<group>"; };
-		07FCD2FE20B45B2B002A6582 /* LOUserAccountManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LOUserAccountManager.h; sourceTree = "<group>"; };
+		07FCD2FE20B45B2B002A6582 /* LOUserProfileManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LOUserProfileManager.h; sourceTree = "<group>"; };
 		07FCD30020B4683E002A6582 /* LOContentContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LOContentContainer.h; sourceTree = "<group>"; };
 		07FCD30120B4683E002A6582 /* LOContentContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LOContentContainer.m; sourceTree = "<group>"; };
-		07FCD30620B49646002A6582 /* LOWPUserAccountManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LOWPUserAccountManager.h; sourceTree = "<group>"; };
-		07FCD30720B49646002A6582 /* LOWPUserAccountManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LOWPUserAccountManager.m; sourceTree = "<group>"; };
+		07FCD30620B49646002A6582 /* LOWPUserProfileManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LOWPUserProfileManager.h; sourceTree = "<group>"; };
+		07FCD30720B49646002A6582 /* LOWPUserProfileManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LOWPUserProfileManager.m; sourceTree = "<group>"; };
 		17D50A5BA576A82BED4E1CD0 /* libPods-Locomote.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Locomote.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5562A4CB5008490DA7043B8A /* Pods-Locomote.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Locomote.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Locomote/Pods-Locomote.debug.xcconfig"; sourceTree = "<group>"; };
 		C20010952D26379F7F8140AE /* Pods-Locomote.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Locomote.release.xcconfig"; path = "Pods/Target Support Files/Pods-Locomote/Pods-Locomote.release.xcconfig"; sourceTree = "<group>"; };
@@ -310,8 +310,6 @@
 				07FCD2E820B42F5B002A6582 /* LOFormViewController.m */,
 				07FCD2E320B42F5A002A6582 /* LOSubmitField.h */,
 				07FCD2DE20B42F5A002A6582 /* LOSubmitField.m */,
-				07FCD2D620B42868002A6582 /* LOAccountFormFactory.h */,
-				07FCD2D720B42868002A6582 /* LOAccountFormFactory.m */,
 			);
 			name = ui;
 			path = Locomote/ui;
@@ -320,11 +318,13 @@
 		07FCD30520B4957D002A6582 /* core */ = {
 			isa = PBXGroup;
 			children = (
-				07FCD2FE20B45B2B002A6582 /* LOUserAccountManager.h */,
+				07FCD2FE20B45B2B002A6582 /* LOUserProfileManager.h */,
 				07FCD30020B4683E002A6582 /* LOContentContainer.h */,
 				07FCD30120B4683E002A6582 /* LOContentContainer.m */,
-				07FCD30620B49646002A6582 /* LOWPUserAccountManager.h */,
-				07FCD30720B49646002A6582 /* LOWPUserAccountManager.m */,
+				07FCD30620B49646002A6582 /* LOWPUserProfileManager.h */,
+				07FCD30720B49646002A6582 /* LOWPUserProfileManager.m */,
+				07FCD2D620B42868002A6582 /* LOCMSAccountFormFactory.h */,
+				07FCD2D720B42868002A6582 /* LOCMSAccountFormFactory.m */,
 			);
 			name = core;
 			path = Locomote/core;
@@ -367,7 +367,7 @@
 				07FCD2F620B42F5C002A6582 /* LOFormViewController.h in Headers */,
 				072C47BA1EB67673003222DD /* LOMIMETypes.h in Headers */,
 				07FCD2FD20B42F5C002A6582 /* LOFormHiddenField.h in Headers */,
-				07FCD30820B49646002A6582 /* LOWPUserAccountManager.h in Headers */,
+				07FCD30820B49646002A6582 /* LOWPUserProfileManager.h in Headers */,
 				07FCD2F720B42F5C002A6582 /* LOFormTextField.h in Headers */,
 				072C47AD1EB67673003222DD /* LOUnzipCommand.h in Headers */,
 				07FCD30220B4683E002A6582 /* LOContentContainer.h in Headers */,
@@ -384,9 +384,9 @@
 				0768133420AD8B5F00A686F7 /* LOCMSRepository.h in Headers */,
 				0768133B20AD90A100A686F7 /* LOCMSContentAuthority.h in Headers */,
 				072C47A91EB67673003222DD /* LOMvFileCommand.h in Headers */,
-				07FCD2D820B42868002A6582 /* LOAccountFormFactory.h in Headers */,
+				07FCD2D820B42868002A6582 /* LOCMSAccountFormFactory.h in Headers */,
 				07FCD2F320B42F5C002A6582 /* LOFormSelectField.h in Headers */,
-				07FCD2FF20B45B2B002A6582 /* LOUserAccountManager.h in Headers */,
+				07FCD2FF20B45B2B002A6582 /* LOUserProfileManager.h in Headers */,
 				07FCD2FB20B42F5C002A6582 /* LOFormImageField.h in Headers */,
 				0768132C20AD8B5F00A686F7 /* LOCMSSettings.h in Headers */,
 				07BD90271EB9295B0067B24C /* LOBundle.h in Headers */,
@@ -517,13 +517,13 @@
 				07BD90241EB8B05F0067B24C /* Locomote.m in Sources */,
 				07FCD2FC20B42F5C002A6582 /* LOFormTextField.m in Sources */,
 				07E7BA1120ADD0A800554B64 /* LOCMSFileListHandler.m in Sources */,
-				07FCD2D920B42868002A6582 /* LOAccountFormFactory.m in Sources */,
+				07FCD2D920B42868002A6582 /* LOCMSAccountFormFactory.m in Sources */,
 				07FCD2EF20B42F5C002A6582 /* LOFormView.m in Sources */,
 				072C47AE1EB67673003222DD /* LOUnzipCommand.m in Sources */,
 				0768133720AD8B5F00A686F7 /* LOCMSFileDB.m in Sources */,
 				0768134420AD9B9E00A686F7 /* LOCMSRepoRequestHandler.m in Sources */,
 				0768132E20AD8B5F00A686F7 /* LOCMSSettings.m in Sources */,
-				07FCD30920B49646002A6582 /* LOWPUserAccountManager.m in Sources */,
+				07FCD30920B49646002A6582 /* LOWPUserProfileManager.m in Sources */,
 				0768134820AD9D2900A686F7 /* LORequestDispatcher.m in Sources */,
 				07E7BA1F20AE1C7200554B64 /* LOCMSRequestHandler.m in Sources */,
 				07FCD2F120B42F5C002A6582 /* LOFormImageField.m in Sources */,

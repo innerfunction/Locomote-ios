@@ -185,10 +185,17 @@
 }
 
 - (void)submitting:(BOOL)submitting {
+    [self beforeSubmit];
     dispatch_async(dispatch_get_main_queue(), ^{
         [_loadingIndicator showFormLoading:submitting];
     });
     _isEnabled = !submitting;
+}
+
+- (void)beforeSubmit {
+    if (_onBeforeSubmit) {
+        _onBeforeSubmit(self, self.inputValues);
+    }
 }
 
 - (BOOL)isSubmitErrorResponse:(SCHTTPClientResponse *)response {

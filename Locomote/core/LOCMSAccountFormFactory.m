@@ -16,9 +16,9 @@
 //  Copyright © 2018 Locomote.sh. All rights reserved.
 //
 
-#import "LOAccountFormFactory.h"
+#import "LOCMSAccountFormFactory.h"
 #import "LOFormViewController.h"
-#import "LOUserAccountManager.h"
+#import "LOUserProfileManager.h"
 #import "SCAppContainer.h"
 #import "SCConfiguration.h"
 #import "SCContainer.h"
@@ -27,9 +27,9 @@
 
 #define ValueOrNSNull(value) (value == nil ? [NSNull null] : value)
 
-@implementation LOAccountFormFactory
+@implementation LOCMSAccountFormFactory
 
-- (id)initWithUserAccountManager:(id<LOUserAccountManager>)userAccountManager httpClient:(SCHTTPClient *)httpClient {
+- (id)initWithRepository:(LOCMSRepository *)repository userProfileManager:(id<LOUserProfileManager>)userProfileManager {
 
     NSDictionary *baseConfiguration = @{
         @"-ios-class":      @"LOFormViewController",
@@ -43,18 +43,19 @@
     self = [super initWithBaseConfiguration:baseConfiguration];
     if (self) {
     
-        self.userAccountManager = userAccountManager;
-        self.httpClient = httpClient;
+        self.repository = repository;
+        self.userProfileManager = userProfileManager;
+        self.httpClient = repository.httpClient;
         
         // Initialize form patterns.
-        NSDictionary *fieldNames = self.userAccountManager.standardFieldNames;
+        NSDictionary *fieldNames = self.userProfileManager.standardFieldNames;
         self.stdParams = @{
             @"ImageField": @{
                 @"-ios-class":              @"LOFormImageField"
             },
             @"FirstnameField": @{
                 @"-ios-class":              @"LOFormTextField",
-                @"name":                    fieldNames[LOUserAccountFirstName],
+                @"name":                    fieldNames[LOUserProfileFirstName],
                 @"title":                   @"First name",
                 @"titleLabel": @{
                     @"style":               @"$TitleStyle"
@@ -67,7 +68,7 @@
             },
             @"LastnameField": @{
                 @"-ios-class":              @"LOFormTextField",
-                @"name":                    fieldNames[LOUserAccountLastName],
+                @"name":                    fieldNames[LOUserProfileLastName],
                 @"title":                   @"Last name",
                 @"titleLabel": @{
                     @"style":               @"$TitleStyle"
@@ -80,7 +81,7 @@
             },
             @"EmailField": @{
                 @"-ios-class":              @"LOFormTextField",
-                @"name":                    fieldNames[LOUserAccountEMail],
+                @"name":                    fieldNames[LOUserProfileEMail],
                 @"isRequired":              @YES,
                 @"title":                   @"Email",
                 @"titleLabel": @{
@@ -95,7 +96,7 @@
             },
             @"UsernameField": @{
                 @"-ios-class":              @"LOFormTextField",
-                @"name":                    fieldNames[LOUserAccountUsername],
+                @"name":                    fieldNames[LOUserProfileUsername],
                 @"isRequired":              @YES,
                 @"title":                   @"Username",
                 @"titleLabel": @{
@@ -109,7 +110,7 @@
             },
             @"PasswordField": @{
                 @"-ios-class":              @"LOFormTextField",
-                @"name":                    fieldNames[LOUserAccountPassword],
+                @"name":                    fieldNames[LOUserProfilePassword],
                 @"isPassword":              @YES,
                 @"isRequired":              @YES,
                 @"title":                   @"Password",
@@ -119,7 +120,7 @@
             },
             @"ConfirmPasswordField": @{
                 @"-ios-class":              @"LOFormTextField",
-                @"name":                    fieldNames[LOUserAccountConfirmPW],
+                @"name":                    fieldNames[LOUserProfileConfirmPW],
                 @"isPassword":              @YES,
                 @"title":                   @"Confirm password",
                 @"hasSameValueAs":          @"user_pass",
@@ -129,7 +130,7 @@
             },
             @"ProfileIDField": @{
                 @"-ios-class":              @"LOFormHiddenField",
-                @"name":                    fieldNames[LOUserAccountProfileID]
+                @"name":                    fieldNames[LOUserProfileProfileID]
             },
             @"SubmitField": @{
                 @"-ios-class":              @"LOSubmitField",
@@ -153,20 +154,27 @@
     BOOL isEnabled = YES;
 
     id<SCViewBehaviour> viewBehaviour = nil;
+    LOFormViewDataEvent onBeforeSubmit = ^(LOFormView *form, NSDictionary *data) {};
     LOFormViewDataEvent onSubmitOk;
     LOFormViewErrorEvent onSubmitError;
 
     if ([@"login" isEqualToString:formType]) {
-        submitURL = _userAccountManager.authenticationURL;
+        submitURL = _userProfileManager.authenticationURL;
         BOOL checkForLogin = [configuration getValueAsBoolean:@"checkForLogin" defaultValue:YES];
         if (checkForLogin) {
-            viewBehaviour = [[LOLoginBehaviour alloc] initWithUserAccountManager:_userAccountManager loginAction:loginAction];
+            viewBehaviour = [[LOLoginBehaviour alloc] initWithAuthenticationManager:_repository.authManager
+                                                                        loginAction:loginAction];
         }
-        //isEnabled = NO;
         onSubmitOk = ^(LOFormView *form, NSDictionary *data) {
             // Store user credentials & user info
-            [_userAccountManager storeUserProfile:data[@"profile"]];
-            [_userAccountManager storeUserCredentials:form.inputValues];
+            NSDictionary *fieldNames = self.userProfileManager.standardFieldNames;
+            NSString *usernameField = fieldNames[LOUserProfileUsername];
+            NSString *passwordField = fieldNames[LOUserProfilePassword];
+            NSString *username = form.inputValues[usernameField];
+            NSString *password = form.inputValues[passwordField];
+            [_repository.authManager registerUsername:username password:password];
+            // [_userAccountManager storeUserProfile:data[@"profile"]]; <<< NOTE account manager must read profile from response data.
+            [_userProfileManager storeUserProfile:data];
             // Dispatch the specified event
             [[SCAppContainer getAppContainer] postMessage:loginAction sender:form];
         };
@@ -176,11 +184,17 @@
         };
     }
     else if ([@"new-account" isEqualToString:formType]) {
-        submitURL = _userAccountManager.newAccountURL;
+        submitURL = _userProfileManager.newAccountURL;
         onSubmitOk = ^(LOFormView *form, NSDictionary *data) {
-            // Store user credentials & user info
-            [_userAccountManager storeUserCredentials:form.inputValues];
-            [_userAccountManager storeUserProfile:data[@"profile"]];
+            // Read credentials from the form data.
+            NSDictionary *fieldNames = self.userProfileManager.standardFieldNames;
+            NSString *usernameField = fieldNames[LOUserProfileUsername];
+            NSString *passwordField = fieldNames[LOUserProfilePassword];
+            NSString *username = form.inputValues[usernameField];
+            NSString *password = form.inputValues[passwordField];
+            [_repository.authManager registerUsername:username password:password];
+            // Store user profile data from the response.
+            [_userProfileManager storeUserProfile:data];
             // Dispatch the specified event
             [[SCAppContainer getAppContainer] postMessage:loginAction sender:form];
         };
@@ -195,10 +209,10 @@
         };
     }
     else if ([@"profile" isEqualToString:formType]) {
-        submitURL = _userAccountManager.accountProfileURL;
+        submitURL = _userProfileManager.accountProfileURL;
         onSubmitOk = ^(LOFormView *form, NSDictionary *data) {
             // Update stored user info
-            [_userAccountManager storeUserProfile:data[@"profile"]];
+            [_userProfileManager storeUserProfile:data];
             NSString *action = [NSString stringWithFormat:@"post:toast+message=%@", @"Account%20updated"];
             [[SCAppContainer getAppContainer] postMessage:action sender:form];
         };
@@ -224,12 +238,13 @@
                                                                                     inContainer:container
                                                                                  withParameters:params
                                                                                      identifier:identifier];
-    formView.behaviour          = viewBehaviour;
-    formView.form.onSubmitOk    = onSubmitOk;
-    formView.form.onSubmitError = onSubmitError;
-    formView.form.httpClient    = _httpClient;
+    formView.behaviour              = viewBehaviour;
+    formView.form.onBeforeSubmit    = onBeforeSubmit;
+    formView.form.onSubmitOk        = onSubmitOk;
+    formView.form.onSubmitError     = onSubmitError;
+    formView.form.httpClient        = _httpClient;
     if ([@"profile" isEqualToString:formType]) {
-        formView.form.inputValues = [_userAccountManager getUserProfile];
+        formView.form.inputValues = [_userProfileManager getUserProfile];
     }
     return formView;
 }
@@ -238,16 +253,16 @@
 
 @implementation LOLoginBehaviour
 
-- (id)initWithUserAccountManager:(id<LOUserAccountManager>)userAccountManager loginAction:(NSString *)loginAction {
+- (id)initWithAuthenticationManager:(LOCMSAuthenticationManager *)authManager loginAction:(NSString *)loginAction {
     self = [super init];
-    self.userAccountManager = userAccountManager;
+    self.authManager = authManager;
     self.loginAction = loginAction;
     return self;
 }
 
 - (void)viewDidAppear {
     // Check if user already logged in, if so then dispatch a specified event.
-    if ([_userAccountManager isAuthenticated]) {
+    if ([_authManager hasCredentials]) {
         [[SCAppContainer getAppContainer] postMessage:_loginAction sender:self.viewController];
     }
 }

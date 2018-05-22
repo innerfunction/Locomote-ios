@@ -56,6 +56,7 @@ typedef void (^LOFormViewErrorEvent)(LOFormView *, NSError *);
 /** A HTTP client to use when submitting the form to a URL. */
 @property (nonatomic, strong) SCHTTPClient *httpClient;
 
+@property (nonatomic, copy) LOFormViewDataEvent onBeforeSubmit;
 @property (nonatomic, copy) LOFormViewErrorEvent onSubmitRequestError;
 @property (nonatomic, copy) LOFormViewDataEvent onSubmitError;
 @property (nonatomic, copy) LOFormViewDataEvent onSubmitOk;
@@ -84,6 +85,10 @@ typedef void (^LOFormViewErrorEvent)(LOFormView *, NSError *);
  * Validates the form before submitting. Returns true if the form is valid and was submitted.
  */
 - (BOOL)submit;
+/**
+ * Before submit event callback.
+ */
+- (void)beforeSubmit;
 /**
  * Update the form's visible state to show that it is submitting.
  */

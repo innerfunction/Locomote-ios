@@ -20,16 +20,22 @@
 #import "LOCMSRepository.h"
 #import "LOCMSSettings.h"
 #import "LOContentProvider.h"
-#import "LOUserAccountManager.h"
-#import "LOAccountFormFactory.h"
+#import "LOUserProfileManager.h"
+#import "LOCMSAccountFormFactory.h"
 #import "SCAppContainer.h"
 #import "NSDictionary+SC.h"
+
+@interface LOContentSource ()
+
+- (void)showLoginForm:(id)sender;
+
+@end
 
 @implementation LOContentContainer
 
 - (id)init {
     self = [super init];
-    self.content = @{};
+    self.sources = @{};
     return self;
 }
 
@@ -37,12 +43,12 @@
     // NOTE - this method intended for use by Locomote.m; user account manager not supported in this usage pattern.
     LOContentSource *source = [LOContentSource new];
     source.ref = ref;
-    _content = [_content dictionaryWithAddedObject:source forKey:ref];
+    _sources = [_sources dictionaryWithAddedObject:source forKey:ref];
 }
 
 - (void)setup {
     // Complete setup of all content sources.
-    for (LOContentSource *source in [_content allValues]) {
+    for (LOContentSource *source in [_sources allValues]) {
         [source setup];
     }
 }
@@ -50,7 +56,7 @@
 - (QPromise *)start {
     // Complete setup and then start the content provider.
     [self setup];
-    [[LOContentProvider getInstance] start];
+    return [[LOContentProvider getInstance] start];
 }
 
 + (LOContentContainer *)getInstance {
@@ -71,7 +77,7 @@
 
 - (NSDictionary *)collectionMemberTypeInfo {
     return @{
-        @"content": [LOContentSource class]
+        @"source": [LOContentSource class]
     };
 }
 
@@ -83,7 +89,7 @@
     // Create repo settings using the ref.
     LOCMSSettings *settings = [[LOCMSSettings alloc] initWithRef:_ref];
     // Create repo using the settings.
-    LOCMSRepository *repo   = [[LOCMSRepository alloc] initWithSettings:settings];
+    _repository   = [[LOCMSRepository alloc] initWithSettings:settings];
     // Check whether the content provider has a content authority for the repo.
     LOContentProvider *provider = [LOContentProvider getInstance];
     id<LOContentAuthority> authority = [provider contentAuthorityForName:settings.authorityName];
@@ -93,14 +99,41 @@
         [provider setContentAuthority:authority withName:settings.authorityName];
     }
     // Add the repository to the content authority.
-    [(LOCMSContentAuthority *)authority addRepository:repo];
-    // Use the content reference as a realm name for user account data.
-    _userAccountManager.realmName = _ref;
+    [(LOCMSContentAuthority *)authority addRepository:_repository];
+    // Complete the repository setup.
+    [_repository setup];
+    // Use the content reference as a realm name for user profile data.
+    _userProfileManager.realmName = _ref;
     // Check whether a form factory is needed.
-    if (_userAccountManager && !_accountFormFactory) {
-        _accountFormFactory = [[LOAccountFormFactory alloc] initWithUserAccountManager:_userAccountManager
-                                                                            httpClient:repo.httpClient];
+    if (_userProfileManager && !_accountFormFactory) {
+        _accountFormFactory = [[LOCMSAccountFormFactory alloc] initWithRepository:_repository
+                                                               userProfileManager:_userProfileManager];
     }
+}
+
+#pragma mark - SCMessageReceiver
+
+- (BOOL)receiveMessage:(SCMessage *)message sender:(id)sender {
+    if ([message hasName:@"logout"]) {
+        [_repository.authManager removeCredentials];
+        [self showLoginForm:sender];
+        return YES;
+    }
+    if ([message hasName:@"password-reminder"]) {
+        [_userProfileManager showPasswordReminder];
+        return YES;
+    }
+    if ([message hasName:@"show-login"]) {
+        [self showLoginForm:sender];
+        return YES;
+    }
+    return NO;
+}
+
+#pragma mark - private
+
+- (void)showLoginForm:(id)sender {
+    [[SCAppContainer getAppContainer] postMessage:_showLoginAction sender:sender];
 }
 
 @end

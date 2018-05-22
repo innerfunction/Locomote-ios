@@ -17,28 +17,31 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "LOCMSRepository.h"
+#import "LOCMSAuthenticationManager.h"
 #import "SCIOCObjectFactoryBase.h"
 #import "SCViewBehaviourObject.h"
 #import "SCHTTPClient.h"
 
-@protocol LOUserAccountManager;
+@protocol LOUserProfileManager;
 
 /// A factory class for generating user account related forms.
-@interface LOAccountFormFactory : SCIOCObjectFactoryBase
+@interface LOCMSAccountFormFactory : SCIOCObjectFactoryBase
 
-@property (nonatomic, weak) id<LOUserAccountManager> userAccountManager;
+@property (nonatomic, weak) LOCMSRepository *repository;
+@property (nonatomic, weak) id<LOUserProfileManager> userProfileManager;
 @property (nonatomic, weak) SCHTTPClient *httpClient;
 @property (nonatomic, strong) NSDictionary *stdParams;
 
-- (id)initWithUserAccountManager:(id<LOUserAccountManager>)userAccountManager httpClient:(SCHTTPClient *)httpClient;
+- (id)initWithRepository:(LOCMSRepository *)repository userProfileManager:(id<LOUserProfileManager>)userProfileManager;
 
 @end
 
 @interface LOLoginBehaviour : SCViewBehaviourObject
 
-- (id)initWithUserAccountManager:(id<LOUserAccountManager>)userAccountManager loginAction:(NSString *)loginAction;
+- (id)initWithAuthenticationManager:(LOCMSAuthenticationManager *)authManager loginAction:(NSString *)loginAction;
 
-@property (nonatomic, weak) id<LOUserAccountManager> userAccountManager;
+@property (nonatomic, weak) LOCMSAuthenticationManager *authManager;
 @property (nonatomic, strong) NSString *loginAction;
 
 @end

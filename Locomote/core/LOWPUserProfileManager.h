@@ -16,15 +16,17 @@
 //  Copyright © 2018 Locomote.sh. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "LOUserAccountManager.h"
+#import <UIKit/UIKit.h>
+#import "LOUserProfileManager.h"
 
 /**
- * An account manager implementation that works with a Wordpress backend to authenticate users.
+ * A profile manager implementation that works with a Wordpress backend to authenticate users.
  * Can also be used to create Wordpress user accounts.
+ * TODO: This class probably belongs outside of this library.
  */
-@interface LOWPUserAccountManager : NSObject <LOUserAccountManager>
+@interface LOWPUserProfileManager : NSObject <LOUserProfileManager>
 
 @property (nonatomic, strong) NSUserDefaults *userDefaults;
+@property (nonatomic, strong) NSString *baseURL;
 
 @end

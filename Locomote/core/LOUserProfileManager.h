@@ -18,20 +18,20 @@
 
 #import <Foundation/Foundation.h>
 
-#define LOUserAccountFirstName  (@"FirstName")
-#define LOUserAccountLastName   (@"LastName")
-#define LOUserAccountEMail      (@"EMail")
-#define LOUserAccountUsername   (@"Username")
-#define LOUserAccountPassword   (@"Password")
-#define LOUserAccountConfirmPW  (@"ConfirmPassword")
-#define LOUserAccountProfileID  (@"ProfileID")
+#define LOUserProfileFirstName  (@"FirstName")
+#define LOUserProfileLastName   (@"LastName")
+#define LOUserProfileEMail      (@"EMail")
+#define LOUserProfileUsername   (@"Username")
+#define LOUserProfilePassword   (@"Password")
+#define LOUserProfileConfirmPW  (@"ConfirmPassword")
+#define LOUserProfileProfileID  (@"ProfileID")
 
 /**
- * A protocol for managing user account details.
+ * A protocol for managing user profile details.
  * The protocol should be implemented by classes providing functionality for authenticating
  * against a specific server-side authentication method or scheme.
  */
-@protocol LOUserAccountManager <NSObject>
+@protocol LOUserProfileManager <NSObject>
 
 /// Get the URL used to authenticate login requests.
 @property (nonatomic, readonly) NSString *authenticationURL;
@@ -40,25 +40,17 @@
 /// Get the URL used to return account profile details.
 @property (nonatomic, readonly) NSString *accountProfileURL;
 /// Return a list of the field names to be stored in the user profile.
-@property (nonatomic, strong) NSArray<NSString *> profileFieldNames;
+@property (nonatomic, strong) NSArray<NSString *> *profileFieldNames;
 /// Return a dictionary of the standard field names used in login forms etc.
-@property (nonatomic, strong) NSDictionary *standardFieldNames<NSString *, NSString *>;
+@property (nonatomic, strong) NSDictionary<NSString *, NSString *> *standardFieldNames;
 /// A user account realm name.
 @property (nonatomic, strong) NSString *realmName;
 
-/// Test whether an authenticated user is logged in.
-- (BOOL)isAuthenticated;
-/// Store a user's authentication credentials.
-- (void)storeUserCredentials:(NSDictionary *)values;
 /// Store a user's profile data.
 - (void)storeUserProfile:(NSDictionary *)values;
 /// Get a user's stored profile data.
 - (NSDictionary *)getUserProfile;
-/// Get the username of the currently authenticated user.
-- (NSString *)getUsername;
-/// Logout the currently authenticated user.
-- (void)logout;
-/// TODO: This may be better as an event/message triggered custom action of the account manager.
+/// Do something to show a password reminder screen to the user.
 - (void)showPasswordReminder;
 
 @end
