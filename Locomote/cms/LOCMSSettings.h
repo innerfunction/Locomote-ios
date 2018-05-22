@@ -36,6 +36,10 @@
 @property (nonatomic, strong) NSString *password;
 /// An authority name, derived from the settings values.
 @property (nonatomic, strong) NSString *authorityName;
+/// Return the URL for login authentication.
+@property (nonatomic, readonly) NSString *authenticationURL;
+/// Return the URL for the updates feed.
+@property (nonatomic, readonly) NSString *updatesURL;
 
 /**
  * Initialize settings with a string reference.
@@ -52,10 +56,6 @@
  */
 - (id)initWithRef:(NSString *)ref;
 
-/// Return the URL for login authentication.
-- (NSString *)urlForAuthentication;
-/// Return the URL for the updates feed.
-- (NSString *)urlForUpdates;
 /// Return the URL for downloading a fileset of the specified category.
 - (NSString *)urlForFileset:(NSString *)category;
 /// Return the URL for downloading a file at the specified path.

@@ -3,8 +3,15 @@ PODS:
   - GRMustache (7.3.2):
     - JRSwizzle (~> 1.0)
   - JRSwizzle (1.0)
+  - JTSImageViewController (1.5.1)
   - MessagePack (1.0.0)
   - Q (0.9.0)
+  - SCFFLD (0.9.6):
+    - SCFFLD/Core (= 0.9.6)
+    - SCFFLD/DB (= 0.9.6)
+    - SCFFLD/HTTP (= 0.9.6)
+    - SCFFLD/IOC (= 0.9.6)
+    - SCFFLD/NoArc (= 0.9.6)
   - SCFFLD/Core (0.9.6):
     - SCFFLD/NoArc
     - ZipArchive
@@ -15,39 +22,46 @@ PODS:
     - Q
     - SCFFLD/Core
     - SSKeychain
+  - SCFFLD/IOC (0.9.6):
+    - JTSImageViewController
+    - SCFFLD/Core
+    - SWRevealViewController
   - SCFFLD/NoArc (0.9.6)
   - SSKeychain (1.4.1)
+  - SWRevealViewController (2.3.0)
   - ZipArchive (1.4.0)
 
 DEPENDENCIES:
   - FilePathPattern
   - GRMustache
   - Q
-  - SCFFLD/Core
-  - SCFFLD/DB
-  - SCFFLD/HTTP
+  - SCFFLD
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - FilePathPattern
     - GRMustache
     - JRSwizzle
+    - JTSImageViewController
     - MessagePack
     - Q
     - SCFFLD
     - SSKeychain
+    - SWRevealViewController
     - ZipArchive
 
 SPEC CHECKSUMS:
   FilePathPattern: 06ecea2ae5c9f4a835affb4e24505e5bd1f131e5
   GRMustache: ebe6104fd30a6d22c1f36af131e19e2dbf7cd292
   JRSwizzle: dd5ead5d913a0f29e7f558200165849f006bb1e3
+  JTSImageViewController: 1f8ce1cc93dab0d0af8e53badeea7528560cfec9
   MessagePack: 6ef1d8f7c4b4021cf0b257d61ec5e8b4f3e9831c
   Q: 003eeabd4b114fbaeec65d4bd970174fc6f4c71b
   SCFFLD: acaf4f42fd71523ea440cda49c120e0f800ce352
   SSKeychain: 55cc80f66f5c73da827e3077f02e43528897db41
+  SWRevealViewController: 6d3fd97f70112fd7cef9de14df4260eacce4c63a
   ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
 
-PODFILE CHECKSUM: 2bfdec5f3d8714f9ce98b18fa6297dd70412c289
+PODFILE CHECKSUM: 0e7d1f4e7fafcb6550ea64505daa02fe68f8b03d
 
 COCOAPODS: 1.5.2

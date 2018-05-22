@@ -23,7 +23,6 @@
 #import "LOLocalCachePaths.h"
 #import "LOCommandQueue.h"
 #import "SCIOCTypeInspectable.h"
-#import "SCService.h"
 #import "SCURIHandling.h"
 
 @class LOCMSRepository;
@@ -38,7 +37,7 @@
  * is mapped to a specific account and repository then the entire authority is mapped to that
  * one repo. The authority's 'setting' property is used to configure the default mapping details.
  */
-@interface LOCMSContentAuthority : NSObject <LOContentAuthority, LORequestDispatcherHost, SCIOCTypeInspectable, SCService> {
+@interface LOCMSContentAuthority : NSObject <LOContentAuthority, LORequestDispatcherHost, SCIOCTypeInspectable> {
     /// A set of live NSURL responses.
     NSMutableSet<NSURLProtocol *> *_liveResponses;
     /// A request dispatcher.

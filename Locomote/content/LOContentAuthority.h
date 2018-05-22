@@ -40,6 +40,8 @@
 - (NSString *)localCacheLocationOfPath:(NSString *)path parameters:(NSDictionary *)parameters;
 /// Return content for an internal content URI.
 - (id)contentForPath:(NSString *)path parameters:(NSDictionary *)parameters;
+/// Start running the content authority. Should complete authority initialization & sync its content.
+- (QPromise *)start;
 /**
  * Synchronize the authority's content with its source.
  * Returns a deferred promise which resolves once the synchronize operation is complete.

@@ -77,14 +77,6 @@
     return _authRealm;
 }
 
-- (NSString *)urlForAuthentication {
-    return [self urlForPath:[self pathForResource:@"authenticate.api" trailing:nil]];
-}
-
-- (NSString *)urlForUpdates {
-    return [self urlForPath:[self pathForResource:@"updates.api" trailing:nil]];
-}
-
 - (NSString *)urlForFileset:(NSString *)category {
     return [self urlForPath:[self pathForResource:@"filesets.api" trailing:category]];
 }
@@ -112,6 +104,14 @@
     }
     // Assign to the property.
     _basePath = basePath;
+}
+
+- (NSString *)authenticationURL {
+    return [self urlForPath:[self pathForResource:@"authenticate.api" trailing:nil]];
+}
+
+- (NSString *)updatesURL {
+    return [self urlForPath:[self pathForResource:@"updates.api" trailing:nil]];
 }
 
 #pragma mark - Private methods

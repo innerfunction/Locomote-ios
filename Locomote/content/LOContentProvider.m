@@ -88,6 +88,18 @@
     return _authorities[name];
 }
 
+- (QPromise *)start {
+    // Register the content: protocol.
+    [NSURLProtocol registerClass:[LOContentURLProtocol class]];
+    // Start all authorities.
+    NSMutableArray *promises = [NSMutableArray new];
+    for (id key in _authorities) {
+        id<LOContentAuthority> authority = _authorities[key];
+        [promises addObject:[authority start]];
+    }
+    return [Q all:promises];
+}
+
 - (QPromise *)syncAuthorities {
     NSMutableArray *promises = [NSMutableArray new];
     for (id key in _authorities) {
@@ -141,20 +153,6 @@
 
 - (BOOL)receiveMessage:(SCMessage *)message sender:(id)sender {
     return NO;
-}
-
-#pragma mark - SCIOCTypeInspectable
-
-- (NSDictionary *)collectionMemberTypeInfo {
-    return @{
-        @"authorities": @protocol(LOContentAuthority)
-    };
-}
-
-#pragma mark - SCService
-
-- (void)startService {
-    [NSURLProtocol registerClass:[LOContentURLProtocol class]];
 }
 
 #pragma mark - SCIOCSingleton

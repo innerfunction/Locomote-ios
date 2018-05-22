@@ -3,9 +3,7 @@ project 'Locomote.xcodeproj'
 workspace 'Locomote.xcworkspace'
 target 'Locomote' do
     pod 'Q'
-    pod 'SCFFLD/Core'
-    pod 'SCFFLD/HTTP'
-    pod 'SCFFLD/DB'
+    pod 'SCFFLD'
     pod 'FilePathPattern'
     pod 'GRMustache'
 end

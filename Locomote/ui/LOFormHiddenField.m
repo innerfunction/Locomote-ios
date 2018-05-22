@@ -1,4 +1,4 @@
-// Copyright 2017 InnerFunction Ltd.
+// Copyright 2018 InnerFunction Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  Created by Julian Goacher on 04/10/2016.
+//  Created by Julian Goacher on 28/02/2016.
 //  Copyright © 2016 InnerFunction. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "LOContentTypeConverter.h"
+#import "LOFormHiddenField.h"
 
-/// A content type converter instance which returns its input unchanged.
-/// @deprecated
-@interface LOPlainContentTypeConverter : NSObject <LOContentTypeConverter>
+@implementation LOFormHiddenField
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        self.isInput = YES;
+        self.height = @0;
+    }
+    return self;
+}
 
 @end

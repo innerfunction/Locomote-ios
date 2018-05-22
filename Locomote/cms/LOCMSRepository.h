@@ -36,7 +36,7 @@
 /**
  * A content authority which sources its content from a Locomote.sh content repository.
  */
-@interface LOCMSRepository : NSObject <LORequestHandler, SCService, SCIOCObjectAware>
+@interface LOCMSRepository : NSObject <LORequestHandler, SCIOCObjectAware>
 
 /// The path this repository is mounted under; i.e. a path in the form account/repo/~branch.
 @property (nonatomic, strong) NSString *basePath;
@@ -61,6 +61,10 @@
 
 /// Initialize a repository with the provided settings.
 - (id)initWithSettings:(LOCMSSettings *)settings;
+/// Complete repository setup.
+- (void)setup;
+/// Start running the repository.
+- (void)start;
 /// Synchronize the repository's content by downloading updates from the server.
 - (QPromise *)syncContent;
 

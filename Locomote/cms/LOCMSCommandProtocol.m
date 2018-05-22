@@ -138,7 +138,7 @@
     
     _promise = [QPromise new];
     
-    NSString *refreshURL = [_protocol.cms urlForUpdates];
+    NSString *refreshURL = _protocol.cms.updatesURL;
     
     // Query the file DB for the latest commit ID.
     NSString *commit = nil, *group = nil;
@@ -375,7 +375,7 @@
     NSString *cvs = [self buildClientVisibleSetForCategory:nil];
     
     // Prepare URL, parameters and options for updates request.
-    NSString *refreshURL = [_protocol.cms urlForUpdates];
+    NSString *refreshURL = _protocol.cms.updatesURL;
     NSDictionary *params = @{
         @"secure":  IsSecure,
         @"cvs":     cvs

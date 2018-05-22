@@ -144,6 +144,33 @@
     return [_fileDB cacheLocationForFileWithPath:path];
 }
 
+- (void)setup {
+    // Set file DB name and initial copy path.
+    if (!_fileDB.name) {
+        NSString *authorityName = self.authority.authorityName;
+        _fileDB.name = [NSString stringWithFormat:@"%@/%@", authorityName, self.basePath];
+    }
+    if (!_fileDB.initialCopyPath) {
+        NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];
+        _fileDB.initialCopyPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:filename];
+    }
+    _authManager = [[LOCMSAuthenticationManager alloc] initWithCMSSettings:_cms];
+    _httpClient = [[SCHTTPClient alloc] initWithNSURLSessionTaskDelegate:(id<NSURLSessionTaskDelegate>)_authManager];
+    /* TODO
+    _httpClient.additionalHTTPHeaders = @{
+        @"User-Agent": [self buildHTTPUserAgent]
+    }
+    */
+    _commandProtocol = [[LOCMSCommandProtocol alloc] initWithRepository:self];
+    // Register command protocol with the scheduler, using the authority name as the command prefix.
+    [_commandProtocol registerWithCommandQueue:self.authority.commandQueue];
+}
+
+- (void)start {
+    // Check for an interrupted file db reset.
+    [self continueDBResetInProgress];
+}
+
 - (QPromise *)syncContent {
     NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.basePath];
     return [self.authority.commandQueue queueCommandWithName:cmd arguments:@[]];
@@ -176,39 +203,6 @@
     return NO;
 }
 
-#pragma mark - SCService
-
-- (void)startService {
-
-    // Set file DB name and initial copy path.
-    if (!_fileDB.name) {
-        NSString *authorityName = self.authority.authorityName;
-        _fileDB.name = [NSString stringWithFormat:@"%@/%@", authorityName, self.basePath];
-    }
-    if (!_fileDB.initialCopyPath) {
-        NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];
-        _fileDB.initialCopyPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:filename];
-    }
-
-    _authManager = [[LOCMSAuthenticationManager alloc] initWithCMSSettings:_cms];
-    _httpClient = [[SCHTTPClient alloc] initWithNSURLSessionTaskDelegate:(id<NSURLSessionTaskDelegate>)_authManager];
-    /* TODO
-    _httpClient.additionalHTTPHeaders = @{
-        @"User-Agent": [self buildHTTPUserAgent]
-    }
-    */
-    _commandProtocol = [[LOCMSCommandProtocol alloc] initWithRepository:self];
-    
-    // Register command protocol with the scheduler, using the authority name as the command prefix.
-    [_commandProtocol registerWithCommandQueue:self.authority.commandQueue];
-    
-    // Check for an interrupted file db reset.
-    [self continueDBResetInProgress];
-    
-    // Refresh the app content on start.
-    // TODO Check should this be done here - Locomote.m also initiates a refresh on start.
-    [self refreshContent];
-}
 
 #pragma mark - Private
 

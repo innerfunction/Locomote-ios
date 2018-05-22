@@ -75,12 +75,7 @@
 - (void)setProvider:(LOContentProvider *)provider {
     _provider = provider;
     self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:provider.localCachePaths suffix:_authorityName];
-}
-
-#pragma mark - SCService
-
-- (void)startService {
-
+    // Authority setup can be completed once the provider is set.
     // Each repository key specifies the base path the repository is mounted under.
     // Generate a list of repo keys ordered longest to shortest, before generating a request
     // handler mapping for each repository based on its base path. (Keys are ordered longest
@@ -105,7 +100,13 @@
     }
     // Set the request handler mappings.
     self.requestHandlers = mappings;
+}
 
+- (QPromise *)start {
+    // Start each content repository.
+    for (LOCMSRepository *repository in [_repositories allValues]) {
+        [repository start];
+    }
     // Start the command queue.
     [_commandQueue startService];
     // Schedule content refreshes.
@@ -116,6 +117,8 @@
                                        userInfo:nil
                                         repeats:YES];
     }
+    
+    return [self syncContent];
 }
 
 #pragma mark - SCIOCTypeInspectable

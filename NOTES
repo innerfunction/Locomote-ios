@@ -55,13 +55,7 @@ Content URLs:
 Repository configuration:
 * By code - [Locomote addRepository:@"account/repo"]
 * By config, via a container:
-    "authorities": {
-        "locomote.sh": {
-            "account/repo": {
-            }
-        }
+    "content": {
+        "main": { "ref": "account/repo", "userAccountManager": { "-type-ios": "LOWPUserAccountManager" } }
     }
 
-}
-}
-}

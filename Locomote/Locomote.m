@@ -17,9 +17,7 @@
 //
 
 #import "Locomote.h"
-#import "LOCMSSettings.h"
-#import "LOCMSRepository.h"
-#import "LOContentProvider.h"
+#import "LOContentContainer.h"
 #import "LOBundle.h"
 
 /**
@@ -33,20 +31,7 @@ BOOL startAndWait(NSTimeInterval timeout);
 @implementation Locomote
 
 + (void)addRepository:(NSString *)ref {
-    // Create repo settings using the ref.
-    LOCMSSettings *settings = [[LOCMSSettings alloc] initWithRef:ref];
-    // Create repo using the settings.
-    LOCMSRepository *repo   = [[LOCMSRepository alloc] initWithSettings:settings];
-    // Check whether the content provider has a content authority for the repo.
-    LOContentProvider *provider = [LOContentProvider getInstance];
-    id<LOContentAuthority> authority = [provider contentAuthorityForName:settings.authorityName];
-    if (!authority) {
-        // No matching content authority found, create a new one and add to the provider.
-        authority = [LOCMSContentAuthority new];
-        [provider setContentAuthority:authority withName:settings.authorityName];
-    }
-    // Add the repository to the content authority.
-    [(LOCMSContentAuthority *)authority addRepository:repo];
+    [[LOContentContainer getInstance] addRepository:ref];
 }
 
 + (QPromise *)start {
@@ -95,8 +80,8 @@ BOOL startAndWait(NSTimeInterval timeout);
 BOOL startAndWait(NSTimeInterval timeout) {
     __block NSNumber *result = nil;
     NSCondition *checkpoint = [NSCondition new];
-    LOContentProvider *provider = [LOContentProvider getInstance];
-    [provider syncAuthorities]
+    LOContentContainer *container = [LOContentContainer getInstance];
+    [container start]
     .then( (id)^(NSNumber *ok) {
         // Signal the result.
         [checkpoint lock];

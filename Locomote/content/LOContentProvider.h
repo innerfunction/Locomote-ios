@@ -19,9 +19,7 @@
 #import <Foundation/Foundation.h>
 #import "LOContentAuthority.h"
 #import "LOLocalCachePaths.h"
-#import "SCIOCTypeInspectable.h"
 #import "SCIOCSingleton.h"
-#import "SCService.h"
 #import "SCMessageRouter.h"
 #import "SCMessageReceiver.h"
 #import "Q.h"
@@ -31,7 +29,7 @@
  * A content provider is a collection of content authorities, each encapsulating different
  * content sources (e.g. different content repos).
  */
-@interface LOContentProvider : NSObject <SCIOCSingleton, SCIOCTypeInspectable, SCService, SCMessageRouter, SCMessageReceiver>
+@interface LOContentProvider : NSObject <SCIOCSingleton, SCMessageRouter, SCMessageReceiver>
 
 /// A map of content authority instances keyed by authority name.
 @property (nonatomic, strong) NSDictionary<NSString *, id<LOContentAuthority>> *authorities;
@@ -42,6 +40,12 @@
 - (void)setContentAuthority:(id<LOContentAuthority>)authority withName:(NSString *)name;
 /// Find a content authority by name, or return nil if no match found.
 - (id<LOContentAuthority>)contentAuthorityForName:(NSString *)name;
+/**
+ * Start the provider.
+ * Registers the URL handler; starts and synchronizes all content authorities;
+ * @return A promise which resolves once the provider is fully started.
+ */
+- (QPromise *)start;
 /**
  * Synchronize all content authorities with their remote sources.
  * @return A promise which resolves once all authorities have synchronized.

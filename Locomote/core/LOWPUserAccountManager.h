@@ -1,4 +1,4 @@
-// Copyright 2017 InnerFunction Ltd.
+// Copyright 2018 InnerFunction Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  Created by Julian Goacher on 04/10/2016.
-//  Copyright © 2016 InnerFunction. All rights reserved.
+//  Created by Julian Goacher on 22/05/2018.
+//  Copyright © 2018 Locomote.sh. All rights reserved.
 //
 
-#import "LOPlainContentTypeConverter.h"
+#import <Foundation/Foundation.h>
+#import "LOUserAccountManager.h"
 
-@implementation LOPlainContentTypeConverter
+/**
+ * An account manager implementation that works with a Wordpress backend to authenticate users.
+ * Can also be used to create Wordpress user accounts.
+ */
+@interface LOWPUserAccountManager : NSObject <LOUserAccountManager>
 
-#pragma mark - LOContentTypeConverter
-
-- (void)writeContent:(id)content toResponse:(id<LOContentAuthorityResponse>)response {
-    [response respondWithJSONData:content cachePolicy:NSURLCacheStorageNotAllowed];
-}
+@property (nonatomic, strong) NSUserDefaults *userDefaults;
 
 @end
