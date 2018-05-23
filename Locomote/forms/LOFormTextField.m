@@ -111,8 +111,8 @@
     }
     // Display the value.
     dispatch_async(dispatch_get_main_queue(), ^{
-        _input.text = value;
-        self.textLabel.textAlignment = HasValue ? NSTextAlignmentLeft : _defaultTitleAlignment;
+        self->_input.text = value;
+        self.textLabel.textAlignment = HasValue ? NSTextAlignmentLeft : self->_defaultTitleAlignment;
         self.detailTextLabel.text = self.valueLabel;
         // Check whether sufficient room to display both detail and text labels, hide the text label if not.
         CGFloat textWidth = [self.textLabel.text sizeWithAttributes:@{ NSFontAttributeName: self.textLabel.font }].width;
@@ -131,11 +131,11 @@
                            options: UIViewAnimationOptionTransitionFlipFromTop + UIViewAnimationOptionCurveLinear
                         animations: ^{
                             self.contentView.hidden = YES;
-                            _inputContentView.hidden = NO;
+                            self->_inputContentView.hidden = NO;
                         }
                         completion: ^(BOOL finished) {
-                            [_input becomeFirstResponder];
-                            if (!_valid) {
+                            [self->_input becomeFirstResponder];
+                            if (!self->_valid) {
                                 // TODO: Proper error messages
                                 [self.form notifyError:@"Invalid field"];
                             }
@@ -152,7 +152,7 @@
                            options: UIViewAnimationOptionTransitionFlipFromTop + UIViewAnimationOptionCurveLinear
                         animations: ^{
                             self.contentView.hidden = NO;
-                            _inputContentView.hidden = YES;
+                            self->_inputContentView.hidden = YES;
                         }
                         completion: ^(BOOL finished) {
                         }];

@@ -17,6 +17,7 @@
 //
 
 #import "LOContentContainer.h"
+#import "LOCMSContentAuthority.h"
 #import "LOCMSRepository.h"
 #import "LOCMSSettings.h"
 #import "LOContentProvider.h"
@@ -27,6 +28,8 @@
 
 @interface LOContentSource ()
 
+- (void)registerSource;
+- (void)completeSetup;
 - (void)showLoginForm:(id)sender;
 
 @end
@@ -46,17 +49,22 @@
     _sources = [_sources dictionaryWithAddedObject:source forKey:ref];
 }
 
-- (void)setup {
-    // Complete setup of all content sources.
-    for (LOContentSource *source in [_sources allValues]) {
-        [source setup];
-    }
-}
-
 - (QPromise *)start {
-    // Complete setup and then start the content provider.
-    [self setup];
-    return [[LOContentProvider getInstance] start];
+    // Register all content sources with the content provider.
+    for (LOContentSource *source in [_sources allValues]) {
+        [source registerSource];
+    }
+    // Start the content provider and then complete setup.
+    return [[LOContentProvider getInstance] start]
+    .then((id)^(NSNumber *ok) {
+        if ([ok boolValue]) {
+            // Complete setup of all sources.
+            for (LOContentSource *source in [self.sources allValues]) {
+                [source completeSetup];
+            }
+        }
+        return ok;
+    });
 }
 
 + (LOContentContainer *)getInstance {
@@ -85,7 +93,7 @@
 
 @implementation LOContentSource
 
-- (void)setup {
+- (void)registerSource {
     // Create repo settings using the ref.
     LOCMSSettings *settings = [[LOCMSSettings alloc] initWithRef:_ref];
     // Create repo using the settings.
@@ -100,8 +108,9 @@
     }
     // Add the repository to the content authority.
     [(LOCMSContentAuthority *)authority addRepository:_repository];
-    // Complete the repository setup.
-    [_repository setup];
+}
+
+- (void)completeSetup {
     // Use the content reference as a realm name for user profile data.
     _userProfileManager.realmName = _ref;
     // Check whether a form factory is needed.

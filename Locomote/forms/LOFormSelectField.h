@@ -16,13 +16,15 @@
 //  Copyright © 2016 InnerFunction. All rights reserved.
 //
 
+#import <UIKit/UIKit.h>
 #import "LOFormTextField.h"
-#import "LOTableViewController.h"
+#import "SCConfiguration.h"
+#import "SCTableViewController.h"
 #import "SCIOCTypeInspectable.h"
 
 @class LOFormSelectField;
 
-@interface LOFormSelectItemsViewController : LOTableViewController {
+@interface LOFormSelectItemsViewController : SCTableViewController {
     UIBarButtonItem *_cancelButton;
 }
 
@@ -34,7 +36,7 @@
 @end
 
 @interface LOFormSelectField : LOFormTextField <SCIOCContainerAware, SCIOCTypeInspectable> {
-    SCConfiguration *_itemsListConfig;
+    id<SCConfiguration> _itemsListConfig;
     LOFormSelectItemsViewController *_itemsList;
     UINavigationController *_itemsListContainer;
 }

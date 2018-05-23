@@ -18,6 +18,7 @@
 
 #import "LOWPUserProfileManager.h"
 #import "SSKeychain.h"
+#import "SCHTTPClient.h"
 
 @implementation LOWPUserProfileManager
 
@@ -114,9 +115,9 @@
 - (void)showPasswordReminder {
     // Fetch the password reminder URL from the server.
     NSString *url = [_baseURL stringByAppendingPathComponent:@"account/password-reminder"];
-    /* TODO: Why is this two-part request needed? Can't this URL ^^^ just do a redirect?
-    [_container.httpClient get:url]
-    .then((id)^(IFHTTPClientResponse *response) {
+    SCHTTPClient *httpClient = [SCHTTPClient new];
+    [httpClient get:url]
+    .then((id)^(SCHTTPClientResponse *response) {
         id data = [response parseData];
         NSString *reminderURL = data[@"lost_password_url"];
         if (reminderURL) {
@@ -125,7 +126,6 @@
         }
         return nil;
     });
-    */
 }
 
 @end

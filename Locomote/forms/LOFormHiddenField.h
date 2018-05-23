@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  Created by Julian Goacher on 27/02/2016.
+//  Created by Julian Goacher on 28/02/2016.
 //  Copyright © 2016 InnerFunction. All rights reserved.
 //
 
+#import <UIKit/UIKit.h>
 #import "LOFormField.h"
 
-@interface LOFormOptionField : LOFormField
-
-@property (nonatomic, assign) BOOL optionSelected;
-@property (nonatomic, strong) NSString *optionValue;
+@interface LOFormHiddenField : LOFormField
 
 @end

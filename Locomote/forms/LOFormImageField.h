@@ -16,6 +16,7 @@
 //  Copyright © 2016 InnerFunction. All rights reserved.
 //
 
+#import <UIKit/UIKit.h>
 #import "LOFormField.h"
 
 @interface LOFormImageField : LOFormField {

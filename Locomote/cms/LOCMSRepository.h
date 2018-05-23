@@ -19,7 +19,6 @@
 #import <Foundation/Foundation.h>
 #import "LORequestDispatcher.h"
 #import "LOLocalCachePaths.h"
-#import "LOCMSRepoRequestHandler.h"
 #import "LOCMSFileDB.h"
 #import "LOCMSCommandProtocol.h"
 #import "LOCMSSettings.h"
@@ -31,7 +30,7 @@
 #import "SCMessageReceiver.h"
 #import "Q.h"
 
-@class LOCMSContentAuthority;
+@class LOCMSContentAuthority, LOCMSRepoRequestHandler;
 
 /**
  * A content authority which sources its content from a Locomote.sh content repository.
@@ -61,12 +60,9 @@
 
 /// Initialize a repository with the provided settings.
 - (id)initWithSettings:(LOCMSSettings *)settings;
-/// Complete repository setup.
-- (void)setup;
 /// Start running the repository.
 - (void)start;
 /// Synchronize the repository's content by downloading updates from the server.
 - (QPromise *)syncContent;
 
 @end
-

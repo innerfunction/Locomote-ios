@@ -16,31 +16,13 @@
 //  Copyright © 2016 InnerFunction. All rights reserved.
 //
 
-#import "LOFormViewController.h"
+#import <UIKit/UIKit.h>
+#import "SCViewController.h"
+#import "LOFormView.h"
 
-@implementation LOFormViewController
+@interface LOFormViewController : SCViewController
 
-- (id)init {
-    self = [super init];
-    if (self) {
-        _form = [LOFormView new];
-        _form.backgroundColor = [UIColor clearColor];
-        _form.viewController = self;
-        
-        self.view = _form;
-        self.view.autoresizesSubviews = YES;
-        self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        self.edgesForExtendedLayout = UIRectEdgeNone;
-    }
-    return self;
-}
-
-- (void)setBackgroundColor:(UIColor *)backgroundColor {
-    _form.backgroundColor = backgroundColor;
-}
-
-- (UIColor *)backgroundColor {
-    return _form.backgroundColor;
-}
+@property (nonatomic, strong, readonly) LOFormView *form;
+@property (nonatomic, strong) UIColor *backgroundColor;
 
 @end

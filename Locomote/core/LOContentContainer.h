@@ -22,8 +22,6 @@
 #import "SCIOCTypeInspectable.h"
 #import "Q.h"
 
-// TODO: Content container should also be responsible for handling events/messages like 'logout' and 'password reminder'
-
 @protocol LOUserProfileManager;
 @class LOCMSAccountFormFactory, LOCMSRepository;
 
@@ -41,9 +39,6 @@
 /// An action message for displaying the login form.
 @property (nonatomic, strong) NSString *showLoginAction;
 
-/// Setup the content repository associated with this source.
-- (void)setup;
-
 @end
 
 /// A container or Locomote sourced content.
@@ -56,7 +51,6 @@
 @property (nonatomic, strong) NSDictionary<NSString *, LOContentSource *> *sources;
 
 - (void)addRepository:(NSString *)ref;
-- (void)setup;
 - (QPromise *)start;
 
 + (LOContentContainer *)getInstance;

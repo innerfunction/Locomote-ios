@@ -44,3 +44,12 @@ NSError *makeUnsupportedTypeResponseError(NSString *type) {
                                      userInfo:@{ NSLocalizedDescriptionKey: description }];
     return error;
 }
+
+NSError *makeInvalidCategoryResponseError(NSString *category) {
+    NSString *description = [NSString stringWithFormat:@"Invalid fileset category: %@", category];
+    // See http://nshipster.com/nserror/
+    NSError *error = [NSError errorWithDomain:NSURLErrorDomain
+                                         code:NSURLErrorResourceUnavailable
+                                     userInfo:@{ NSLocalizedDescriptionKey: description }];
+    return error;
+}

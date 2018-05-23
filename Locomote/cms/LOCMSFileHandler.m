@@ -155,8 +155,7 @@ static SCLogger *Logger;
     NSString *category = record[@"files.category"];
     LOCMSFileset *fileset = self.filesets[category];
     if (!fileset) {
-        // TODO review this error
-        [response respondWithError:makeUnsupportedTypeResponseError(category)];
+        [response respondWithError:makeInvalidCategoryResponseError(category)];
         return;
     }
     // Check if the file is cacheable.

@@ -18,7 +18,6 @@
 
 #import <UIKit/UIKit.h>
 #import "LOFormField.h"
-#import "SCIOCContainerAware.h"
 #import "SCHTTPClient.h"
 
 typedef void (^LOFormViewDataEvent)(LOFormView *, id);
@@ -33,7 +32,7 @@ typedef void (^LOFormViewErrorEvent)(LOFormView *, NSError *);
 
 @end
 
-@interface LOFormView : UITableView <UITableViewDataSource, UITableViewDelegate, SCIOCContainerAware> {
+@interface LOFormView : UITableView <UITableViewDataSource, UITableViewDelegate> {
     NSInteger _focusedFieldIdx;
     UIEdgeInsets _defaultInsets;
     NSDictionary *_defaultValues;
@@ -68,7 +67,7 @@ typedef void (^LOFormViewErrorEvent)(LOFormView *, NSError *);
 /** Get the current value of a named field. */
 - (id)getFieldValue:(NSString *)name;
 /** Get the currently focused field. */
-- (IFFormField *)getFocusedField;
+- (LOFormField *)getFocusedField;
 /** Clear the current field focus. */
 - (void)clearFieldFocus;
 /** Move field focus to the next focusable field. */

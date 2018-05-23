@@ -62,3 +62,7 @@ NSError *makeInvalidPathResponseError(NSString *path);
 
 /// Make an unsupported type error.
 NSError *makeUnsupportedTypeResponseError(NSString *type);
+
+/// Make an invalid fileset category error.
+NSError *makeInvalidCategoryResponseError(NSString *category);
+

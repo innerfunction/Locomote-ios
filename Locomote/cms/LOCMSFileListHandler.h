@@ -17,7 +17,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LOCMSRequestHandler.m"
+#import "LOCMSRequestHandler.h"
+#import "LORequestDispatcher.h"
 
 /**
  * A request handler for file list requests.

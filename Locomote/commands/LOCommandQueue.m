@@ -96,23 +96,23 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
 
 - (QPromise *)queueCommand:(id<LOCommand>)command arguments:(NSArray *)args {
     QPromise *promise = [QPromise new];
-    // Modify the queue on the dispatch queue.
+    // Modify the command queue on the dispatch queue.
     dispatch_async(commandDispatchQueue, ^{
         LOCommandQueueItem *item = [[LOCommandQueueItem alloc] initWithCommand:command args:args];
         // Test whether the same command already exists on the queue.
-        NSInteger idx = [_queue indexOfObject:item];
+        NSInteger idx = [self->_queue indexOfObject:item];
         if (idx == NSNotFound) {
             // Add new command to the queue.
-            [_queue addObject:item];
+            [self->_queue addObject:item];
             // Give the command a runtime identity.
             item.runTimeID = [NSNumber numberWithInteger:[item hash]];
             // Add the command's promise to the map of pending.
-            _pendingPromises[item.runTimeID] = promise;
+            self->_pendingPromises[item.runTimeID] = promise;
             // Execute if the queue was empty (if not empty then a
             // command is currently executing, and will eventually
             // dispatch the new command once the rest of the queue
             // is executed).
-            if ([_queue count] == 1) {
+            if ([self->_queue count] == 1) {
                 [self dispatchNext];
             }
         }
@@ -121,8 +121,8 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
             // the matching, pending command completes, join the current
             // promise and the pending promise in a new promise, and replace
             // the pending promise with the new joined promise.
-            LOCommandQueueItem *queuedItem = _queue[idx];
-            QPromise *pending = _pendingPromises[queuedItem.runTimeID];
+            LOCommandQueueItem *queuedItem = self->_queue[idx];
+            QPromise *pending = self->_pendingPromises[queuedItem.runTimeID];
             QPromise *joined = [QPromise new];
             joined.then( (id)^(id result) {
                 [pending resolve:result];
@@ -133,7 +133,7 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                 [pending reject:error];
                 [promise reject:error];
             });
-            _pendingPromises[queuedItem.runTimeID] = joined;
+            self->_pendingPromises[queuedItem.runTimeID] = joined;
         }
     });
     return promise;
@@ -150,7 +150,7 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
 - (QPromise *)clearPending {
     QPromise *promise = [QPromise new];
     dispatch_async(commandDispatchQueue, ^{
-        [_queue removeAllObjects];
+        [self->_queue removeAllObjects];
         [promise resolve:self];
     });
     return promise;
@@ -177,24 +177,24 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
         return;
     }
     // The next step...
-    void (^next)() = ^() {
+    void (^next)(void) = ^() {
         // Check that there are pending commands.
-        if ([_queue count] > 0) {
+        if ([self->_queue count] > 0) {
             // Read and execute the next pending command.
-            LOCommandQueueItem *item = _queue[0];
+            LOCommandQueueItem *item = self->_queue[0];
             [item.command execute:item.args]
                 .then((id)^(NSArray *followOns) {
                     dispatch_async(commandDispatchQueue, ^{
                         // Remove the completed command from the queue.
-                        [_queue removeObjectAtIndex:0];
+                        [self->_queue removeObjectAtIndex:0];
                         // Add any follow-on commands to the end of the queue.
                         if ([followOns count] > 0) {
                             for (NSDictionary *followOn in followOns) {
                                 NSString *command = followOn[@"command"];
                                 NSArray *args = followOn[@"arguments"];
                                 LOCommandQueueItem *followOnItem = [self makeQueueItemForCommandName:command arguments:args];
-                                if (![_queue containsObject:followOnItem]) {
-                                    [_queue addObject:followOnItem];
+                                if (![self->_queue containsObject:followOnItem]) {
+                                    [self->_queue addObject:followOnItem];
                                     // Give the follow-on the same runtime ID as
                                     // its parent command.
                                     followOnItem.runTimeID = item.runTimeID;
@@ -204,11 +204,11 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                         // If completed command has a runtime ID then check whether
                         // a pending promise needs to be resolved.
                         if (item.runTimeID) {
-                            QPromise *promise = _pendingPromises[item.runTimeID];
+                            QPromise *promise = self->_pendingPromises[item.runTimeID];
                             if (promise) {
                                 // Check for pending commands with the same runtime ID.
                                 BOOL pending = NO;
-                                for (LOCommandQueueItem *pendingItem in _queue) {
+                                for (LOCommandQueueItem *pendingItem in self->_queue) {
                                     if ([item.runTimeID isEqual:pendingItem.runTimeID]) {
                                         pending = YES;
                                         break;
@@ -218,7 +218,7 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                                 // resolve the promise and remove it from the set of pending.
                                 if (!pending) {
                                     [promise resolve:nil];
-                                    [_pendingPromises removeObjectForKey:item.runTimeID];
+                                    [self->_pendingPromises removeObjectForKey:item.runTimeID];
                                 }
                             }
                         }
@@ -231,12 +231,12 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                     [Logger error:@"Error executing command %@ %@: %@", item.command.name, item.args, error];
                     // Check for a pending promise.
                     if (item.runTimeID) {
-                        QPromise *promise = _pendingPromises[item.runTimeID];
+                        QPromise *promise = self->_pendingPromises[item.runTimeID];
                         if (promise) {
                             // If a pending promise found for the current runtime ID then reject with
                             // the error and remove from the set of pending.
                             [promise reject:error];
-                            [_pendingPromises removeObjectForKey:item.runTimeID];
+                            [self->_pendingPromises removeObjectForKey:item.runTimeID];
                         }
                     }
                     [self dispatchNext];

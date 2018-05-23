@@ -52,16 +52,16 @@
         
         dispatch_block_t request = ^() {
 
-            if ([_requestWindow count] > RequestWindowSize) {
-                [_requestWindow removeObjectAtIndex:0];
+            if ([self->_requestWindow count] > RequestWindowSize) {
+                [self->_requestWindow removeObjectAtIndex:0];
             }
-            [_requestWindow addObject:[NSDate new]];
+            [self->_requestWindow addObject:[NSDate new]];
 
-            [_httpClient getFile:_url]
+            [self->_httpClient getFile:self->_url]
             .then((id)^(SCHTTPClientResponse *response) {
                 // Copy downloaded file to target location.
                 NSFileManager *fileManager = [NSFileManager defaultManager];
-                NSURL *fileURL = [NSURL fileURLWithPath:_filename];
+                NSURL *fileURL = [NSURL fileURLWithPath:self->_filename];
                 
                 // Check whether the target location exists, delete any file already at the target location.
                 NSString *dirPath = [fileURL.path stringByDeletingLastPathComponent];
@@ -74,19 +74,19 @@
                 
                 // Copy downloaded file to target location.
                 [fileManager moveItemAtURL:response.downloadLocation toURL:fileURL error:nil];
-                [_promise resolve:@[]];
+                [self->_promise resolve:@[]];
                 return nil;
             })
             .fail(^(id error) {
                 // Check for retries.
                 NSInteger attempts = previousAttempts + 1;
-                if (attempts < _maxRetries) {
-                    NSString *arg = [NSString stringWithFormat:@"%@ %ld", _url, (long)attempts ];
+                if (attempts < self->_maxRetries) {
+                    NSString *arg = [NSString stringWithFormat:@"%@ %ld", self->_url, (long)attempts ];
                     LOCommandQueueItem *followOn = [[LOCommandQueueItem alloc] initWithCommand:self args:@[ arg ]];
-                    [_promise resolve:@[ followOn ]];
+                    [self->_promise resolve:@[ followOn ]];
                 }
                 else {
-                    [_promise reject:@"All retries used"];
+                    [self->_promise reject:@"All retries used"];
                 }
             });
         };

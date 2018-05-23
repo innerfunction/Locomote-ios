@@ -18,11 +18,12 @@
 
 #import "LOFormSelectField.h"
 #import "LOFormView.h"
+#import "SCIOCConfiguration.h"
 
 @implementation LOFormSelectItemsViewController
 
 - (id)init {
-    SCConfiguration *config = [[SCConfiguration alloc] initWithData:@{}];
+    id<SCConfiguration> config = [[SCIOCConfiguration alloc] initWithData:@{}];
     self = [self initWithConfiguration:config];
     if (self) {
         [self afterIOCConfiguration:config];
@@ -55,8 +56,8 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSDictionary *item = [self.tableData rowDataForIndexPath:indexPath];
-    _parentField.selectedItem = item;
+    id<SCConfiguration> item = [self.tableData rowDataForIndexPath:indexPath];
+    _parentField.selectedItem = item.configData;
     [_parentField releaseFieldFocus];
 }
 
@@ -83,7 +84,7 @@
     if (self) {
         self.isEditable = NO; // Disable text field editing.
         self.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-        _itemsListConfig = [[SCConfiguration alloc] initWithData:@{}];
+        _itemsListConfig = [[SCIOCConfiguration alloc] initWithData:@{}];
     }
     return self;
 }
@@ -198,8 +199,8 @@
 
 - (void)releaseFieldFocus {
     if (_itemsList) {
-        [self.form.viewController dismissViewControllerAnimated:_itemsListContainer completion:^{
-            _itemsList = nil;
+        [self.form.viewController dismissViewControllerAnimated:YES completion:^{
+            self->_itemsList = nil;
         }];
     }
 }
@@ -210,9 +211,9 @@
 
 #pragma mark - SCIOCContainerAware
 
-- (void)beforeIOCConfiguration:(SCConfiguration *)configuration {}
+- (void)beforeIOCConfiguration:(id<SCConfiguration>)configuration {}
 
-- (void)afterIOCConfiguration:(SCConfiguration *)configuration {
+- (void)afterIOCConfiguration:(id<SCConfiguration>)configuration {
     self.selectedItem = self.nullItem;
     // Check for default/initial value, set the field title accordingly.
     if (self.value == nil) {

@@ -17,10 +17,10 @@
 //
 
 #import "LOCMSRepository.h"
-#import "Locomote.h"
 #import "LOCMSContentAuthority.h"
 #import "LOCMSFileset.h"
 #import "LOContentProvider.h"
+#import "LOCMSRepoRequestHandler.h"
 
 #define SDKPlatform (@"ios")
 
@@ -144,7 +144,7 @@
     return [_fileDB cacheLocationForFileWithPath:path];
 }
 
-- (void)setup {
+- (void)start {
     // Set file DB name and initial copy path.
     if (!_fileDB.name) {
         NSString *authorityName = self.authority.authorityName;
@@ -164,9 +164,6 @@
     _commandProtocol = [[LOCMSCommandProtocol alloc] initWithRepository:self];
     // Register command protocol with the scheduler, using the authority name as the command prefix.
     [_commandProtocol registerWithCommandQueue:self.authority.commandQueue];
-}
-
-- (void)start {
     // Check for an interrupted file db reset.
     [self continueDBResetInProgress];
 }
@@ -219,11 +216,13 @@
     }
 }
 
+#define Locomote_Version @"1.0"
+
 - (NSString *)buildHTTPUserAgent {
     NSString *dpi = [NSString stringWithFormat:@"@%.fx", [UIScreen mainScreen].scale];
     NSLocale *locale = [NSLocale autoupdatingCurrentLocale];
-    return [NSString stringWithFormat:@"Locomote/%s %@ (dpi=%@,locale=%@)",
-            Locomote_iosVersionString, SDKPlatform, dpi, locale.localeIdentifier];
+    return [NSString stringWithFormat:@"Locomote/%@ %@ (dpi=%@,locale=%@)",
+            Locomote_Version, SDKPlatform, dpi, locale.localeIdentifier];
 }
 
 @end

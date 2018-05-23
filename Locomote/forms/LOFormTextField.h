@@ -12,12 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  Created by Julian Goacher on 28/02/2016.
+//  Created by Julian Goacher on 12/02/2016.
 //  Copyright © 2016 InnerFunction. All rights reserved.
 //
 
+#import <UIKit/UIKit.h>
 #import "LOFormField.h"
 
-@interface LOFormHiddenField : LOFormField
+@interface LOFormTextField : LOFormField <UITextFieldDelegate> {
+    UIView *_inputContentView;
+    UILabel *_invalidWarning;
+    NSTextAlignment _defaultTitleAlignment;
+    BOOL _valid;
+}
+
+@property (nonatomic, assign) BOOL isPassword;
+@property (nonatomic, assign) BOOL isEditable;
+@property (nonatomic, assign) BOOL isRequired;
+@property (nonatomic, strong) NSString *hasSameValueAs;
+@property (nonatomic, readonly) UITextField *input;
+@property (nonatomic, strong) NSString *valueLabel;
 
 @end

@@ -172,9 +172,9 @@
             NSString *passwordField = fieldNames[LOUserProfilePassword];
             NSString *username = form.inputValues[usernameField];
             NSString *password = form.inputValues[passwordField];
-            [_repository.authManager registerUsername:username password:password];
+            [self.repository.authManager registerUsername:username password:password];
             // [_userAccountManager storeUserProfile:data[@"profile"]]; <<< NOTE account manager must read profile from response data.
-            [_userProfileManager storeUserProfile:data];
+            [self.userProfileManager storeUserProfile:data];
             // Dispatch the specified event
             [[SCAppContainer getAppContainer] postMessage:loginAction sender:form];
         };
@@ -192,9 +192,9 @@
             NSString *passwordField = fieldNames[LOUserProfilePassword];
             NSString *username = form.inputValues[usernameField];
             NSString *password = form.inputValues[passwordField];
-            [_repository.authManager registerUsername:username password:password];
+            [self.repository.authManager registerUsername:username password:password];
             // Store user profile data from the response.
-            [_userProfileManager storeUserProfile:data];
+            [self.userProfileManager storeUserProfile:data];
             // Dispatch the specified event
             [[SCAppContainer getAppContainer] postMessage:loginAction sender:form];
         };
@@ -212,7 +212,7 @@
         submitURL = _userProfileManager.accountProfileURL;
         onSubmitOk = ^(LOFormView *form, NSDictionary *data) {
             // Update stored user info
-            [_userProfileManager storeUserProfile:data];
+            [self.userProfileManager storeUserProfile:data];
             NSString *action = [NSString stringWithFormat:@"post:toast+message=%@", @"Account%20updated"];
             [[SCAppContainer getAppContainer] postMessage:action sender:form];
         };

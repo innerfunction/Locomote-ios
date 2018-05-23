@@ -33,7 +33,7 @@
     _optionSelected = optionSelected;
     self.value = optionSelected ? self.optionValue : nil;
     dispatch_async(dispatch_get_main_queue(), ^{
-         self.accessoryType = _optionSelected ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
+         self.accessoryType = self->_optionSelected ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
     });
 }
 

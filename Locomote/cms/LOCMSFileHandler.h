@@ -17,9 +17,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LOCMSRequestHandler.m"
-
-@class LOCMSRepository;
+#import "LOCMSRequestHandler.h"
+#import "LOCMSRepository.h"
 
 /**
  * A request handler for file record and content requests.

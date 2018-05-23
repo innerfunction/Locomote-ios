@@ -26,8 +26,6 @@
 
 @implementation LOFormView
 
-@synthesize iocContainer = _iocContainer;
-
 - (id)init {
     self = [super init];
     if (self) {
@@ -175,7 +173,7 @@
                 // The submit URI is an internal URI which the form will post as a message.
                 // The URI property is treated as a template into which the form's values can be inserted.
                 NSDictionary *values = [self inputValues];
-                NSString *message = [SCStringTemplate render:_submitURI context:values uriEncode:YES];
+                NSString *message = [SCStringTemplate render:self->_submitURI context:values uriEncode:YES];
                 [[SCAppContainer getAppContainer] postMessage:message sender:self];
                 [self submitting:NO];
             });
@@ -187,7 +185,7 @@
 - (void)submitting:(BOOL)submitting {
     [self beforeSubmit];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [_loadingIndicator showFormLoading:submitting];
+        [self->_loadingIndicator showFormLoading:submitting];
     });
     _isEnabled = !submitting;
 }
@@ -280,8 +278,8 @@
 
 - (void)keyboardDidHide:(NSNotification *)notification {
     [UIView animateWithDuration:0.2 animations:^{
-        self.contentInset = _defaultInsets;
-        self.scrollIndicatorInsets = _defaultInsets;
+        self.contentInset = self->_defaultInsets;
+        self.scrollIndicatorInsets = self->_defaultInsets;
     }];
 }
 
@@ -323,11 +321,5 @@
     LOFormField *field = _fields[indexPath.row];
     return [field.height floatValue];
 }
-
-#pragma mark - SCIOCContainerAware
-
-- (void)beforeIOCConfiguration:(SCConfiguration *)configuration {}
-
-- (void)afterIOCConfiguration:(SCConfiguration *)configuration {}
 
 @end
