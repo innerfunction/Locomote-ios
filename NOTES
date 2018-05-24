@@ -59,3 +59,9 @@ Repository configuration:
         "main": { "ref": "account/repo", "userAccountManager": { "-type-ios": "LOWPUserAccountManager" } }
     }
 
+Packaged content & first start:
+* App is packaged with an initial file db copy and some or all of the cacheable file content
+* Packaged file content is downloaded as filesets and stored *unzipped* in the app project
+* But there must be some mechanism for downloading unpackaged filesets when the app is installed
+* Also need some way to delete the file db & content of previous semo-content versions
+

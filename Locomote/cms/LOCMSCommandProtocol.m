@@ -242,7 +242,7 @@
             // At end, issue fileset download for SELECT category FROM fileset WHERE latest != current OR fingerprint != preprint
         
             // Shift current fileset fingerprints to previous.
-            [fileDB performUpdate:@"UPDATE filesets SET previous=current" withParams:@[]];
+            [fileDB performUpdate:@"UPDATE filesets SET preprint=fingerprint" withParams:@[]];
 
             // Apply all downloaded updates to the database.
             for (NSString *tableName in updates) {

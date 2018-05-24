@@ -42,38 +42,38 @@
     self = [super init];
     if (self) {
         _fileDB = [[LOCMSFileDB alloc] initWithRepository:self];
-        _fileDB.version = @1;
+        _fileDB.version = @2;
         _fileDB.tables = @{
             @"files": @{
                 @"columns": @{
-                    @"id":          @{ @"type": @"INTEGER", @"tag": @"id" },
+                    @"id":          @{ @"type": @"STRING", @"tag": @"id" },
                     @"path":        @{ @"type": @"STRING" },
                     @"category":    @{ @"type": @"STRING" },
                     @"status":      @{ @"type": @"STRING" },
-                    @"commit":      @{ @"type": @"STRING",  @"tag": @"version" }
+                    @"version":     @{ @"type": @"STRING", @"tag": @"version" }
                 }
             },
             @"pages": @{
                 @"columns": @{
-                    @"id":          @{ @"type": @"INTEGER", @"tag": @"id" },
+                    @"id":          @{ @"type": @"STRING", @"tag": @"id" },
                     @"type":        @{ @"type": @"STRING" },
                     @"title":       @{ @"type": @"STRING" },
                     @"content":     @{ @"type": @"STRING" },
-                    @"image":       @{ @"type": @"INTEGER" },
-                    @"commit":      @{ @"type": @"STRING",  @"tag": @"version" }
+                    @"image":       @{ @"type": @"STRING" },
+                    @"version":     @{ @"type": @"STRING", @"tag": @"version" }
 
                 }
             },
             @"commits": @{
                 @"columns": @{
-                    @"commit":      @{ @"type": @"STRING",  @"tag": @"id" },
+                    @"id":          @{ @"type": @"STRING", @"tag": @"id" },
                     @"date":        @{ @"type": @"STRING" },
                     @"subject":     @{ @"type": @"STRING" }
                 }
             },
-            @"filesets": @{
+            @"fingerprints": @{
                 @"columns": @{
-                    @"category":    @{ @"type": @"STRING",  @"tag": @"id" },
+                    @"category":    @{ @"type": @"STRING", @"tag": @"id" },
                     @"fingerprint": @{ @"type": @"STRING" },
                     @"preprint":    @{ @"type": @"STRING" },
                     @"current":     @{ @"type": @"STRING" },
@@ -82,11 +82,11 @@
             },
             @"meta": @{
                 @"columns": @{
-                    @"id":          @{ @"type": @"STRING",  @"tag": @"id", @"format": @"{fileid}:{key}" },
-                    @"fileid":      @{ @"type": @"INTEGER", @"tag": @"ownerid" },
-                    @"key":         @{ @"type": @"STRING",  @"tag": @"key" },
+                    @"id":          @{ @"type": @"STRING", @"tag": @"id", @"format": @"{fileid}:{key}" },
+                    @"fileid":      @{ @"type": @"STRING", @"tag": @"ownerid" },
+                    @"key":         @{ @"type": @"STRING", @"tag": @"key" },
                     @"value":       @{ @"type": @"STRING" },
-                    @"commit":      @{ @"type": @"STRING",  @"tag": @"version" }
+                    @"version":     @{ @"type": @"STRING", @"tag": @"version" }
 
                 }
             }
@@ -148,7 +148,7 @@
     // Set file DB name and initial copy path.
     if (!_fileDB.name) {
         NSString *authorityName = self.authority.authorityName;
-        _fileDB.name = [NSString stringWithFormat:@"%@/%@", authorityName, self.basePath];
+        _fileDB.name = [NSString stringWithFormat:@"%@/%@/filedb", authorityName, self.basePath];
     }
     if (!_fileDB.initialCopyPath) {
         NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];
