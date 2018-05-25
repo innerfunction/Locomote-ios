@@ -5,7 +5,7 @@ PODS:
   - JRSwizzle (1.0)
   - JTSImageViewController (1.5.1)
   - MessagePack (1.0.0)
-  - Q (0.9.2)
+  - Q (0.9.3)
   - SCFFLD (0.9.6):
     - SCFFLD/Core (= 0.9.6)
     - SCFFLD/DB (= 0.9.6)
@@ -56,7 +56,7 @@ SPEC CHECKSUMS:
   JRSwizzle: dd5ead5d913a0f29e7f558200165849f006bb1e3
   JTSImageViewController: 1f8ce1cc93dab0d0af8e53badeea7528560cfec9
   MessagePack: 6ef1d8f7c4b4021cf0b257d61ec5e8b4f3e9831c
-  Q: 3fe840ce504528b08447d95d57424d4a7d6aaaaf
+  Q: aa341e66f953af7ad7026fd0d438384917ded29b
   SCFFLD: acaf4f42fd71523ea440cda49c120e0f800ce352
   SSKeychain: 55cc80f66f5c73da827e3077f02e43528897db41
   SWRevealViewController: 6d3fd97f70112fd7cef9de14df4260eacce4c63a
