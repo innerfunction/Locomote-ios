@@ -17,21 +17,15 @@
 //
 
 #import <Foundation/Foundation.h>
-
-#define LOUserProfileFirstName  (@"FirstName")
-#define LOUserProfileLastName   (@"LastName")
-#define LOUserProfileEMail      (@"EMail")
-#define LOUserProfileUsername   (@"Username")
-#define LOUserProfilePassword   (@"Password")
-#define LOUserProfileConfirmPW  (@"ConfirmPassword")
-#define LOUserProfileProfileID  (@"ProfileID")
+#import "LOUserProfile.h"
+#import "LOHTTPAuthenticationManager.h"
 
 /**
  * A protocol for managing user profile details.
  * The protocol should be implemented by classes providing functionality for authenticating
  * against a specific server-side authentication method or scheme.
  */
-@protocol LOUserProfileManager <NSObject>
+@protocol LOUserAccountManager <NSObject>
 
 /// Get the URL used to authenticate login requests.
 @property (nonatomic, readonly) NSString *authenticationURL;
@@ -45,7 +39,15 @@
 @property (nonatomic, strong) NSDictionary<NSString *, NSString *> *standardFieldNames;
 /// A user account realm name.
 @property (nonatomic, strong) NSString *realmName;
+/// The HTTP authentication manager to use with the account manager.
+@property (nonatomic, weak) LOHTTPAuthenticationManager *authManager;
 
+/// Test if there is a current logged-in user account.
+- (BOOL)isLoggedIn;
+/// Set the account state to logged-in with the specified username and password.
+- (void)loginWithUsername:(NSString *)username password:(NSString *)password;
+/// Change the account state from logged-in to logged-out.
+- (void)logout;
 /// Store a user's profile data.
 - (void)storeUserProfile:(NSDictionary *)values;
 /// Get a user's stored profile data.

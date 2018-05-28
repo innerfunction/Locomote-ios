@@ -19,8 +19,8 @@
 #import "LOCMSRepository.h"
 #import "LOCMSContentAuthority.h"
 #import "LOCMSFileset.h"
-#import "LOContentProvider.h"
 #import "LOCMSRepoRequestHandler.h"
+#import "LOContentProvider.h"
 
 #define SDKPlatform (@"ios")
 
@@ -154,16 +154,28 @@
         NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];
         _fileDB.initialCopyPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:filename];
     }
-    _authManager = [[LOCMSAuthenticationManager alloc] initWithCMSSettings:_cms];
-    _httpClient = [[SCHTTPClient alloc] initWithNSURLSessionTaskDelegate:(id<NSURLSessionTaskDelegate>)_authManager];
+    
+    LOHTTPAuthenticationManager *authManager = [[LOHTTPAuthenticationManager alloc] initWithHost:_cms.host
+                                                                                            port:_cms.port
+                                                                                        protocol:_cms.protocol
+                                                                                           realm:_cms.authRealm];
+    
+    _httpClient = [[SCHTTPClient alloc] initWithNSURLSessionTaskDelegate:(id<NSURLSessionTaskDelegate>)authManager];
+    
+    // If a user account manager is present then pass it a reference to the auth manager.
+    if (_accountManager) {
+        _accountManager.authManager = authManager;
+    }
+    
     /* TODO
     _httpClient.additionalHTTPHeaders = @{
         @"User-Agent": [self buildHTTPUserAgent]
     }
     */
-    _commandProtocol = [[LOCMSCommandProtocol alloc] initWithRepository:self];
-    // Register command protocol with the scheduler, using the authority name as the command prefix.
+    // Init and register command protocol with the scheduler, using the authority name as the command prefix.
+    _commandProtocol = [[LOCMSCommandProtocol alloc] initWithRepository:self authenticationManager:authManager];
     [_commandProtocol registerWithCommandQueue:self.authority.commandQueue];
+    
     // Check for an interrupted file db reset.
     [self continueDBResetInProgress];
 }
@@ -194,7 +206,7 @@
 
 - (BOOL)receiveMessage:(SCMessage *)message sender:(id)sender {
     if ([message.name isEqualToString:@"logout"]) {
-        [self.authManager removeCredentials];
+        [self.accountManager logout];
         return YES;
     }
     return NO;

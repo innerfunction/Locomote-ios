@@ -16,11 +16,10 @@
 //  Copyright © 2016 InnerFunction. All rights reserved.
 //
 
-#import "LOCMSAuthenticationManager.h"
-#import "LOCMSSettings.h"
+#import "LOHTTPAuthenticationManager.h"
 #import "SSKeychain.h"
 
-@interface LOCMSAuthenticationManager()
+@interface LOHTTPAuthenticationManager()
 
 - (NSURLCredential *)getCredentialForUsername:(NSString *)username;
 - (NSString *)getActiveUsername;
@@ -29,15 +28,15 @@
 
 @end
 
-@implementation LOCMSAuthenticationManager
+@implementation LOHTTPAuthenticationManager
 
-- (id)initWithCMSSettings:(LOCMSSettings *)cms {
+- (id)initWithHost:(NSString *)host port:(NSInteger)port protocol:(NSString *)protocol realm:(NSString *)realm {
     self = [super init];
     if (self) {
-        _protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:cms.host
-                                                                 port:cms.port
-                                                             protocol:cms.protocol
-                                                                realm:cms.authRealm
+        _protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:host
+                                                                 port:port
+                                                             protocol:protocol
+                                                                realm:realm
                                                  authenticationMethod:NSURLAuthenticationMethodHTTPBasic];
         
         // Startup check - make sure the active user matches the default credential.
@@ -60,8 +59,8 @@
 }
 
 - (void)registerCredentials:(NSDictionary *)credentials {
-    NSString *username = credentials[@"username"];
-    NSString *password = credentials[@"password"];
+    NSString *username = credentials[LOUserProfileUsername];
+    NSString *password = credentials[LOUserProfilePassword];
     [self registerUsername:username password:password];
 }
 

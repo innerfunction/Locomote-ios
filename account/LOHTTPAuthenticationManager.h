@@ -17,16 +17,16 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LOCMSSettings.h"
 #import "SCHTTPClient.h"
+#import "LOUserProfile.h"
 
 /// A class for managing HTTP authentication on CMS server requests.
-@interface LOCMSAuthenticationManager : NSObject <NSURLSessionTaskDelegate> {
+@interface LOHTTPAuthenticationManager : NSObject <NSURLSessionTaskDelegate> {
     NSURLProtectionSpace *_protectionSpace;
 }
 
-/// Initialize an authentication manager for the named authentication realm.
-- (id)initWithCMSSettings:(LOCMSSettings *)cms;
+/// Initialize an authentication manager with the specified settings.
+- (id)initWithHost:(NSString *)host port:(NSInteger)port protocol:(NSString *)protocol realm:(NSString *)realm;
 
 /**
  * Register basic auth credentials to be used with subsequent requests.

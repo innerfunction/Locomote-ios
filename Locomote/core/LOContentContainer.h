@@ -22,7 +22,7 @@
 #import "SCIOCTypeInspectable.h"
 #import "Q.h"
 
-@protocol LOUserProfileManager;
+@protocol LOUserAccountManager;
 @class LOCMSAccountFormFactory, LOCMSRepository;
 
 /// A content source, i.e. a content repository.
@@ -33,7 +33,7 @@
 /// A reference to the source's content repository.
 @property (nonatomic, strong) NSString *ref;
 /// The user account manager to use with this content source.
-@property (nonatomic, strong) id<LOUserProfileManager> userProfileManager;
+@property (nonatomic, strong) id<LOUserAccountManager> userAccountManager;
 /// The source's form factory.
 @property (nonatomic, strong) LOCMSAccountFormFactory *accountFormFactory;
 /// An action message for displaying the login form.

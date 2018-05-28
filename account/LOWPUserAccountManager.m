@@ -16,20 +16,28 @@
 //  Copyright © 2018 Locomote.sh. All rights reserved.
 //
 
-#import "LOWPUserProfileManager.h"
+#import "LOWPUserAccountManager.h"
+#import "LOUserProfile.h"
 #import "SSKeychain.h"
 #import "SCHTTPClient.h"
 
-@implementation LOWPUserProfileManager
+@implementation LOWPUserAccountManager
 
 @synthesize profileFieldNames=_profileFieldNames,
             standardFieldNames=_standardFieldNames,
-            realmName=_realmName;
+            realmName=_realmName,
+            authManager=_authManager;
 
 - (id)init {
     self = [super init];
     self.userDefaults = [NSUserDefaults standardUserDefaults];
-    self.profileFieldNames = @[@"ID", @"first_name", @"last_name", @"user_email"];
+    self.profileFieldNames = @[
+        LOUserProfileProfileID,
+        LOUserProfileUsername,
+        LOUserProfileFirstName,
+        LOUserProfileLastName,
+        LOUserProfileEMail
+    ];
     self.standardFieldNames = @{
         LOUserProfileFirstName:     @"first_name",
         LOUserProfileLastName:      @"last_name",
@@ -40,6 +48,18 @@
         LOUserProfileProfileID:     @"ID"
     };
     return self;
+}
+
+- (BOOL)isLoggedIn {
+    return [_authManager hasCredentials];
+}
+
+- (void)loginWithUsername:(NSString *)username password:(NSString *)password {
+    [_authManager registerUsername:username password:password];
+}
+
+- (void)logout {
+    [_authManager removeCredentials];
 }
 
 - (void)storeUserProfile:(NSDictionary *)values {
@@ -76,8 +96,8 @@
 
 - (NSDictionary *)getUserProfile {
     NSMutableDictionary *values = [NSMutableDictionary new];
-    NSString *storageKey = [NSString stringWithFormat:@"%@/%@", _realmName, @"user_login"];
-    values[@"user_login"] = [_userDefaults stringForKey:storageKey];
+    NSString *storageKey = [NSString stringWithFormat:@"%@/%@", _realmName, LOUserProfileUsername];
+    values[LOUserProfileUsername] = [_userDefaults stringForKey:storageKey];
     // Read standard profile fields.
     for (NSString *field in _profileFieldNames) {
         storageKey = [NSString stringWithFormat:@"%@/%@", _realmName, field];

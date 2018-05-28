@@ -96,10 +96,10 @@
 
 @implementation LOCMSCommandProtocol
 
-- (id)initWithRepository:(LOCMSRepository *)repository {
+- (id)initWithRepository:(LOCMSRepository *)repository authenticationManager:(LOHTTPAuthenticationManager *)authManager {
     self = [super init];
     self.cms = repository.cms;
-    self.authManager = repository.authManager;
+    self.authManager = authManager;
     // Use a copy of the file DB to avoid problems with multi-thread access.
     self.fileDB = [repository.fileDB newInstance];
     self.httpClient = repository.httpClient;
@@ -172,7 +172,7 @@
     [_protocol.httpClient get:refreshURL data:params options:options]
     .then((id)^(SCHTTPClientResponse *response) {
     
-        LOCMSAuthenticationManager *authManager = self->_protocol.authManager;
+        LOHTTPAuthenticationManager *authManager = self->_protocol.authManager;
         LOCMSFileDB *fileDB = self->_protocol.fileDB;
         
         // Check the response code.
@@ -391,7 +391,7 @@
     [_protocol.httpClient post:refreshURL data:params options:options]
     .then((id)^(SCHTTPClientResponse *response) {
 
-        LOCMSAuthenticationManager *authManager = self->_protocol.authManager;
+        LOHTTPAuthenticationManager *authManager = self->_protocol.authManager;
         LOCMSFileDB *fileDB = self->_protocol.fileDB;
         
         // Check the response code.

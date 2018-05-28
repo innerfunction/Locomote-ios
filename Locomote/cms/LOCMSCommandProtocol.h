@@ -17,7 +17,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LOCMSAuthenticationManager.h"
+#import "LOHTTPAuthenticationManager.h"
 #import "LOCMSSettings.h"
 #import "LOCMSFileDB.h"
 #import "LOCommandQueue.h"
@@ -35,14 +35,14 @@
 @property (nonatomic, strong) NSString *commandPrefix;
 /** The content repository's settings. */
 @property (nonatomic, weak) LOCMSSettings *cms;
-/** The content repository's authentication manager. */
-@property (nonatomic, weak) LOCMSAuthenticationManager *authManager;
+/** The content repository's authentication manager for HTTP requests. */
+@property (nonatomic, weak) LOHTTPAuthenticationManager *authManager;
 /** The local file database. */
 @property (nonatomic, strong) LOCMSFileDB *fileDB;
 /** An HTTP client instance. */
 @property (nonatomic, weak) SCHTTPClient *httpClient;
 
-- (id)initWithRepository:(LOCMSRepository *)repository;
+- (id)initWithRepository:(LOCMSRepository *)repository authenticationManager:(LOHTTPAuthenticationManager *)authManager;
 /// Register the protocol's commands with a command queue.
 - (void)registerWithCommandQueue:(LOCommandQueue *)commandQueue;
 

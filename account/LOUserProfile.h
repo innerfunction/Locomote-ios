@@ -12,21 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  Created by Julian Goacher on 22/05/2018.
+//  Created by Julian Goacher on 28/05/2018.
 //  Copyright © 2018 Locomote.sh. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-#import "LOUserProfileManager.h"
+#ifndef LOUserProfile_h
+#define LOUserProfile_h
 
-/**
- * A profile manager implementation that works with a Wordpress backend to authenticate users.
- * Can also be used to create Wordpress user accounts.
- * TODO: This class probably belongs outside of this library.
- */
-@interface LOWPUserProfileManager : NSObject <LOUserProfileManager>
+#define LOUserProfileFirstName  (@"FirstName")
+#define LOUserProfileLastName   (@"LastName")
+#define LOUserProfileEMail      (@"EMail")
+#define LOUserProfileUsername   (@"Username")
+#define LOUserProfilePassword   (@"Password")
+#define LOUserProfileConfirmPW  (@"ConfirmPassword")
+#define LOUserProfileProfileID  (@"ProfileID")
 
-@property (nonatomic, strong) NSUserDefaults *userDefaults;
-@property (nonatomic, strong) NSString *baseURL;
-
-@end
+#endif /* LOUserProfile_h */

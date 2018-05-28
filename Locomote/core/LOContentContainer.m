@@ -20,9 +20,9 @@
 #import "LOCMSContentAuthority.h"
 #import "LOCMSRepository.h"
 #import "LOCMSSettings.h"
-#import "LOContentProvider.h"
-#import "LOUserProfileManager.h"
 #import "LOCMSAccountFormFactory.h"
+#import "LOContentProvider.h"
+#import "LOUserAccountManager.h"
 #import "SCAppContainer.h"
 #import "NSDictionary+SC.h"
 
@@ -97,26 +97,27 @@
     // Create repo settings using the ref.
     LOCMSSettings *settings = [[LOCMSSettings alloc] initWithRef:_ref];
     // Create repo using the settings.
-    _repository   = [[LOCMSRepository alloc] initWithSettings:settings];
+    _repository = [[LOCMSRepository alloc] initWithSettings:settings];
     // Check whether the content provider has a content authority for the repo.
     LOContentProvider *provider = [LOContentProvider getInstance];
-    id<LOContentAuthority> authority = [provider contentAuthorityForName:settings.authorityName];
+    LOCMSContentAuthority *authority = (LOCMSContentAuthority *)[provider contentAuthorityForName:settings.authorityName];
     if (!authority) {
         // No matching content authority found, create a new one and add to the provider.
         authority = [LOCMSContentAuthority new];
+        authority.uriHandler = [SCAppContainer getAppContainer].uriHandler;
         [provider setContentAuthority:authority withName:settings.authorityName];
     }
     // Add the repository to the content authority.
-    [(LOCMSContentAuthority *)authority addRepository:_repository];
+    [authority addRepository:_repository];
 }
 
 - (void)completeSetup {
     // Use the content reference as a realm name for user profile data.
-    _userProfileManager.realmName = _ref;
+    _userAccountManager.realmName = _ref;
     // Check whether a form factory is needed.
-    if (_userProfileManager && !_accountFormFactory) {
+    if (_userAccountManager && !_accountFormFactory) {
         _accountFormFactory = [[LOCMSAccountFormFactory alloc] initWithRepository:_repository
-                                                               userProfileManager:_userProfileManager];
+                                                               userAccountManager:_userAccountManager];
     }
 }
 
@@ -124,12 +125,12 @@
 
 - (BOOL)receiveMessage:(SCMessage *)message sender:(id)sender {
     if ([message hasName:@"logout"]) {
-        [_repository.authManager removeCredentials];
+        [_userAccountManager logout];
         [self showLoginForm:sender];
         return YES;
     }
     if ([message hasName:@"password-reminder"]) {
-        [_userProfileManager showPasswordReminder];
+        [_userAccountManager showPasswordReminder];
         return YES;
     }
     if ([message hasName:@"show-login"]) {

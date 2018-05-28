@@ -19,10 +19,10 @@
 #import <Foundation/Foundation.h>
 #import "LORequestDispatcher.h"
 #import "LOLocalCachePaths.h"
+#import "LOUserAccountManager.h"
 #import "LOCMSFileDB.h"
 #import "LOCMSCommandProtocol.h"
 #import "LOCMSSettings.h"
-#import "LOCMSAuthenticationManager.h"
 #import "SCHTTPClient.h"
 #import "SCIOCObjectAware.h"
 #import "SCIOCContainerAware.h"
@@ -43,8 +43,8 @@
 @property (nonatomic, strong) LOCMSFileDB *fileDB;
 /// The HTTP client used for server requests.
 @property (nonatomic, strong) SCHTTPClient *httpClient;
-/// The authentication manager.
-@property (nonatomic, strong) LOCMSAuthenticationManager *authManager;
+/// The user account manager to use to control repository access.
+@property (nonatomic, strong) id<LOUserAccountManager> accountManager;
 /// The filesets defined for this authority.
 @property (nonatomic, strong, readonly) NSDictionary *filesets;
 /// The CMS settings (host / account / repo).

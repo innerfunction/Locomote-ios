@@ -18,7 +18,6 @@
 
 #import "LOCMSAccountFormFactory.h"
 #import "LOFormViewController.h"
-#import "LOUserProfileManager.h"
 #import "SCAppContainer.h"
 #import "SCConfiguration.h"
 #import "SCContainer.h"
@@ -29,7 +28,7 @@
 
 @implementation LOCMSAccountFormFactory
 
-- (id)initWithRepository:(LOCMSRepository *)repository userProfileManager:(id<LOUserProfileManager>)userProfileManager {
+- (id)initWithRepository:(LOCMSRepository *)repository userAccountManager:(id<LOUserAccountManager>)accountManager {
 
     NSDictionary *baseConfiguration = @{
         @"-ios-class":      @"LOFormViewController",
@@ -44,11 +43,11 @@
     if (self) {
     
         self.repository = repository;
-        self.userProfileManager = userProfileManager;
+        self.userAccountManager = accountManager;
         self.httpClient = repository.httpClient;
         
         // Initialize form patterns.
-        NSDictionary *fieldNames = self.userProfileManager.standardFieldNames;
+        NSDictionary *fieldNames = self.userAccountManager.standardFieldNames;
         self.stdParams = @{
             @"ImageField": @{
                 @"-ios-class":              @"LOFormImageField"
@@ -159,22 +158,20 @@
     LOFormViewErrorEvent onSubmitError;
 
     if ([@"login" isEqualToString:formType]) {
-        submitURL = _userProfileManager.authenticationURL;
+        submitURL = _userAccountManager.authenticationURL;
         BOOL checkForLogin = [configuration getValueAsBoolean:@"checkForLogin" defaultValue:YES];
         if (checkForLogin) {
-            viewBehaviour = [[LOLoginBehaviour alloc] initWithAuthenticationManager:_repository.authManager
-                                                                        loginAction:loginAction];
+            viewBehaviour = [[LOLoginBehaviour alloc] initWithUserAccountManager:_userAccountManager loginAction:loginAction];
         }
         onSubmitOk = ^(LOFormView *form, NSDictionary *data) {
             // Store user credentials & user info
-            NSDictionary *fieldNames = self.userProfileManager.standardFieldNames;
+            NSDictionary *fieldNames = self.userAccountManager.standardFieldNames;
             NSString *usernameField = fieldNames[LOUserProfileUsername];
             NSString *passwordField = fieldNames[LOUserProfilePassword];
             NSString *username = form.inputValues[usernameField];
             NSString *password = form.inputValues[passwordField];
-            [self.repository.authManager registerUsername:username password:password];
-            // [_userAccountManager storeUserProfile:data[@"profile"]]; <<< NOTE account manager must read profile from response data.
-            [self.userProfileManager storeUserProfile:data];
+            [self.userAccountManager loginWithUsername:username password:password];
+            [self.userAccountManager storeUserProfile:data];
             // Dispatch the specified event
             [[SCAppContainer getAppContainer] postMessage:loginAction sender:form];
         };
@@ -184,17 +181,17 @@
         };
     }
     else if ([@"new-account" isEqualToString:formType]) {
-        submitURL = _userProfileManager.newAccountURL;
+        submitURL = _userAccountManager.newAccountURL;
         onSubmitOk = ^(LOFormView *form, NSDictionary *data) {
             // Read credentials from the form data.
-            NSDictionary *fieldNames = self.userProfileManager.standardFieldNames;
+            NSDictionary *fieldNames = self.userAccountManager.standardFieldNames;
             NSString *usernameField = fieldNames[LOUserProfileUsername];
             NSString *passwordField = fieldNames[LOUserProfilePassword];
             NSString *username = form.inputValues[usernameField];
             NSString *password = form.inputValues[passwordField];
-            [self.repository.authManager registerUsername:username password:password];
+            [self.userAccountManager loginWithUsername:username password:password];
             // Store user profile data from the response.
-            [self.userProfileManager storeUserProfile:data];
+            [self.userAccountManager storeUserProfile:data];
             // Dispatch the specified event
             [[SCAppContainer getAppContainer] postMessage:loginAction sender:form];
         };
@@ -209,10 +206,10 @@
         };
     }
     else if ([@"profile" isEqualToString:formType]) {
-        submitURL = _userProfileManager.accountProfileURL;
+        submitURL = _userAccountManager.accountProfileURL;
         onSubmitOk = ^(LOFormView *form, NSDictionary *data) {
             // Update stored user info
-            [self.userProfileManager storeUserProfile:data];
+            [self.userAccountManager storeUserProfile:data];
             NSString *action = [NSString stringWithFormat:@"post:toast+message=%@", @"Account%20updated"];
             [[SCAppContainer getAppContainer] postMessage:action sender:form];
         };
@@ -244,7 +241,7 @@
     formView.form.onSubmitError     = onSubmitError;
     formView.form.httpClient        = _httpClient;
     if ([@"profile" isEqualToString:formType]) {
-        formView.form.inputValues = [_userProfileManager getUserProfile];
+        formView.form.inputValues = [_userAccountManager getUserProfile];
     }
     return formView;
 }
@@ -253,16 +250,16 @@
 
 @implementation LOLoginBehaviour
 
-- (id)initWithAuthenticationManager:(LOCMSAuthenticationManager *)authManager loginAction:(NSString *)loginAction {
+- (id)initWithUserAccountManager:(id<LOUserAccountManager>)accountManager loginAction:(NSString *)loginAction {
     self = [super init];
-    self.authManager = authManager;
+    self.userAccountManager = accountManager;
     self.loginAction = loginAction;
     return self;
 }
 
 - (void)viewDidAppear {
     // Check if user already logged in, if so then dispatch a specified event.
-    if ([_authManager hasCredentials]) {
+    if ([_userAccountManager isLoggedIn]) {
         [[SCAppContainer getAppContainer] postMessage:_loginAction sender:self.viewController];
     }
 }

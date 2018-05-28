@@ -36,10 +36,10 @@ iOS SDK for the Locomote.sh mobile asset and content management server.
                                       'Locomote/core/*.{h,m}',
                                       'Locomote/forms/*.{h,m}';
         core.public_header_files    = 'Locomote/Locomote.h';
-#                                      'Locomote/cms/*.h',
-#                                      'Locomote/commands/*.h',
-#                                      'Locomote/content/*.h',
-#                                      'Locomote/core/*.h';
+                                      'Locomote/cms/*.h',
+                                      'Locomote/commands/*.h',
+                                      'Locomote/content/*.h',
+                                      'Locomote/core/*.h';
         core.requires_arc           = true;
         core.compiler_flags         = '-w';
         core.dependency 'Q'
