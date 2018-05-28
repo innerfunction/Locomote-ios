@@ -30,12 +30,14 @@ iOS SDK for the Locomote.sh mobile asset and content management server.
 
     s.subspec 'core' do |core|
         core.source_files           = 'Locomote/Locomote.{h,m}',
+                                      'Locomote/account/*.{h,m}',
                                       'Locomote/cms/*.{h,m}',
                                       'Locomote/commands/*.{h,m}',
                                       'Locomote/content/*.{h,m}',
                                       'Locomote/core/*.{h,m}',
                                       'Locomote/forms/*.{h,m}';
         core.public_header_files    = 'Locomote/Locomote.h';
+                                      'Locomote/account/*.h',
                                       'Locomote/cms/*.h',
                                       'Locomote/commands/*.h',
                                       'Locomote/content/*.h',
