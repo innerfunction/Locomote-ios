@@ -27,6 +27,8 @@
     NSMutableArray *values = [NSMutableArray new];
     NSArray *mappings = @[];
 
+    // TODO: Support _orderBy
+    
     // A reference file ID.
     NSString *fileID = request.pathParameters[@"id"];
     // A fileset category.

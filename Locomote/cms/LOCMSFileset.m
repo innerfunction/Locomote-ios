@@ -18,7 +18,8 @@
 
 #import "LOCMSFileset.h"
 
-#define CacheDirName ([@"~" stringByAppendingString:_category])
+//#define CacheDirName ([@"~" stringByAppendingString:_category])
+#define CacheDirName (_category)
 
 @implementation LOCMSFileset
 

@@ -23,6 +23,7 @@
 #import "LOCMSAccountFormFactory.h"
 #import "LOContentProvider.h"
 #import "LOUserAccountManager.h"
+#import "LOContentScheme.h"
 #import "SCAppContainer.h"
 #import "NSDictionary+SC.h"
 
@@ -35,6 +36,12 @@
 @end
 
 @implementation LOContentContainer
+
++ (void)initialize {
+    // Register the content scheme with the internal URI handler.
+    id<SCURIHandler> uriHandler = [SCAppContainer getAppContainer].uriHandler;
+    [uriHandler addHandler:[LOContentScheme new] forScheme:@"content"];
+}
 
 - (id)init {
     self = [super init];
@@ -54,17 +61,15 @@
     for (LOContentSource *source in [_sources allValues]) {
         [source registerSource];
     }
-    // Start the content provider and then complete setup.
-    return [[LOContentProvider getInstance] start]
-    .then((id)^(NSNumber *ok) {
-        if ([ok boolValue]) {
-            // Complete setup of all sources.
-            for (LOContentSource *source in [self.sources allValues]) {
-                [source completeSetup];
-            }
-        }
-        return ok;
-    });
+    LOContentProvider *provider = [LOContentProvider getInstance];
+    // Complete content provider setup.
+    [provider completeSetup];
+    // Complete setup of all sources.
+    for (LOContentSource *source in [self.sources allValues]) {
+        [source completeSetup];
+    }
+    // Start the content provider.
+    return [provider start];
 }
 
 + (LOContentContainer *)getInstance {
@@ -85,7 +90,7 @@
 
 - (NSDictionary *)collectionMemberTypeInfo {
     return @{
-        @"source": [LOContentSource class]
+        @"sources": [LOContentSource class]
     };
 }
 

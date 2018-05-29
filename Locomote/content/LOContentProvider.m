@@ -34,6 +34,9 @@
 - (id)init {
     self = [super init];
     if (self) {
+    
+        self.authorities = @{};
+        
         // NOTES on staging and cache paths:
         // * Freshly downloaded content is stored under the staging path until the download is complete,
         //   after which it is deployed to the appropriate cache path and deleted from the staging location.
@@ -86,6 +89,12 @@
 
 - (id<LOContentAuthority>)contentAuthorityForName:(NSString *)name {
     return _authorities[name];
+}
+
+- (void)completeSetup {
+    for (id<LOContentAuthority> authority in [_authorities allValues]) {
+        [authority completeSetup];
+    }
 }
 
 - (QPromise *)start {

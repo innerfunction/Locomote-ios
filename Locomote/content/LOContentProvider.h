@@ -40,6 +40,8 @@
 - (void)setContentAuthority:(id<LOContentAuthority>)authority withName:(NSString *)name;
 /// Find a content authority by name, or return nil if no match found.
 - (id<LOContentAuthority>)contentAuthorityForName:(NSString *)name;
+/// Complete the content provider setup.
+- (void)completeSetup;
 /**
  * Start the provider.
  * Registers the URL handler; starts and synchronizes all content authorities;

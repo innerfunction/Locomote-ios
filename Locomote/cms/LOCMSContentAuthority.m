@@ -64,6 +64,7 @@
         _liveResponses = [NSMutableSet new];
         _dispatcher    = [[LORequestDispatcher alloc] initWithHost:self];
         _commandQueue  = [LOCommandQueue new];
+        _repositories  = @{};
     }
     return self;
 }
@@ -72,9 +73,8 @@
     _repositories = [_repositories dictionaryWithAddedObject:repository forKey:repository.basePath];
 }
 
-- (void)setProvider:(LOContentProvider *)provider {
-    _provider = provider;
-    self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:provider.localCachePaths suffix:_authorityName];
+- (void)completeSetup {
+    self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:_provider.localCachePaths suffix:_authorityName];
     // Authority setup can be completed once the provider is set.
     // Each repository key specifies the base path the repository is mounted under.
     // Generate a list of repo keys ordered longest to shortest, before generating a request

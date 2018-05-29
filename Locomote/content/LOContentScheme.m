@@ -51,15 +51,15 @@
 
 - (id)dereference:(SCCompoundURI *)uri parameters:(NSDictionary *)params {
     // Strip the leading '//'
-    NSString *authName = [uri.name substringFromIndex:2];
+    NSString *name = [uri.name substringFromIndex:2];
     // Extract authority name from start.
-    NSRange range = [authName rangeOfString:@"/"];
-    authName = (range.location != NSNotFound)
-        ? [authName substringToIndex:range.location]
-        : authName;
+    NSRange range = [name rangeOfString:@"/"];
+    NSString *authName = (range.location != NSNotFound)
+        ? [name substringToIndex:range.location]
+        : name;
     // Extract the content path.
     NSString *path = (range.location != NSNotFound)
-        ? [authName substringFromIndex:range.location]
+        ? [name substringFromIndex:range.location]
         : @"/";
     // Lookup the content authority.
     id<LOContentAuthority> authority = [[LOContentProvider getInstance] contentAuthorityForName:authName];

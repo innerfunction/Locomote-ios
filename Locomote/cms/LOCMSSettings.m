@@ -66,6 +66,9 @@
     if (repoURL.fragment) {
         self.authorityName = repoURL.fragment;
     }
+    else {
+        self.authorityName = self.host;
+    }
 
     return self;
 }
