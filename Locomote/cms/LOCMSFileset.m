@@ -32,10 +32,10 @@
     NSString *path = nil;
     LOLocalCachePaths *cachePaths = repository.localCachePaths;
     if ([@"content" isEqualToString:_cache]) {
-        path = [cachePaths.contentCachePath stringByAppendingString:CacheDirName];
+        path = [cachePaths.contentCachePath stringByAppendingPathComponent:CacheDirName];
     }
     else if ([@"app" isEqualToString:_cache]) {
-        path = [cachePaths.appCachePath stringByAppendingString:CacheDirName];
+        path = [cachePaths.appCachePath stringByAppendingPathComponent:CacheDirName];
     }
     return path;
 }
@@ -49,9 +49,10 @@
 
 #pragma mark - Class methods
 
-+ (LOCMSFileset *)filesetWithCache:(NSString *)cache mappings:(NSArray *)mappings {
++ (LOCMSFileset *)filesetWithCategory:(NSString *)category cache:(NSString *)cache mappings:(NSArray *)mappings {
     LOCMSFileset *fileset = [LOCMSFileset new];
-    fileset.cache = cache;
+    fileset.category = category;
+    fileset.cache    = cache;
     fileset.mappings = mappings;
     return fileset;
 }

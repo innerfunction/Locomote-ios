@@ -42,6 +42,7 @@
     self = [super init];
     if (self) {
         _fileDB = [[LOCMSFileDB alloc] initWithRepository:self];
+        _fileDB.name = @"filedb";
         _fileDB.version = @2;
         _fileDB.tables = @{
             @"files": @{
@@ -93,16 +94,24 @@
         };
     
         _fileDB.orm = [SCDBORM ormWithSource:@"files" mappings:@{
-            @"page":    [SCDBORMMapping mappingWithRelation:@"object"        table:@"pages"],
-            @"commit":  [SCDBORMMapping mappingWithRelation:@"shared-object" table:@"commits"],
-            @"meta":    [SCDBORMMapping mappingWithRelation:@"map"           table:@"meta"]
+            @"page":       [SCDBORMMapping mappingWithRelation:@"object"        table:@"pages"],
+            @"version":    [SCDBORMMapping mappingWithRelation:@"shared-object" table:@"commits"],
+            @"meta":       [SCDBORMMapping mappingWithRelation:@"map"           table:@"meta"]
         }];
         
         _fileDB.filesets = @{
-            @"pages":       [LOCMSFileset filesetWithCache:@"none"    mappings:@[ @"commit", @"meta", @"page" ]],
-            @"images":      [LOCMSFileset filesetWithCache:@"content" mappings:@[ @"commit", @"meta" ]],
-            @"assets":      [LOCMSFileset filesetWithCache:@"content" mappings:@[ @"commit" ]],
-            @"templates":   [LOCMSFileset filesetWithCache:@"app"     mappings:@[ @"commit" ]]
+            @"pages":       [LOCMSFileset filesetWithCategory:@"pages"
+                                                        cache:@"none"
+                                                     mappings:@[ @"version", @"meta", @"page" ]],
+            @"images":      [LOCMSFileset filesetWithCategory:@"images"
+                                                        cache:@"content"
+                                                     mappings:@[ @"version", @"meta" ]],
+            @"assets":      [LOCMSFileset filesetWithCategory:@"assets"
+                                                        cache:@"content"
+                                                     mappings:@[ @"version" ]],
+            @"templates":   [LOCMSFileset filesetWithCategory:@"templates"
+                                                        cache:@"app"
+                                                     mappings:@[ @"version" ]]
         };
         
         self.requestHandler = [[LOCMSRepoRequestHandler alloc] initWithRepository:self];
@@ -152,8 +161,14 @@
     }
     if (!_fileDB.initialCopyPath) {
         NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];
-        _fileDB.initialCopyPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:filename];
+        NSString *path = [[NSBundle mainBundle] resourcePath];
+        path = [path stringByAppendingPathComponent:_authority.authorityName];
+        path = [path stringByAppendingPathComponent:_basePath];
+        path = [path stringByAppendingPathComponent:filename];
+        _fileDB.initialCopyPath = path;
     }
+    
+    [_fileDB startService];
     
     LOHTTPAuthenticationManager *authManager = [[LOHTTPAuthenticationManager alloc] initWithHost:_cms.host
                                                                                             port:_cms.port

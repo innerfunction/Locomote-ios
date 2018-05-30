@@ -109,6 +109,7 @@
     if (!authority) {
         // No matching content authority found, create a new one and add to the provider.
         authority = [LOCMSContentAuthority new];
+        authority.authorityName = settings.authorityName;
         authority.uriHandler = [SCAppContainer getAppContainer].uriHandler;
         [provider setContentAuthority:authority withName:settings.authorityName];
     }

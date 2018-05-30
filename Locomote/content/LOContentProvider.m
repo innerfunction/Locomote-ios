@@ -67,8 +67,8 @@
         dirName = [NSString stringWithFormat:@"%@.content", NamePrefix];
         _localCachePaths.contentCachePath = [cachePath stringByAppendingPathComponent:dirName];
 
-        // Packaged content stored in a folder named 'packaged-content'.
-        _localCachePaths.packagedContentPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"packaged-content"];
+        // Packaged content stored with all other app resources..
+        _localCachePaths.packagedContentPath = [[NSBundle mainBundle] resourcePath];
         
     }
     return self;

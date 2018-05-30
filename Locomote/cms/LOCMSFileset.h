@@ -45,6 +45,6 @@
 /// Get the path of the cache location for this fileset.
 - (NSString *)cachePath:(LOCMSRepository *)repository;
 
-+ (LOCMSFileset *)filesetWithCache:(NSString *)cache mappings:(NSArray *)mappings;
++ (LOCMSFileset *)filesetWithCategory:(NSString *)category cache:(NSString *)cache mappings:(NSArray *)mappings;
 
 @end

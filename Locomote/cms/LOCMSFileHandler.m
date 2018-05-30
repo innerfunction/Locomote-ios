@@ -26,7 +26,7 @@ static SCLogger *Logger;
 @interface LOCMSFileHandler ()
 
 /// Render a page's content.
-- (NSString *)renderPageContent:(NSDictionary *)pageData;
+- (NSString *)renderPageContent:(NSDictionary *)record;
 /// Write a file's content to a response.
 - (void)writeFileContent:(NSDictionary *)record toResponse:(id<LOContentResponse>)response;
 
@@ -91,9 +91,9 @@ static SCLogger *Logger;
         [response respondWithJSONData:record cachePolicy:NSURLCacheStorageNotAllowed];
     }
     else if ([@"content" isEqualToString:mode]) {
-        // If the file data has 'pages.type' and 'pages.content' fields then page file type and
-        // render the file's contents using a client template.
-        if (record[@"pages.type"] && record[@"pages.content"]) {
+        // If the file data has a 'page' property then render the file's contents using
+        // a client template.
+        if (record[@"page"]) {
             NSString *content = [self renderPageContent:record];
             // Note for now the assumption that all page content is HTML.
             [response respondWithStringData:content
@@ -106,18 +106,19 @@ static SCLogger *Logger;
     }
 }
 
-- (NSString *)renderPageContent:(NSDictionary *)pageData {
+- (NSString *)renderPageContent:(NSDictionary *)record {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSString *pageType = pageData[@"pages.type"];
+    NSDictionary *pageData = record[@"page"];
+    NSString *pageType = pageData[@"type"];
     NSString *pageHTML;
     // Resolve the client template to use to render the post.
     // TODO: Note that the following code assumes the page templates are avaiable in the app
     // cache; consider whether to instead load templates via the content: URL.
     NSString *templateFilename = [NSString stringWithFormat:@"_templates/page-%@.html", pageType];
     NSString *templatePath = [self.fileDB cacheLocationForFileWithPath:templateFilename];
-    if (![fileManager fileExistsAtPath:templatePath]) {
+    if (!(templatePath && [fileManager fileExistsAtPath:templatePath])) {
         templatePath = [self.fileDB cacheLocationForFileWithPath:@"_templates/page.html"];
-        if (![fileManager fileExistsAtPath:templatePath]) {
+        if (!(templatePath && [fileManager fileExistsAtPath:templatePath])) {
             [Logger warn:@"Client template not found for page type %@", pageType];
             templatePath = nil;
         }
@@ -146,7 +147,7 @@ static SCLogger *Logger;
     // If no page content yet then just wrap what we have in <html> tags.
     if (!pageHTML) {
         // If failed to render content then return a default rendering of the post body.
-        NSString *pageContent = pageData[@"pages.content"];
+        NSString *pageContent = pageData[@"content"];
         pageHTML = [NSString stringWithFormat:@"<html>%@</html>", pageContent];
     }
     return pageHTML;

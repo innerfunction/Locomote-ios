@@ -125,6 +125,8 @@
 
 // TODO: Consider breaking the following method into two; strictly speaking, the cache location
 // should be writeable, but if content is packaged then its cache location isn't writeable.
+// TODO: Also, knowledge of how to build a cache path is distributed between this class,
+// LOLocalCachePaths and LOCMSFileset - can this be improved by having it all in a single place?
 - (NSString *)cacheLocationForFile:(NSDictionary *)fileRecord {
     NSString *path = nil;
     NSString *status = fileRecord[@"status"];
@@ -132,6 +134,7 @@
     if ([@"packaged" isEqualToString:status]) {
         // Packaged content is distributed with the app, under a folder with the content authority name.
         path = _repository.localCachePaths.packagedContentPath;
+        path = [path stringByAppendingPathComponent:category];
         path = [path stringByAppendingPathComponent:fileRecord[@"path"]];
     }
     else {
