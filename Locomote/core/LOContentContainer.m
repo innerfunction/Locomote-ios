@@ -65,7 +65,7 @@
     // Complete content provider setup.
     [provider completeSetup];
     // Complete setup of all sources.
-    for (LOContentSource *source in [self.sources allValues]) {
+    for (LOContentSource *source in [_sources allValues]) {
         [source completeSetup];
     }
     // Start the content provider.

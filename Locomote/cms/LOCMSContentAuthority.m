@@ -75,7 +75,6 @@
 
 - (void)completeSetup {
     self.localCachePaths = [[LOLocalCachePaths alloc] initWithSettings:_provider.localCachePaths suffix:_authorityName];
-    // Authority setup can be completed once the provider is set.
     // Each repository key specifies the base path the repository is mounted under.
     // Generate a list of repo keys ordered longest to shortest, before generating a request
     // handler mapping for each repository based on its base path. (Keys are ordered longest

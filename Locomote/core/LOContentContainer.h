@@ -23,6 +23,7 @@
 #import "Q.h"
 
 @protocol LOUserAccountManager;
+
 @class LOCMSAccountFormFactory, LOCMSRepository;
 
 /// A content source, i.e. a content repository.

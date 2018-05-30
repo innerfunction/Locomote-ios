@@ -25,7 +25,7 @@
 
 @interface LOContentProvider ()
 
-- (NSDictionary *)parseContentPath:(NSString *)path;
+- (void)parseContentPath:(NSString *)path authorityName:(NSString **)authorityName relativePath:(NSString **)relativePath;
 
 @end
 
@@ -119,19 +119,21 @@
 }
 
 - (BOOL)hasContentForPath:(NSString *)path {
-    NSDictionary *parts = [self parseContentPath:path];
-    id<LOContentAuthority> authority = [self contentAuthorityForName:parts[@"authority"]];
+    NSString *authorityName, *relativePath;
+    [self parseContentPath:path authorityName:&authorityName relativePath:&relativePath];
+    id<LOContentAuthority> authority = [self contentAuthorityForName:authorityName];
     if (authority) {
-        return [authority hasContentForPath:parts[@"part"] parameters:@{}];
+        return [authority hasContentForPath:relativePath parameters:@{}];
     }
     return NO;
 }
 
 - (NSString *)localCacheLocationOfPath:(NSString *)path {
-    NSDictionary *parts = [self parseContentPath:path];
-    id<LOContentAuthority> authority = [self contentAuthorityForName:parts[@"authority"]];
+    NSString *authorityName, *relativePath;
+    [self parseContentPath:path authorityName:&authorityName relativePath:&relativePath];
+    id<LOContentAuthority> authority = [self contentAuthorityForName:authorityName];
     if (authority) {
-        return [authority localCacheLocationOfPath:parts[@"part"] parameters:@{}];
+        return [authority localCacheLocationOfPath:relativePath parameters:@{}];
     }
     return nil;
 }
@@ -148,6 +150,7 @@
 
 - (BOOL)routeMessage:(SCMessage *)message sender:(id)sender {
     BOOL routed = NO;
+    // TODO This won't work for dotted authority names, message path will be split around dots.
     NSString *authorityName = [message targetHead];
     id authority = [self contentAuthorityForName:authorityName];
     if (authority) {
@@ -172,15 +175,16 @@
 
 #pragma mark - private
 
-- (NSDictionary *)parseContentPath:(NSString *)path {
+- (void)parseContentPath:(NSString *)path authorityName:(NSString *__autoreleasing *)authorityName relativePath:(NSString *__autoreleasing *)relativePath {
     NSRange range = [path rangeOfString:@"/"];
     if (range.location != NSNotFound) {
-        return @{
-            @"authority":   [path substringToIndex:range.location],
-            @"path":        [path substringFromIndex:range.location + 1]
-         };
+         *authorityName = [path substringToIndex:range.location];
+         *relativePath = [path substringFromIndex:range.location + 1];
     }
-    return @{ @"authority": path };
+    else {
+        *authorityName = path;
+        *relativePath = nil;
+    }
 }
 
 @end

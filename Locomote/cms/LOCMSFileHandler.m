@@ -76,10 +76,12 @@ static SCLogger *Logger;
     if (!record) {
         // File not found.
         [response respondWithError:makePathNotFoundResponseError(request.path)];
+        return;
     }
     // Check if we have the file category - if not then we need to reload the file
     // record so that fileset mappings are included.
     if (!category) {
+        fileID   = record[@"id"];
         category = record[@"category"];
         record = [self readFileRecordByID:fileID inCategory:category];
     }

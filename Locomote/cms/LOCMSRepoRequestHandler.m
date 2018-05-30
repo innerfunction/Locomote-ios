@@ -52,6 +52,7 @@
             // Read a file by path.
             RequestMapping(@"**", fileHandler )
         ];
+        _dispatcher = [[LORequestDispatcher alloc] initWithHost:self];
     }
     return self;
 }
