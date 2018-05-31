@@ -50,7 +50,7 @@
             // Do a file search.
             RequestMapping(@"search.api", searchHandler ),
             // Read a file by path.
-            RequestMapping(@"**", fileHandler )
+            RequestMapping(@"**/*", fileHandler )
         ];
         _dispatcher = [[LORequestDispatcher alloc] initWithHost:self];
     }

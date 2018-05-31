@@ -642,7 +642,7 @@
     NSArray *deleted = [fileDB performQuery:@"SELECT id, path FROM files WHERE status='deleted'" withParams:@[]];
     for (NSDictionary *record in deleted) {
         // Delete cached file, if exists.
-        NSString *path = [fileDB cacheLocationForFile:record];
+        NSString *path = [fileDB cacheLocationForFileRecord:record];
         if (path && [fileManager fileExistsAtPath:path]) {
             [fileManager removeItemAtPath:path error:nil];
         }

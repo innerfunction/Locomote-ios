@@ -26,6 +26,8 @@
 @property (nonatomic, assign) NSInteger port;
 /// The base path on the server for accessing the CMS.
 @property (nonatomic, strong) NSString *basePath;
+/// The server HTTP API path; e.g. 'cms/0.2'.
+@property (nonatomic, strong) NSString *apiPath;
 /// The  HTTP authentication realm.
 @property (nonatomic, strong) NSString *authRealm;
 /// The server protocol, e.g. HTTP or HTTPS.

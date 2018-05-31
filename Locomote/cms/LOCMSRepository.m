@@ -150,7 +150,7 @@
 }
 
 - (NSString *)localCacheLocationOfPath:(NSString *)path parameters:(NSDictionary *)parameters {
-    return [_fileDB cacheLocationForFileWithPath:path];
+    return [_fileDB cacheLocationForFile:path];
 }
 
 - (void)start {

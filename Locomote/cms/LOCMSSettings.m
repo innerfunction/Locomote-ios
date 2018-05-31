@@ -17,6 +17,7 @@
 //
 
 #import "LOCMSSettings.h"
+#import "SCRegExp.h"
 
 #define DefaultAPIProtocol  (@"https")
 #define DefaultAPIHost      (@"locomote.sh")
@@ -58,7 +59,16 @@
     if (repoURL.port) {
         self.port = [repoURL.port integerValue];
     }
-    self.basePath = repoURL.path;
+    // Check whether the path has an API path prefix.
+    SCRegExp *re = [[SCRegExp alloc] initWithPattern:@"(/(?:cms/)?\\d+\\.\\d+)(.*)"];
+    NSArray *groups = [re match:repoURL.path];
+    if (groups) {
+        self.apiPath  = groups[1];
+        self.basePath = groups[2];
+    }
+    else {
+        self.basePath = repoURL.path;
+    }
     self.username = repoURL.user;
     self.password = repoURL.password;
     
@@ -85,7 +95,8 @@
 }
 
 - (NSString *)urlForFile:(NSString *)path {
-    return [self urlForPath:[self pathForResource:@"files.api" trailing:path]];
+    //return [self urlForPath:[self pathForResource:@"files.api" trailing:path]];
+    return [self urlForPath:[self pathForResource:path trailing:@""]];
 }
 
 - (NSString *)apiBaseURL {
@@ -121,7 +132,12 @@
 
 // http://{host}/{apiroot}/{apiver}/path
 - (NSString *)pathForResource:(NSString *)resourceName trailing:(NSString *)trailing {
-    NSString *path = [_basePath stringByAppendingPathComponent:resourceName];
+    NSString *path = _basePath;
+    // Prepend the API path if one is specified.
+    if (_apiPath) {
+        path = [_apiPath stringByAppendingPathComponent:path];
+    }
+    path = [path stringByAppendingPathComponent:resourceName];
     if (trailing) {
         path = [path stringByAppendingPathComponent:trailing];
     }
@@ -130,7 +146,7 @@
 
 - (NSString *)urlForPath:(NSString *)path {
     NSString *port = _port == 0 ? @"" : [NSString stringWithFormat:@":%ld", (long)_port];
-    return [NSString stringWithFormat:@"%@://%@%@/%@", _protocol, _host, port, path];
+    return [NSString stringWithFormat:@"%@://%@%@%@", _protocol, _host, port, path];
 }
 
 #pragma mark - Class members

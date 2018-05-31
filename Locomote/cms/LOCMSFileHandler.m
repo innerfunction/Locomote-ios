@@ -115,9 +115,9 @@ static SCLogger *Logger;
     // TODO: Note that the following code assumes the page templates are avaiable in the app
     // cache; consider whether to instead load templates via the content: URL.
     NSString *templateFilename = [NSString stringWithFormat:@"_templates/page-%@.html", pageType];
-    NSString *templatePath = [self.fileDB cacheLocationForFileWithPath:templateFilename];
+    NSString *templatePath = [self.fileDB cacheLocationForFile:templateFilename];
     if (!(templatePath && [fileManager fileExistsAtPath:templatePath])) {
-        templatePath = [self.fileDB cacheLocationForFileWithPath:@"_templates/page.html"];
+        templatePath = [self.fileDB cacheLocationForFile:@"_templates/page.html"];
         if (!(templatePath && [fileManager fileExistsAtPath:templatePath])) {
             [Logger warn:@"Client template not found for page type %@", pageType];
             templatePath = nil;
@@ -155,7 +155,7 @@ static SCLogger *Logger;
 
 - (void)writeFileContent:(NSDictionary *)record toResponse:(id<LOContentResponse>)response {
     // Read the fileset.
-    NSString *category = record[@"files.category"];
+    NSString *category    = record[@"category"];
     LOCMSFileset *fileset = self.filesets[category];
     if (!fileset) {
         [response respondWithError:makeInvalidCategoryResponseError(category)];
@@ -164,13 +164,11 @@ static SCLogger *Logger;
     // Check if the file is cacheable.
     BOOL cachable       = [fileset cachable];
     // Read the file type from it's file extension.
-    NSString *path      = record[@"files.path"];
+    NSString *path      = record[@"path"];
     NSString *ext       = [path pathExtension];
     NSString *mimeType  = [LOMIMETypes mimeTypeForType:ext];
-    // Read the file URL and cache location.
-    // TODO: Need to review the code used to generate the URL.
-    NSString *url       = [_repository.cms urlForFile:path];
-    NSString *cachePath = [self.fileDB cacheLocationForFile:record];
+    // Read the cache location.
+    NSString *cachePath = [self.fileDB cacheLocationForFileRecord:record];
     // Check if a local copy of the file exists in the cache.
     if (cachable && [[NSFileManager defaultManager] fileExistsAtPath:cachePath]) {
         // Local copy found, respond with contents.
@@ -179,6 +177,11 @@ static SCLogger *Logger;
                           cachePolicy:NSURLCacheStorageNotAllowed];
         return;
     }
+    // Read the file's server-side URL.
+    NSString *url = [_repository.cms urlForFile:path];
+    // Read the cache location for downloaded content (note that the cacheLocationForFileRecord:
+    // may return a path to the app bundle if the content was packaged).
+    cachePath = [self.fileDB cacheLocationForFile:path inFileset:category];
     // No local copy found, download from server.
     SCHTTPClient *httpClient = _repository.httpClient;
     [httpClient getFile:url]
@@ -188,16 +191,27 @@ static SCLogger *Logger;
         // If cachable then move file to cache.
         if (cachable) {
             NSFileManager *fileManager = [NSFileManager defaultManager];
-            // Ensure that the target directory exists.
-            NSString *cacheDir = [cachePath stringByDeletingLastPathComponent];
-            [fileManager createDirectoryAtPath:cacheDir
-                   withIntermediateDirectories:YES
-                                    attributes:nil
-                                         error:&error];
+            if ([fileManager fileExistsAtPath:cachePath]) {
+                // Remove any file already at the target location.
+                [fileManager removeItemAtPath:cachePath error:&error];
+            }
+            else {
+                // Ensure that the target directory exists.
+                NSString *cacheDir = [cachePath stringByDeletingLastPathComponent];
+                [fileManager createDirectoryAtPath:cacheDir
+                       withIntermediateDirectories:YES
+                                        attributes:nil
+                                             error:&error];
+            }
             if (!error) {
+                // Move the file to the cache location.
                 [fileManager moveItemAtPath:downloadPath
                                      toPath:cachePath
                                       error:&error];
+            }
+            if (!error) {
+                // Update the file's cache status.
+                [self.fileDB markFileAsDownloaded:path];
             }
         }
         if (error) {

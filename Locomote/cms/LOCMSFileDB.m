@@ -123,11 +123,15 @@
     return path;
 }
 
-// TODO: Consider breaking the following method into two; strictly speaking, the cache location
-// should be writeable, but if content is packaged then its cache location isn't writeable.
-// TODO: Also, knowledge of how to build a cache path is distributed between this class,
-// LOLocalCachePaths and LOCMSFileset - can this be improved by having it all in a single place?
-- (NSString *)cacheLocationForFile:(NSDictionary *)fileRecord {
+- (NSString *)cacheLocationForFile:(NSString *)filePath inFileset:(NSString *)category {
+    NSString *cachePath = [self cacheLocationForFileset:category];
+    if (cachePath) {
+        return [cachePath stringByAppendingPathComponent:filePath];
+    }
+    return nil;
+}
+
+- (NSString *)cacheLocationForFileRecord:(NSDictionary *)fileRecord {
     NSString *path = nil;
     NSString *status = fileRecord[@"status"];
     NSString *category = fileRecord[@"category"];
@@ -138,19 +142,20 @@
         path = [path stringByAppendingPathComponent:fileRecord[@"path"]];
     }
     else {
-        LOCMSFileset *fileset = _filesets[category];
-        if (fileset != nil && fileset.cachable) {
-            NSString *cachePath = [fileset cachePath:_repository];
-            path = [cachePath stringByAppendingPathComponent:fileRecord[@"path"]];
-        }
+        path = [self cacheLocationForFile:fileRecord[@"path"] inFileset:category];
     }
     return path;
 }
 
-- (NSString *)cacheLocationForFileWithPath:(NSString *)path {
+- (NSString *)cacheLocationForFile:(NSString *)filePath {
     NSString *sql = [NSString stringWithFormat:@"SELECT * FROM %@ WHERE path=?", _filesTable];
-    NSArray *rs = [self performQuery:sql withParams:@[ path ]];
-    return [rs count] > 0 ? [self cacheLocationForFile:rs[0]] : nil;
+    NSArray *rs = [self performQuery:sql withParams:@[ filePath ]];
+    return [rs count] > 0 ? [self cacheLocationForFileRecord:rs[0]] : nil;
+}
+
+- (void)markFileAsDownloaded:(NSString *)filePath {
+    NSString *sql = [NSString stringWithFormat:@"UPDATE %@ SET status='published' WHERE path=?", _filesTable];
+    [self performUpdate:sql withParams:@[ filePath ]];
 }
 
 - (void)insertResetCVS:(NSString *)cvs forCategory:(NSString *)category {

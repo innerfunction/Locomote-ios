@@ -90,7 +90,7 @@
         LOCMSRepository *repository = _repositories[key];
         // Generate a file path pattern using the repo base path (note that base path will have a
         // trailing slash).
-        NSString *path = [NSString stringWithFormat:@"%@**", repository.basePath];
+        NSString *path = [NSString stringWithFormat:@"%@**/*", repository.basePath];
         // Create the mapping and add to the list.
         LORequestHandlerMapping *mapping = [[LORequestHandlerMapping alloc] initWithPath:path handler:repository];
         [mappings addObject:mapping];
@@ -135,8 +135,6 @@
     LONSURLProtocolResponse *response = [[LONSURLProtocolResponse alloc] initWithNSURLProtocol:protocol
                                                                                  liveResponses:_liveResponses];
     NSURL *url = protocol.request.URL;
-    // Use the URL path without the leading slash.
-    NSString *contentPath = [url.path substringFromIndex:1];
     
     // Parse the URL's scheme and path parts as a compound URI; this is to allow encoding of
     // request parameters in the compound URI format - i.e. +p1@v1+p2@v2 etc.
@@ -149,7 +147,7 @@
     }
     
     [self writeResponse:response
-                forPath:contentPath
+                forPath:url.path
              parameters:parameters];
 }
 
