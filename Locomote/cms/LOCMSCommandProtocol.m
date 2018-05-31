@@ -29,6 +29,7 @@
 #define AcceptEncodings     (@"gzip")
 
 #define QualifiedCommandName(protocol, name)    ([NSString stringWithFormat:@"%@.%@", protocol.commandPrefix, name ])
+#define MakeFollowOn(name,args)                 (@{ @"name": name, @"args": args })
 
 /// Refresh the file DB by pulling updates from the server.
 @interface LOCMSCommandProtocolRefresh : NSObject <LOCommand> {
@@ -172,12 +173,12 @@
     [_protocol.httpClient get:refreshURL data:params options:options]
     .then((id)^(SCHTTPClientResponse *response) {
     
-        LOHTTPAuthenticationManager *authManager = self->_protocol.authManager;
         LOCMSFileDB *fileDB = self->_protocol.fileDB;
         
         // Check the response code.
         NSInteger responseCode = response.httpResponse.statusCode;
         if (responseCode == 401) {
+            LOHTTPAuthenticationManager *authManager = self->_protocol.authManager;
             [authManager removeCredentials];
             [self->_promise resolve:@[]];
             return nil;
@@ -186,7 +187,8 @@
         // LS-13: ACM group mismatch, perform a database reset.
         if (responseCode == 205) {
             NSString *command = QualifiedCommandName(self->_protocol, @"reset");
-            [self->_promise resolve:@[ @{ @"name": command, @"args": @[] } ]];
+            id followOn = MakeFollowOn(command,args);
+            [self->_promise resolve:@[ followOn ]];
             return nil;
         }
         
@@ -253,7 +255,7 @@
                     // If processing the files table then record the updated file category name.
                     if (isFilesTable) {
                         NSString *category = values[@"category"];
-                        NSString *status = values[@"status"];
+                        NSString *status   = values[@"status"];
                         if (category != nil && ![@"deleted" isEqualToString:status]) {
                             if (commit) {
                                 updatedCategories[category] = commit;
@@ -273,7 +275,8 @@
             NSMutableArray *commands = [NSMutableArray new];
 
             // Queue command to delete unused files.
-            [commands addObject:@{ @"name": QualifiedCommandName(self->_protocol, @"file-gc"), @"args": @[] }];
+            id followOn = MakeFollowOn( QualifiedCommandName(self->_protocol, @"file-gc"), @[]);
+            [commands addObject:followOn];
 
             // Read list of fileset names with modified fingerprints.
             NSArray *rows = [fileDB performQuery:@"SELECT category FROM fingerprints WHERE current != previous" withParams:@[]];
@@ -300,7 +303,8 @@
                     if (since != [NSNull null]) {
                         [args addObject:since];
                     }
-                    [commands addObject:@{ @"name": command, @"args": args }];
+                    followOn = MakeFollowOn(command,args);
+                    [commands addObject:followOn];
                 }
             }
 
@@ -391,12 +395,12 @@
     [_protocol.httpClient post:refreshURL data:params options:options]
     .then((id)^(SCHTTPClientResponse *response) {
 
-        LOHTTPAuthenticationManager *authManager = self->_protocol.authManager;
         LOCMSFileDB *fileDB = self->_protocol.fileDB;
         
         // Check the response code.
         NSInteger responseCode = response.httpResponse.statusCode;
         if (responseCode == 401) {
+            LOHTTPAuthenticationManager *authManager = self->_protocol.authManager;
             [authManager removeCredentials];
             [self->_promise resolve:@[]];
             return nil;
@@ -443,7 +447,8 @@
         NSMutableArray *commands = [NSMutableArray new];
 
         // Queue command to delete unused files.
-        [commands addObject:@{ @"name": QualifiedCommandName(self->_protocol, @"file-gc"), @"args": @[] }];
+        id followOn = MakeFollowOn( QualifiedCommandName(self->_protocol, @"file-gc"), @[] );
+        [commands addObject:followOn];
         
         // Read list of fileset category names and queue fileset reset commands.
         // (Note that this is done after the updates, and not before, to ensure that any newly
@@ -456,7 +461,8 @@
                 // The ACM group fingerprint entry - skip.
                 continue;
             }
-            [commands addObject:@{ @"name": command, @"args": @[ category ] }];
+            followOn = MakeFollowOn(command, @[ category ]);
+            [commands addObject:followOn];
         }
             
         [self->_promise resolve:commands];
@@ -575,7 +581,7 @@
     if (!cvs) {
         id command = QualifiedCommandName(_protocol, @"download-fileset");
         id args = @[ category ];
-        [_promise resolve:@[ @{ @"name": command, @"args": args } ]];
+        [_promise resolve:@[ MakeFollowOn(command, args) ]];
     }
     else {
         // Otherwise continue with reset command.

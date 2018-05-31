@@ -190,9 +190,9 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                         // Add any follow-on commands to the end of the queue.
                         if ([followOns count] > 0) {
                             for (NSDictionary *followOn in followOns) {
-                                NSString *command = followOn[@"command"];
-                                NSArray *args = followOn[@"arguments"];
-                                LOCommandQueueItem *followOnItem = [self makeQueueItemForCommandName:command arguments:args];
+                                NSString *name = followOn[@"name"];
+                                NSArray *args  = followOn[@"args"];
+                                LOCommandQueueItem *followOnItem = [self makeQueueItemForCommandName:name arguments:args];
                                 if (![self->_queue containsObject:followOnItem]) {
                                     [self->_queue addObject:followOnItem];
                                     // Give the follow-on the same runtime ID as

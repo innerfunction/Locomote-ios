@@ -196,7 +196,7 @@
 }
 
 - (QPromise *)syncContent {
-    NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.basePath];
+    NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.authority.authorityName];
     return [self.authority.commandQueue queueCommandWithName:cmd arguments:@[]];
 }
 
@@ -239,7 +239,10 @@
     for (NSDictionary *reset in fsresets) {
         NSString *category = reset[@"category"];
         id cacheLocation = [_fileDB cacheLocationForFileset:category];
-        [commandQueue queueCommandWithName:command arguments:@[ category, cacheLocation, reset[@"cvs"] ]];
+        if (cacheLocation) {
+            [commandQueue queueCommandWithName:command arguments:@[ category, cacheLocation, reset[@"cvs"] ]];
+        }
+        // else unsupported fileset.
     }
 }
 
