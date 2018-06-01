@@ -192,6 +192,7 @@
                                                  settings:_cms
                                                httpClient:_httpClient
                                     authenticationManager:authManager];
+    [_ops startService];
     
     // Check for an interrupted file db reset.
     [self continueDBResetInProgress];

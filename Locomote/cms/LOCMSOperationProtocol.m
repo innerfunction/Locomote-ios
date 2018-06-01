@@ -223,7 +223,7 @@ authenticationManager:(LOHTTPAuthenticationManager *)authManager {
                 [followOns addObject:[self opFileGC]];
 
                 // Read list of fileset names with modified fingerprints.
-                NSArray *rows = [fileDB performQuery:@"SELECT category FROM fingerprints WHERE current != previous" withParams:@[]];
+                NSArray *rows = [fileDB performQuery:@"SELECT category FROM fingerprints WHERE current != latest" withParams:@[]];
                 for (NSDictionary *row in rows) {
                     NSString *category = row[@"category"];
                     if ([@"$group" isEqualToString:category]) {
