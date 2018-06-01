@@ -64,6 +64,8 @@
         _liveResponses = [NSMutableSet new];
         _dispatcher    = [[LORequestDispatcher alloc] initWithHost:self];
         _repositories  = @{};
+        // By default, refresh every minute.
+        _refreshInterval = 1.0f;
     }
     return self;
 }
