@@ -46,6 +46,18 @@ typedef QPromise *(^LOOperationBlock) (void);
 
 @end
 
+/**
+ * A class for executing asynchronous operations sequentially on a background thread.
+ * Allows operations to be executed with a deferred promise that resolves once the
+ * operation completes. Operations may raise follow-on operations in order to complete
+ * their task; when this happens then their deferred promise only resolves once all
+ * follow-ons have also completed.
+ * All operations added to the queue are executed sequentially, one at a time.
+ * Operations added to the queue may provide an operation ID. When provided, then the
+ * operation is only added to the queue if another operation with the same ID is not
+ * already on the queue. This provides a mechanism for ensuring that multiple instances
+ * of a potentially slow to complete operation don't fill up the queue.
+ */
 @interface LOOperationQueue : NSObject <SCService> {
     /**
      * A flag indicating whether the queue is started.
