@@ -63,7 +63,6 @@
     if (self) {
         _liveResponses = [NSMutableSet new];
         _dispatcher    = [[LORequestDispatcher alloc] initWithHost:self];
-        _commandQueue  = [LOCommandQueue new];
         _repositories  = @{};
     }
     return self;
@@ -106,8 +105,6 @@
     for (LOCMSRepository *repository in [_repositories allValues]) {
         [repository start];
     }
-    // Start the command queue.
-    [_commandQueue startService];
     // Schedule content refreshes.
     if (_refreshInterval > 0) {
         [NSTimer scheduledTimerWithTimeInterval:(_refreshInterval * 60.0f)

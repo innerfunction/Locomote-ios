@@ -53,7 +53,7 @@ typedef QPromise *(^LOOperationBlock) (void);
      */
     BOOL _running;
     /// A queue of pending operations.
-    NSMutableArray<LOCommandOperationItem *> *_queue;
+    NSMutableArray<LOOperationQueueItem *> *_queue;
     /// A map of pending operation completion promises.
     NSMutableDictionary<NSNumber *,QPromise *> *_pendingPromises;
 }

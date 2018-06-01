@@ -21,6 +21,7 @@
 #import "LOCMSFileDB.h"
 #import "LOCMSSettings.h"
 #import "SCHTTPClient.h"
+#import "SCService.h"
 #import "Q.h"
 
 /**
@@ -29,12 +30,18 @@
  * updates from the Locomote server and managing the DB and local cache state.
  * All operations are executed sequentially on a background queue.
  */
-@interface LOCMSOperationProtocol : NSObject {
+@interface LOCMSOperationProtocol : NSObject <SCService> {
+    /// A queue for executing operations.
     LOOperationQueue *_opQueue;
+    /// The local copy of the content repository file DB.
     __weak LOCMSFileDB *_fileDB;
+    /// CMS settings.
     __weak LOCMSSettings *_settings;
+    /// A HTTP client for talking to the server.
     __weak SCHTTPClient *_httpClient;
+    /// A HTTP authentication manager.
     __weak LOHTTPAuthenticationManager *_authManager;
+    /// A pending deferred promise for the currently executing operation.
     QPromise *_promise;
 }
 
@@ -43,6 +50,9 @@
           httpClient:(SCHTTPClient *)httpClient
 authenticationManager:(LOHTTPAuthenticationManager *)authManager;
 
-- (QPromise *)refresh:(NSString *)updatesURL;
+/// Perform a content refresh.
+- (QPromise *)refresh;
+/// Perform a fileset reset.
+- (QPromise *)resetFileset:(NSString *)category;
 
 @end

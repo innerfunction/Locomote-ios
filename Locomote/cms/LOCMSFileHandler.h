@@ -24,7 +24,7 @@
  * A request handler for file record and content requests.
  */
 @interface LOCMSFileHandler : LOCMSRequestHandler {
-    LOCMSRepository *_repository;
+    __weak LOCMSRepository *_repository;
 }
 
 @end

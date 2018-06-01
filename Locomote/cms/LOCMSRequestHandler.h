@@ -30,7 +30,7 @@
 - (id)initWithRepository:(LOCMSRepository *)repository;
 
 /// The file database.
-@property (nonatomic, strong) LOCMSFileDB *fileDB;
+@property (nonatomic, weak) LOCMSFileDB *fileDB;
 /// A map of filesets keyed by category name.
 @property (nonatomic, strong) NSDictionary<NSString *, LOCMSFileset *> *filesets;
 

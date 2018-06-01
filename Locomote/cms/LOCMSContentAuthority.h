@@ -21,7 +21,6 @@
 #import "LORequestDispatcher.h"
 #import "LOCMSSettings.h"
 #import "LOLocalCachePaths.h"
-#import "LOCommandQueue.h"
 #import "SCIOCTypeInspectable.h"
 #import "SCURIHandling.h"
 
@@ -62,8 +61,6 @@
 @property (nonatomic, assign) float refreshInterval;
 /// An optional URL handler.
 @property (nonatomic, strong) id<SCURIHandler> uriHandler;
-/// A command queue for executing content related commands.
-@property (nonatomic, strong) LOCommandQueue *commandQueue;
 
 /// Add a content repository to this authority.
 - (void)addRepository:(LOCMSRepository *)repository;

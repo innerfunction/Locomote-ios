@@ -27,8 +27,8 @@
 
 @interface LOCMSOperationProtocol ()
 
-- (LOOperationBlock)opRefreshWithURL:(NSString *)updatesURL;
-- (LOOperationBlock)opResetWithURL:(NSString *)updatesURL;
+- (LOOperationBlock)opRefresh;
+- (LOOperationBlock)opReset;
 - (LOOperationBlock)opResetFilesetWithCategory:(NSString *)category;
 - (LOOperationBlock)opFileGC;
 - (LOOperationBlock)opDownloadFilesetWithCategory:(NSString *)category since:(id)since; // TODO since can be == [NSNull null]
@@ -62,22 +62,33 @@ authenticationManager:(LOHTTPAuthenticationManager *)authManager {
     return self;
 }
 
-- (QPromise *)refresh:(NSString *)updatesURL {
-    LOOperationBlock refresh = [self opRefreshWithURL:updatesURL];
-    NSString *opID = [NSString stringWithFormat:@"%@:%@", refresh, updatesURL];
-    return [_opQueue queueOperation:refresh opID:opID];
+- (QPromise *)refresh {
+    LOOperationBlock refresh = [self opRefresh];
+    return [_opQueue queueOperation:refresh opID:@"refresh"];
+}
+
+- (QPromise *)resetFileset:(NSString *)category {
+    LOOperationBlock reset = [self opResetFilesetWithCategory:category];
+    NSString *opID = [NSString stringWithFormat:@"resetFileset:%@", category];
+    return [_opQueue queueOperation:reset opID:opID];
+}
+
+#pragma mark - SCService
+
+- (void)startService {
+    [_opQueue startService];
 }
 
 #pragma mark - private
 
 #define IsSecure ([self->_authManager hasCredentials] ? @"true" : @"false")
 
-- (LOOperationBlock)opRefreshWithURL:(NSString *)updatesURL {
+- (LOOperationBlock)opRefresh {
     return ^() {
         self->_promise = [QPromise new];
         
-        NSString *refreshURL = updatesURL;
-        
+        NSString *updatesURL = [self->_settings updatesURL];
+
         // Query the file DB for the latest commit ID.
         NSString *commit = nil, *group = nil;
         NSMutableDictionary *params = [NSMutableDictionary new];
@@ -106,7 +117,7 @@ authenticationManager:(LOHTTPAuthenticationManager *)authManager {
             SCHTTPClientRequestOptionAcceptEncoding:    AcceptEncodings
         };
         // Fetch updates from the server.
-        [self->_httpClient get:refreshURL data:params options:options]
+        [self->_httpClient get:updatesURL data:params options:options]
         .then((id)^(SCHTTPClientResponse *response) {
         
             LOCMSFileDB *fileDB = self->_fileDB;
@@ -122,7 +133,7 @@ authenticationManager:(LOHTTPAuthenticationManager *)authManager {
             
             // LS-13: ACM group mismatch, perform a database reset.
             if (responseCode == 205) {
-                [self->_promise resolve:@[ [self opResetWithURL:updatesURL] ]];
+                [self->_promise resolve:@[ [self opReset] ]];
                 return nil;
             }
             
@@ -258,7 +269,7 @@ authenticationManager:(LOHTTPAuthenticationManager *)authManager {
             return nil;
         })
         .fail(^(id error) {
-            NSString *msg = [NSString stringWithFormat:@"Updates download from %@ failed: %@", refreshURL, error ];
+            NSString *msg = [NSString stringWithFormat:@"Updates download from %@ failed: %@", updatesURL, error ];
             [self->_promise reject:msg];
         });
         
@@ -267,10 +278,12 @@ authenticationManager:(LOHTTPAuthenticationManager *)authManager {
     };
 }
 
-- (LOOperationBlock)opResetWithURL:(NSString *)updatesURL {
+- (LOOperationBlock)opReset {
     return ^() {
         self->_promise = [QPromise new];
         
+        NSString *updatesURL = [self->_settings updatesURL];
+
         LOCMSFileDB *fileDB = self->_fileDB;
         
         // Delete all reset records

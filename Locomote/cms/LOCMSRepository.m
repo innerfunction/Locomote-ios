@@ -188,16 +188,17 @@
     }
     */
     // Init and register command protocol with the scheduler, using the authority name as the command prefix.
-    _commandProtocol = [[LOCMSCommandProtocol alloc] initWithRepository:self authenticationManager:authManager];
-    [_commandProtocol registerWithCommandQueue:self.authority.commandQueue];
+    _ops = [[LOCMSOperationProtocol alloc] initWithFileDB:_fileDB
+                                                 settings:_cms
+                                               httpClient:_httpClient
+                                    authenticationManager:authManager];
     
     // Check for an interrupted file db reset.
     [self continueDBResetInProgress];
 }
 
 - (QPromise *)syncContent {
-    NSString *cmd = [NSString stringWithFormat:@"%@.refresh", self.authority.authorityName];
-    return [self.authority.commandQueue queueCommandWithName:cmd arguments:@[]];
+    return [_ops refresh];
 }
 
 #pragma mark - LORequestHandler
@@ -231,16 +232,13 @@
 #pragma mark - Private
 
 - (void)continueDBResetInProgress {
-    // TODO Modify command queue api to accept authority name - it can then do the following line.
-    NSString *command = [NSString stringWithFormat:@"%@.%@", self.authority.authorityName, @"reset-fileset"];
-    LOCommandQueue *commandQueue = self.authority.commandQueue;
     // Query the file DB for any outstanding fileset resets, and reissue a reset command for each one.
     NSArray *fsresets = [_fileDB getInProgressResetRecords];
     for (NSDictionary *reset in fsresets) {
         NSString *category = reset[@"category"];
         id cacheLocation = [_fileDB cacheLocationForFileset:category];
         if (cacheLocation) {
-            [commandQueue queueCommandWithName:command arguments:@[ category, cacheLocation, reset[@"cvs"] ]];
+            [_ops resetFileset:category];
         }
         // else unsupported fileset.
     }

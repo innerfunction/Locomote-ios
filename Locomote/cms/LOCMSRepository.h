@@ -21,7 +21,7 @@
 #import "LOLocalCachePaths.h"
 #import "LOUserAccountManager.h"
 #import "LOCMSFileDB.h"
-#import "LOCMSCommandProtocol.h"
+#import "LOCMSOperationProtocol.h"
 #import "LOCMSSettings.h"
 #import "SCHTTPClient.h"
 #import "SCIOCObjectAware.h"
@@ -49,8 +49,8 @@
 @property (nonatomic, strong, readonly) NSDictionary *filesets;
 /// The CMS settings (host / account / repo).
 @property (nonatomic, strong) LOCMSSettings *cms;
-/// The authority's scheduled command protocol.
-@property (nonatomic, strong) LOCMSCommandProtocol *commandProtocol;
+/// The repository's operation protocol.
+@property (nonatomic, strong) LOCMSOperationProtocol *ops;
 /// Repository content request handler.
 @property (nonatomic, strong) LOCMSRepoRequestHandler *requestHandler;
 /// The content authority this repository belongs to.
