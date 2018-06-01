@@ -1,4 +1,4 @@
-// Copyright 2017 InnerFunction Ltd.
+// Copyright 2018 InnerFunction Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  Created by Julian Goacher on 08/12/2015.
-//  Copyright © 2015 InnerFunction. All rights reserved.
+//  Created by Julian Goacher on 01/06/2018.
 //
 
-#import <Foundation/Foundation.h>
-#import "LOCommand.h"
+#import "LOWebViewController.h"
 
-/**
- * Command to move a file or directory on the local filesystem to another location.
- * Arguments: <from> <to>
- * - from:  The file path to move.
- * - to:    Where to move the file or directory to.
- */
-@interface LOMvFileCommand : NSObject <LOCommand> {
-    NSFileManager *_fileManager;
+@implementation LOWebViewController
+
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+    NSURL *url = [request URL];
+    if (self.loadExternalLinks && [@"content" isEqualToString:url.scheme]) {
+        // Always load content URLs.
+        return YES;
+    }
+    return [super webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
 }
 
 @end

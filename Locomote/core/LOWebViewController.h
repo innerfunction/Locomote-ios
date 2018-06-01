@@ -1,4 +1,4 @@
-// Copyright 2017 InnerFunction Ltd.
+// Copyright 2018 InnerFunction Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  Created by Julian Goacher on 08/12/2015.
-//  Copyright © 2015 InnerFunction. All rights reserved.
+//  Created by Julian Goacher on 01/06/2018.
 //
 
 #import <Foundation/Foundation.h>
-#import "LOCommand.h"
+#import "SCWebViewController.h"
 
-/**
- * Command to unzip a zip archive.
- * Arguments: <zip> <to>
- * - zip:   The path to a zip archive file.
- * - to:    The path to a directory to unzip the archive's contents into.
- */
-@interface LOUnzipCommand : NSObject <LOCommand>
+@interface LOWebViewController : SCWebViewController
 
 @end

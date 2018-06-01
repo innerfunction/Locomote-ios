@@ -1,4 +1,4 @@
-// Copyright 2017 InnerFunction Ltd.
+// Copyright 2018 InnerFunction Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,63 +12,75 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-//  Created by Julian Goacher on 30/03/2017.
-//  Copyright © 2017 InnerFunction. All rights reserved.
+//  Created by Julian Goacher on 01/06/2018.
 //
 
-#import "LOCommandQueue.h"
+#import "LOOperationQueue.h"
 #import "SCLogger.h"
 #import "NSDictionary+SC.h"
 #import "NSString+SC.h"
 
 static SCLogger *Logger;
-static dispatch_queue_t commandDispatchQueue;
-static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
+static dispatch_queue_t operationDispatchQueue;
+static void *operationDispatchQueueKey = "sh.locomote.OperationQueue";
 
 // Macro to test whether a method is called on the command dispatch queue.
-#define RunningOnDispatchQueue  (dispatch_get_specific(commandDispatchQueueKey) != NULL)
+#define RunningOnDispatchQueue  (dispatch_get_specific(operationDispatchQueueKey) != NULL)
 
-@interface LOCommandQueue ()
+#define AnonymousID (@"Anonymous")
+
+@interface LOOperationQueue ()
 
 /// Execute the next queued command.
 - (void)dispatchNext;
 
 @end
 
-@implementation LOCommandQueueItem
+@implementation LOOperationQueueItem
 
-- (id)initWithCommand:(id<LOCommand>)command args:(NSArray *)args {
+- (id)initWithOperation:(LOOperationBlock)operation opID:(NSString *)opID {
     self = [super init];
-    self.command = command;
-    self.args = args;
+    self.operation = operation;
+    if (opID) {
+        self.opID = opID;
+    }
+    else {
+        self.opID = AnonymousID;
+    }
     return self;
 }
 
+- (id)initWithOperation:(LOOperationBlock)operation {
+    return [self initWithOperation:operation opID:nil];
+}
+
 - (BOOL)isEqual:(id)object {
-    if ([object isKindOfClass:[LOCommandQueueItem class]]) {
-        LOCommandQueueItem *item = (LOCommandQueueItem *)object;
-        // Note that we test command equality using command object identity.
-        return _command == item.command && [_args isEqualToArray:item.args];
+    if ([_opID isEqualToString:AnonymousID]) {
+        // Anonymous operations cannot be equal to each other.
+        return NO;
+    }
+    if ([object isKindOfClass:[LOOperationQueueItem class]]) {
+        return [_opID isEqualToString:((LOOperationQueueItem *)object).opID];
     }
     return NO;
 }
 
 - (NSUInteger)hash {
-    return [_command hash] ^ [_args hash];
+    return [_opID hash];
 }
 
 @end
 
-@implementation LOCommandQueue
+@implementation LOOperationQueue
 
 + (void)initialize {
-    Logger = [[SCLogger alloc] initWithTag:@"LOCommandQueue"];
-    commandDispatchQueue = dispatch_queue_create( commandDispatchQueueKey, 0);
-    dispatch_queue_set_specific(commandDispatchQueue, commandDispatchQueueKey, commandDispatchQueueKey, NULL);
+    Logger = [[SCLogger alloc] initWithTag:@"LOOperationQueue"];
+    operationDispatchQueue = dispatch_queue_create( operationDispatchQueueKey, 0);
+    dispatch_queue_set_specific(operationDispatchQueue, operationDispatchQueueKey, operationDispatchQueueKey, NULL);
 }
 
 + (dispatch_queue_t)getDispatchQueue {
-    return commandDispatchQueue;
+    return operationDispatchQueue;
 }
 
 - (id)init {
@@ -77,51 +89,35 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
         _running = NO;
         _queue = [NSMutableArray new];
         _pendingPromises = [NSMutableDictionary new];
-        _registeredCommands = [NSMutableDictionary new];
     }
     return self;
 }
 
-- (void)registerCommand:(id<LOCommand>)command {
-    _registeredCommands[command.name] = command;
-}
-
-- (LOCommandQueueItem *)makeQueueItemForCommandName:(NSString *)name arguments:(NSArray *)args {
-    id<LOCommand> command = _registeredCommands[name];
-    if (command) {
-        return [[LOCommandQueueItem alloc] initWithCommand:command args:args];
-    }
-    return nil;
-}
-
-- (QPromise *)queueCommand:(id<LOCommand>)command arguments:(NSArray *)args {
+- (QPromise *)queueOperation:(LOOperationBlock)operation opID:(NSString *)opID {
     QPromise *promise = [QPromise new];
-    // Modify the command queue on the dispatch queue.
-    dispatch_async(commandDispatchQueue, ^{
-        LOCommandQueueItem *item = [[LOCommandQueueItem alloc] initWithCommand:command args:args];
-        // Test whether the same command already exists on the queue.
+    // Modify the operation queue on the dispatch queue.
+    dispatch_async(operationDispatchQueue, ^{
+        LOOperationQueueItem *item = [[LOOperationQueueItem alloc] initWithOperation:operation opID:opID];
+        // Test whether the same operation already exists on the queue.
         NSInteger idx = [self->_queue indexOfObject:item];
         if (idx == NSNotFound) {
-            // Add new command to the queue.
+            // Add new operation to the queue.
             [self->_queue addObject:item];
-            // Give the command a runtime identity.
+            // Give the operation a runtime identity.
             item.runTimeID = [NSNumber numberWithInteger:[item hash]];
-            // Add the command's promise to the map of pending.
+            // Add the operation's promise to the map of pending.
             self->_pendingPromises[item.runTimeID] = promise;
-            // Execute if the queue was empty (if not empty then a
-            // command is currently executing, and will eventually
-            // dispatch the new command once the rest of the queue
-            // is executed).
+            // Execute if the queue was empty (if not empty then a operation is currently executing,
+            // and will eventually dispatch the new operation once the rest of the queue is executed).
             if ([self->_queue count] == 1) {
                 [self dispatchNext];
             }
         }
         else {
-            // So that this command invocation's promise resolves when
-            // the matching, pending command completes, join the current
-            // promise and the pending promise in a new promise, and replace
+            // So that this operation invocation's promise resolves when the matching, pending operation
+            // completes, join the current promise and the pending promise in a new promise, and replace
             // the pending promise with the new joined promise.
-            LOCommandQueueItem *queuedItem = self->_queue[idx];
+            LOOperationQueueItem *queuedItem = self->_queue[idx];
             QPromise *pending = self->_pendingPromises[queuedItem.runTimeID];
             QPromise *joined = [QPromise new];
             joined.then( (id)^(id result) {
@@ -139,17 +135,9 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
     return promise;
 }
 
-- (QPromise *)queueCommandWithName:(NSString *)name arguments:(NSArray *)args {
-    id<LOCommand> command = _registeredCommands[name];
-    if (command) {
-        return [self queueCommand:command arguments:args];
-    }
-    return [Q reject:[NSString stringWithFormat:@"LOCommandQueue: Unrecogized command '%@'", name]];
-}
-
 - (QPromise *)clearPending {
     QPromise *promise = [QPromise new];
-    dispatch_async(commandDispatchQueue, ^{
+    dispatch_async(operationDispatchQueue, ^{
         [self->_queue removeAllObjects];
         [promise resolve:self];
     });
@@ -160,7 +148,7 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
 
 - (void)startService {
     _running = YES;
-    // Commands may be added to the queue before it is started, execute them
+    // Operations may be added to the queue before it is started, execute them
     // now once the queue is started.
     [self dispatchNext];
 }
@@ -181,24 +169,22 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
         // Check that there are pending commands.
         if ([self->_queue count] > 0) {
             // Read and execute the next pending command.
-            LOCommandQueueItem *item = self->_queue[0];
-            [item.command execute:item.args]
+            LOOperationQueueItem *item = self->_queue[0];
+            item.operation()
                 .then((id)^(NSArray *followOns) {
-                    dispatch_async(commandDispatchQueue, ^{
+                    dispatch_async(operationDispatchQueue, ^{
                         // Remove the completed command from the queue.
                         [self->_queue removeObjectAtIndex:0];
                         // Add any follow-on commands to the end of the queue.
                         if ([followOns count] > 0) {
-                            for (NSDictionary *followOn in followOns) {
-                                NSString *name = followOn[@"name"];
-                                NSArray *args  = followOn[@"args"];
-                                LOCommandQueueItem *followOnItem = [self makeQueueItemForCommandName:name arguments:args];
-                                if (![self->_queue containsObject:followOnItem]) {
-                                    [self->_queue addObject:followOnItem];
-                                    // Give the follow-on the same runtime ID as
-                                    // its parent command.
-                                    followOnItem.runTimeID = item.runTimeID;
-                                }
+                            for (LOOperationBlock followOn in followOns) {
+                                // Note that follow-on ops are anonymous; this is to simplify the operation interface
+                                // (by not requiring operations to package follow on blocks before returning them).
+                                LOOperationQueueItem *followOnItem = [[LOOperationQueueItem alloc] initWithOperation:followOn];
+                                [self->_queue addObject:followOnItem];
+                                // Give the follow-on the same runtime ID as
+                                // its parent command.
+                                followOnItem.runTimeID = item.runTimeID;
                             }
                         }
                         // If completed command has a runtime ID then check whether
@@ -208,7 +194,7 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                             if (promise) {
                                 // Check for pending commands with the same runtime ID.
                                 BOOL pending = NO;
-                                for (LOCommandQueueItem *pendingItem in self->_queue) {
+                                for (LOOperationQueueItem *pendingItem in self->_queue) {
                                     if ([item.runTimeID isEqual:pendingItem.runTimeID]) {
                                         pending = YES;
                                         break;
@@ -228,7 +214,7 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
                     return nil;
                 })
                 .fail(^(id error) {
-                    [Logger error:@"Error executing command %@ %@: %@", item.command.name, item.args, error];
+                    [Logger error:@"Operation execution error (%@): %@", item.opID, error];
                     // Check for a pending promise.
                     if (item.runTimeID) {
                         QPromise *promise = self->_pendingPromises[item.runTimeID];
@@ -249,7 +235,7 @@ static void *commandDispatchQueueKey = "sh.locomote.CommandQueue";
         next();
     }
     else {
-        dispatch_async(commandDispatchQueue, next);
+        dispatch_async(operationDispatchQueue, next);
     }
 }
 
