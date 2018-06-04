@@ -161,7 +161,8 @@
         submitURL = _userAccountManager.authenticationURL;
         BOOL checkForLogin = [configuration getValueAsBoolean:@"checkForLogin" defaultValue:YES];
         if (checkForLogin) {
-            viewBehaviour = [[LOLoginBehaviour alloc] initWithUserAccountManager:_userAccountManager loginAction:loginAction];
+            viewBehaviour = [[LOLoginBehaviour alloc] initWithUserAccountManager:_userAccountManager
+                                                                     loginAction:loginAction];
         }
         onSubmitOk = ^(LOFormView *form, NSDictionary *data) {
             // Store user credentials & user info
@@ -252,14 +253,14 @@
 
 - (id)initWithUserAccountManager:(id<LOUserAccountManager>)accountManager loginAction:(NSString *)loginAction {
     self = [super init];
-    self.userAccountManager = accountManager;
+    self.accountManager = accountManager;
     self.loginAction = loginAction;
     return self;
 }
 
 - (void)viewDidAppear {
     // Check if user already logged in, if so then dispatch a specified event.
-    if ([_userAccountManager isLoggedIn]) {
+    if ([_accountManager isLoggedIn]) {
         [[SCAppContainer getAppContainer] postMessage:_loginAction sender:self.viewController];
     }
 }

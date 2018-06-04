@@ -119,11 +119,11 @@
 
 - (void)completeSetup {
     // Use the content reference as a realm name for user profile data.
-    _userAccountManager.realmName = _ref;
+    _accountManager.realmName = _ref;
     // Check whether a form factory is needed.
-    if (_userAccountManager && !_accountFormFactory) {
+    if (_accountManager && !_accountFormFactory) {
         _accountFormFactory = [[LOCMSAccountFormFactory alloc] initWithRepository:_repository
-                                                               userAccountManager:_userAccountManager];
+                                                               userAccountManager:_accountManager];
     }
 }
 
@@ -131,12 +131,12 @@
 
 - (BOOL)receiveMessage:(SCMessage *)message sender:(id)sender {
     if ([message hasName:@"logout"]) {
-        [_userAccountManager logout];
+        [_accountManager logout];
         [self showLoginForm:sender];
         return YES;
     }
     if ([message hasName:@"password-reminder"]) {
-        [_userAccountManager showPasswordReminder];
+        [_accountManager showPasswordReminder];
         return YES;
     }
     if ([message hasName:@"show-login"]) {

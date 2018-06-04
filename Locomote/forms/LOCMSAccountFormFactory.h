@@ -41,7 +41,7 @@
 
 - (id)initWithUserAccountManager:(id<LOUserAccountManager>)accountManager loginAction:(NSString *)loginAction;
 
-@property (nonatomic, weak) id<LOUserAccountManager> userAccountManager;
+@property (nonatomic, weak) id<LOUserAccountManager> accountManager;
 @property (nonatomic, strong) NSString *loginAction;
 
 @end

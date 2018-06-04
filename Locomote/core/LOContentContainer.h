@@ -34,7 +34,7 @@
 /// A reference to the source's content repository.
 @property (nonatomic, strong) NSString *ref;
 /// The user account manager to use with this content source.
-@property (nonatomic, strong) id<LOUserAccountManager> userAccountManager;
+@property (nonatomic, strong) id<LOUserAccountManager> accountManager;
 /// The source's form factory.
 @property (nonatomic, strong) LOCMSAccountFormFactory *accountFormFactory;
 /// An action message for displaying the login form.

@@ -98,6 +98,12 @@ static void *operationDispatchQueueKey = "sh.locomote.OperationQueue";
     // Modify the operation queue on the dispatch queue.
     dispatch_async(operationDispatchQueue, ^{
         LOOperationQueueItem *item = [[LOOperationQueueItem alloc] initWithOperation:operation opID:opID];
+        
+        // TODO: The desired behaviour here is not to add an op to the queue if it *or any of its follow-ons*
+        // has yet to complete; but this isn't what currently happens (as the op is removed from the queue as
+        // soon as it completes, i.e. before its follow-ons are executed). A separate queue of pending op IDs
+        // would be needed to get the desired behaviour.
+
         // Test whether the same operation already exists on the queue.
         NSInteger idx = [self->_queue indexOfObject:item];
         if (idx == NSNotFound) {
