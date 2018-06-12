@@ -100,6 +100,10 @@
     }
     // Set the request handler mappings.
     self.requestHandlers = mappings;
+    // Complete setup of each content repository.
+    for (LOCMSRepository *repository in [_repositories allValues]) {
+        [repository completeSetup];
+    }
 }
 
 - (QPromise *)start {

@@ -59,6 +59,7 @@
                     @"id":          @{ @"type": @"STRING", @"tag": @"id" },
                     @"type":        @{ @"type": @"STRING" },
                     @"title":       @{ @"type": @"STRING" },
+                    @"sort":        @{ @"type": @"STRING" },
                     @"content":     @{ @"type": @"STRING" },
                     @"image":       @{ @"type": @"STRING" },
                     @"version":     @{ @"type": @"STRING", @"tag": @"version" }
@@ -153,23 +154,7 @@
     return [_fileDB cacheLocationForFile:path];
 }
 
-- (void)start {
-    // Set file DB name and initial copy path.
-    if (!_fileDB.name) {
-        NSString *authorityName = self.authority.authorityName;
-        _fileDB.name = [NSString stringWithFormat:@"%@/%@/filedb", authorityName, self.basePath];
-    }
-    if (!_fileDB.initialCopyPath) {
-        NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];
-        NSString *path = [[NSBundle mainBundle] resourcePath];
-        path = [path stringByAppendingPathComponent:_authority.authorityName];
-        path = [path stringByAppendingPathComponent:_basePath];
-        path = [path stringByAppendingPathComponent:filename];
-        _fileDB.initialCopyPath = path;
-    }
-    
-    [_fileDB startService];
-    
+- (void)completeSetup {
     LOHTTPAuthenticationManager *authManager = [[LOHTTPAuthenticationManager alloc] initWithHost:_cms.host
                                                                                             port:_cms.port
                                                                                         protocol:_cms.protocol
@@ -187,11 +172,31 @@
         @"User-Agent": [self buildHTTPUserAgent]
     }
     */
-    // Init and register command protocol with the scheduler, using the authority name as the command prefix.
+        // Init and register command protocol with the scheduler, using the authority name as the command prefix.
     _ops = [[LOCMSOperationProtocol alloc] initWithFileDB:_fileDB
                                                  settings:_cms
                                                httpClient:_httpClient
                                     authenticationManager:authManager];
+
+}
+
+- (void)start {
+    // Set file DB name and initial copy path.
+    if (!_fileDB.name) {
+        NSString *authorityName = self.authority.authorityName;
+        _fileDB.name = [NSString stringWithFormat:@"%@/%@/filedb", authorityName, self.basePath];
+    }
+    if (!_fileDB.initialCopyPath) {
+        NSString *filename = [_fileDB.name stringByAppendingPathExtension:@"sqlite"];
+        NSString *path = [[NSBundle mainBundle] resourcePath];
+        path = [path stringByAppendingPathComponent:_authority.authorityName];
+        path = [path stringByAppendingPathComponent:_basePath];
+        path = [path stringByAppendingPathComponent:filename];
+        _fileDB.initialCopyPath = path;
+    }
+    
+    [_fileDB startService];
+
     [_ops startService];
     
     // Check for an interrupted file db reset.

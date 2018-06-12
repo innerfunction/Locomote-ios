@@ -67,15 +67,16 @@
     NSDictionary *profile = values[@"profile"];
     // Store standard profile values.
     for (NSString *field in _profileFieldNames) {
+        NSString *name = _standardFieldNames[field];
         NSString *key = [NSString stringWithFormat:@"%@/%@", _realmName, field];
-        id value = profile[field];
+        id value = profile[name];
         if (value) {
             [_userDefaults setValue:value forKey:key];
         }
     }
     // Search for and store any meta data values.
     NSMutableArray *metaKeys = [NSMutableArray new];
-    for (NSString *key in [values keyEnumerator]) {
+    for (NSString *key in [profile keyEnumerator]) {
         if ([key hasPrefix:@"meta_"]) {
             id value = profile[key];
             NSString *storageKey = [NSString stringWithFormat:@"%@/%@", _realmName, key];
@@ -103,7 +104,8 @@
         storageKey = [NSString stringWithFormat:@"%@/%@", _realmName, field];
         id value = [_userDefaults stringForKey:storageKey];
         if (value) {
-            values[field] = value;
+            NSString *name = _standardFieldNames[field];
+            values[name] = value;
         }
     }
     // Read profile meta-data.
@@ -120,21 +122,23 @@
     return values;
 }
 
+#define AppendPath(url,path) ([path hasSuffix:@"/"] ? [url stringByAppendingString:path] : [url stringByAppendingString:[@"/" stringByAppendingString:path]])
+
 - (NSString *)authenticationURL {
-    return [_baseURL stringByAppendingPathComponent:@"account/login"];
+    return AppendPath(_baseURL, @"account/login");
 }
 
 - (NSString *)newAccountURL {
-    return [_baseURL stringByAppendingPathComponent:@"account/create"];
+    return AppendPath(_baseURL, @"account/create");
 }
 
 - (NSString *)accountProfileURL {
-    return [_baseURL stringByAppendingPathComponent:@"account/profile"];
+    return AppendPath(_baseURL, @"account/profile");
 }
 
 - (void)showPasswordReminder {
     // Fetch the password reminder URL from the server.
-    NSString *url = [_baseURL stringByAppendingPathComponent:@"account/password-reminder"];
+    NSString *url = AppendPath(_baseURL, @"account/password-reminder");
     SCHTTPClient *httpClient = [SCHTTPClient new];
     [httpClient get:url]
     .then((id)^(SCHTTPClientResponse *response) {

@@ -40,7 +40,7 @@
 /// A user account realm name.
 @property (nonatomic, strong) NSString *realmName;
 /// The HTTP authentication manager to use with the account manager.
-@property (nonatomic, weak) LOHTTPAuthenticationManager *authManager;
+@property (nonatomic, strong) LOHTTPAuthenticationManager *authManager;
 
 /// Test if there is a current logged-in user account.
 - (BOOL)isLoggedIn;

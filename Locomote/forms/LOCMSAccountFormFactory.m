@@ -177,7 +177,7 @@
             [[SCAppContainer getAppContainer] postMessage:loginAction sender:form];
         };
         onSubmitError = ^(LOFormView *form, id data) {
-            NSString *action = [NSString stringWithFormat:@"post:toast+message=%@", @"Login%20failure"];
+            NSString *action = [NSString stringWithFormat:@"post:#toast+message=%@", @"Login%20failure"];
             [[SCAppContainer getAppContainer] postMessage:action sender:form];
         };
     }
@@ -202,7 +202,7 @@
                 message = @"Account creation failure";
             }
             message = [message stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
-            NSString *action = [NSString stringWithFormat:@"post:toast+message=%@", message];
+            NSString *action = [NSString stringWithFormat:@"post:#toast+message=%@", message];
             [[SCAppContainer getAppContainer] postMessage:action sender:form];
         };
     }
@@ -211,7 +211,7 @@
         onSubmitOk = ^(LOFormView *form, NSDictionary *data) {
             // Update stored user info
             [self.userAccountManager storeUserProfile:data];
-            NSString *action = [NSString stringWithFormat:@"post:toast+message=%@", @"Account%20updated"];
+            NSString *action = [NSString stringWithFormat:@"post:#toast+message=%@", @"Account%20updated"];
             [[SCAppContainer getAppContainer] postMessage:action sender:form];
         };
         onSubmitError = ^(LOFormView *form, id data) {
@@ -220,7 +220,7 @@
                 message = @"Account update failure";
             }
             message = [message stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
-            NSString *action = [NSString stringWithFormat:@"post:toast+message=%@", message];
+            NSString *action = [NSString stringWithFormat:@"post:#toast+message=%@", message];
             [[SCAppContainer getAppContainer] postMessage:action sender:form];
         };
     }

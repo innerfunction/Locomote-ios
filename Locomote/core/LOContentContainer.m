@@ -80,6 +80,18 @@
     return instance;
 }
 
+#pragma mark - SCMessageRouter
+
+- (BOOL)routeMessage:(SCMessage *)message sender:(id)sender {
+    NSString *sourceID = [message targetHead];
+    LOContentSource *source = _sources[sourceID];
+    if (source) {
+        [source receiveMessage:[message popTargetHead] sender:sender];
+        return YES;
+    }
+    return NO;
+}
+
 #pragma mark - SCService
 
 - (void)startService {
@@ -103,6 +115,7 @@
     LOCMSSettings *settings = [[LOCMSSettings alloc] initWithRef:_ref];
     // Create repo using the settings.
     _repository = [[LOCMSRepository alloc] initWithSettings:settings];
+    _repository.accountManager = self.accountManager;
     // Check whether the content provider has a content authority for the repo.
     LOContentProvider *provider = [LOContentProvider getInstance];
     LOCMSContentAuthority *authority = (LOCMSContentAuthority *)[provider contentAuthorityForName:settings.authorityName];

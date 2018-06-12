@@ -43,7 +43,8 @@
         // Read the file path.
         NSDictionary *row = [self readFileRecordByID:fileID];
         if (row) {
-            refPath = (NSString *)row[@"path"];
+            category = (NSString *)row[@"category"];
+            refPath  = (NSString *)row[@"path"];
         }
         else {
             // File not found.
@@ -52,6 +53,9 @@
         }
         // Get the path to the directory containing the reference file.
         refPath = [refPath stringByDeletingLastPathComponent];
+        // Add a where clause to filter by path.
+        [wheres addObject:[NSString stringWithFormat:@"%@.path LIKE ?", self.fileDB.orm.source]];
+        [values addObject:[NSString stringWithFormat:@"%@%%", refPath]];
     }
     
     // If category specified then include fileset bindings.
@@ -71,6 +75,10 @@
     // Add filters for each of the specified parameters.
     NSDictionary *parameters = request.parameters;
     for (id key in [parameters keyEnumerator]) {
+        // Skip params starting with underscore.
+        if ([key hasPrefix:@"_"]) {
+            continue;
+        }
         // Note that parameter names must be qualified by the correct relation name.
         [wheres addObject:[NSString stringWithFormat:@"%@ = ?", key]];
         [values addObject:parameters[key]];

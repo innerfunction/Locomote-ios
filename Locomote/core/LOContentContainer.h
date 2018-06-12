@@ -19,6 +19,7 @@
 #import <Foundation/Foundation.h>
 #import "SCService.h"
 #import "SCMessageReceiver.h"
+#import "SCMessageRouter.h"
 #import "SCIOCTypeInspectable.h"
 #import "Q.h"
 
@@ -43,7 +44,7 @@
 @end
 
 /// A container or Locomote sourced content.
-@interface LOContentContainer : NSObject <SCService, SCIOCTypeInspectable>
+@interface LOContentContainer : NSObject <SCService, SCIOCTypeInspectable, SCMessageRouter>
 
 /**
  * A map to the different content sources contained by this container.

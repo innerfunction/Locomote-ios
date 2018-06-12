@@ -60,6 +60,8 @@
 
 /// Initialize a repository with the provided settings.
 - (id)initWithSettings:(LOCMSSettings *)settings;
+/// Complete setup of the repository.
+- (void)completeSetup;
 /// Start running the repository.
 - (void)start;
 /// Synchronize the repository's content by downloading updates from the server.

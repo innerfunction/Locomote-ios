@@ -36,16 +36,12 @@
         LOCMSSearchHandler *searchHandler = [[LOCMSSearchHandler alloc] initWithRepository:repository];
         self.requestHandlers = @[
             // Read file contents.
-            RequestMapping(@"files.api/{id}(/{mode:content})?", fileHandler ),
+            RequestMapping(@"file.api/{id}(/{mode:content})?", fileHandler ),
             // List siblings / children / descendents of a file.
-            RequestMapping(@"files.api/{id}/{relation:siblings|children|descendents}", fileListHandler ),
+            RequestMapping(@"file.api/{id}/{relation:siblings|children|descendents}", fileListHandler ),
             // List all files.
-            RequestMapping(@"files.api", fileListHandler ),
-            // Read file contents within a fileset category.
-            RequestMapping(@"fileset.api/{category}/{id}(/{mode:content})?", fileHandler ),
-            // List siblings / children / descendents of a file within a fileset category.
-            RequestMapping(@"fileset.api/{category}/{id}/{relation:siblings|children|descendents}", fileListHandler ),
-            // Listfiles within a fileset category.
+            RequestMapping(@"file.api", fileListHandler ),
+            // List files within a fileset category.
             RequestMapping(@"fileset.api/{category}", fileListHandler ),
             // Do a file search.
             RequestMapping(@"search.api", searchHandler ),
