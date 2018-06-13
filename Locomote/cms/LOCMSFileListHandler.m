@@ -27,14 +27,17 @@
     NSMutableArray *values = [NSMutableArray new];
     NSArray *mappings = @[];
 
-    // TODO: Support _orderBy
-    
     // A reference file ID.
     NSString *fileID = request.pathParameters[@"id"];
     // A fileset category.
     NSString *category = request.pathParameters[@"category"];
     // A file relation - sibling, child or descendent.
     NSString *relation = request.pathParameters[@"relation"];
+    // An order by clause.
+    NSString *orderBy  = request.parameters[@"_orderBy"];
+    if (!orderBy) {
+        orderBy = @"pages.sort";
+    }
     // Reference file path.
     NSString *refPath = @"";
     
@@ -87,7 +90,7 @@
     // Join the wheres into a single where clause.
     NSString *where = [wheres componentsJoinedByString:@" AND "];
     // Execute query.
-    NSArray *result = [self.fileDB.orm selectWhere:where values:values mappings:mappings];
+    NSArray *result = [self.fileDB.orm selectWhere:where values:values mappings:mappings orderBy:orderBy];
     
     // Apply relation filter.
     if ([@"siblings" isEqualToString:relation]) {
@@ -114,6 +117,7 @@
         }]];
     }
     else if ([@"descendents" isEqualToString:relation]) {
+        // Filter out the reference file from the result.
         result = [result filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings) {
             NSDictionary *row = (NSDictionary *)item;
             id rowID = row[@"id"];
@@ -121,9 +125,12 @@
                 // Reference file can't be its own descendent.
                 return NO;
             }
+            /*
             NSString *itemPath = (NSString *)row[@"path"];
             // File is a descendent if its path has the reference path as a prefix.
             return [itemPath hasPrefix:refPath];
+            */
+            return YES;
         }]];
     }
     

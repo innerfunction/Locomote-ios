@@ -20,9 +20,16 @@
 #import "LOContentAuthority.h"
 #import "NSDictionary+SC.h"
 
-#define PAGE_TABLE (@"pages")
+#define PAGE_TABLE                  (@"pages")
+#define DEFAULT_SEACH_RESULT_LIMIT  (100);
 
 @implementation LOCMSSearchHandler
+
+- (id)initWithRepository:(LOCMSRepository *)repository {
+    self = [super initWithRepository:repository];
+    self.searchResultLimit = DEFAULT_SEACH_RESULT_LIMIT;
+    return self;
+}
 
 - (void)handleRequest:(id<LOContentRequest>)request response:(id<LOContentResponse>)response {
     
@@ -54,12 +61,14 @@
         NSMutableArray *terms = [NSMutableArray new];
         NSArray *tokens = [term componentsSeparatedByString:@" "];
         for (NSString *token in tokens) {
-            NSString *term = [NSString stringWithFormat:@"(%@.title LIKE ? OR %@.content LIKE ?)", PAGE_TABLE, PAGE_TABLE];
-            [terms addObject:term];
-            // TODO: Trim the token, check for empty tokens.
-            NSString *param = [NSString stringWithFormat:@"%%%@%%", token];
-            [params addObject:param];
-            [params addObject:param];
+            NSString *trimmedToken = [token stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+            if ([trimmedToken length] > 0) {
+                NSString *term = [NSString stringWithFormat:@"(%@.title LIKE ? OR %@.content LIKE ?)", PAGE_TABLE, PAGE_TABLE];
+                [terms addObject:term];
+                NSString *param = [NSString stringWithFormat:@"%%%@%%", trimmedToken];
+                [params addObject:param];
+                [params addObject:param];
+            }
         }
         NSString *where;
         if ([@"any" isEqualToString:mode]) {

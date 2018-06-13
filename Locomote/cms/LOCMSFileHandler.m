@@ -108,8 +108,8 @@ static SCLogger *Logger;
 
 - (NSString *)renderPageContent:(NSDictionary *)record {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSDictionary *pageData = record[@"page"];
-    NSString *pageType = pageData[@"type"];
+    NSDictionary *page = record[@"page"];
+    NSString *pageType = page[@"type"];
     NSString *pageHTML;
     // Resolve the client template to use to render the post.
     // TODO: Note that the following code assumes the page templates are avaiable in the app
@@ -136,7 +136,7 @@ static SCLogger *Logger;
             // as they should allow partials to be used within templates, whilst supporting the two
             // use cases of loading templates from file (i.e. for full post html) or evaluating
             // a template from a string (i.e. for post content only).
-            pageHTML = [GRMustacheTemplate renderObject:pageData
+            pageHTML = [GRMustacheTemplate renderObject:page
                                              fromString:template
                                                   error:&error];
         }
@@ -147,7 +147,7 @@ static SCLogger *Logger;
     // If no page content yet then just wrap what we have in <html> tags.
     if (!pageHTML) {
         // If failed to render content then return a default rendering of the post body.
-        NSString *pageContent = pageData[@"content"];
+        NSString *pageContent = page[@"content"];
         pageHTML = [NSString stringWithFormat:@"<html>%@</html>", pageContent];
     }
     return pageHTML;
