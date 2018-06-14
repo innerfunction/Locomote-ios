@@ -114,10 +114,10 @@ static SCLogger *Logger;
     // Resolve the client template to use to render the post.
     // TODO: Note that the following code assumes the page templates are avaiable in the app
     // cache; consider whether to instead load templates via the content: URL.
-    NSString *templateFilename = [NSString stringWithFormat:@"_templates/page-%@.html", pageType];
+    NSString *templateFilename = [NSString stringWithFormat:@"templates/page-%@.html", pageType];
     NSString *templatePath = [self.fileDB cacheLocationForFile:templateFilename];
     if (!(templatePath && [fileManager fileExistsAtPath:templatePath])) {
-        templatePath = [self.fileDB cacheLocationForFile:@"_templates/page.html"];
+        templatePath = [self.fileDB cacheLocationForFile:@"templates/page.html"];
         if (!(templatePath && [fileManager fileExistsAtPath:templatePath])) {
             [Logger warn:@"Client template not found for page type %@", pageType];
             templatePath = nil;

@@ -47,48 +47,48 @@
         _fileDB.tables = @{
             @"files": @{
                 @"columns": @{
-                    @"id":          @{ @"type": @"STRING", @"tag": @"id" },
-                    @"path":        @{ @"type": @"STRING" },
-                    @"category":    @{ @"type": @"STRING" },
-                    @"status":      @{ @"type": @"STRING" },
-                    @"version":     @{ @"type": @"STRING", @"tag": @"version" }
+                    @"id":          @{ @"type": @"TEXT", @"tag": @"id" },
+                    @"path":        @{ @"type": @"TEXT" },
+                    @"category":    @{ @"type": @"TEXT" },
+                    @"status":      @{ @"type": @"TEXT" },
+                    @"version":     @{ @"type": @"TEXT", @"tag": @"version" }
                 }
             },
             @"pages": @{
                 @"columns": @{
-                    @"id":          @{ @"type": @"STRING", @"tag": @"id" },
-                    @"type":        @{ @"type": @"STRING" },
-                    @"title":       @{ @"type": @"STRING" },
-                    @"sort":        @{ @"type": @"STRING" },
-                    @"content":     @{ @"type": @"STRING" },
-                    @"image":       @{ @"type": @"STRING" },
-                    @"version":     @{ @"type": @"STRING", @"tag": @"version" }
+                    @"id":          @{ @"type": @"TEXT", @"tag": @"id" },
+                    @"type":        @{ @"type": @"TEXT" },
+                    @"title":       @{ @"type": @"TEXT" },
+                    @"sort":        @{ @"type": @"TEXT" },
+                    @"content":     @{ @"type": @"TEXT" },
+                    @"image":       @{ @"type": @"TEXT" },
+                    @"version":     @{ @"type": @"TEXT", @"tag": @"version" }
 
                 }
             },
             @"commits": @{
                 @"columns": @{
-                    @"id":          @{ @"type": @"STRING", @"tag": @"id" },
-                    @"date":        @{ @"type": @"STRING" },
-                    @"subject":     @{ @"type": @"STRING" }
+                    @"id":          @{ @"type": @"TEXT", @"tag": @"id" },
+                    @"date":        @{ @"type": @"TEXT" },
+                    @"subject":     @{ @"type": @"TEXT" }
                 }
             },
             @"fingerprints": @{
                 @"columns": @{
-                    @"category":    @{ @"type": @"STRING", @"tag": @"id" },
-                    @"fingerprint": @{ @"type": @"STRING" },
-                    @"preprint":    @{ @"type": @"STRING" },
-                    @"current":     @{ @"type": @"STRING" },
-                    @"latest":      @{ @"type": @"STRING" }
+                    @"category":    @{ @"type": @"TEXT", @"tag": @"id" },
+                    @"fingerprint": @{ @"type": @"TEXT" },
+                    @"preprint":    @{ @"type": @"TEXT" },
+                    @"current":     @{ @"type": @"TEXT" },
+                    @"latest":      @{ @"type": @"TEXT" }
                 }
             },
             @"meta": @{
                 @"columns": @{
-                    @"id":          @{ @"type": @"STRING", @"tag": @"id", @"format": @"{fileid}:{key}" },
-                    @"fileid":      @{ @"type": @"STRING", @"tag": @"ownerid" },
-                    @"key":         @{ @"type": @"STRING", @"tag": @"key" },
-                    @"value":       @{ @"type": @"STRING" },
-                    @"version":     @{ @"type": @"STRING", @"tag": @"version" }
+                    @"id":          @{ @"type": @"TEXT", @"tag": @"id", @"format": @"{fileid}:{key}" },
+                    @"fileid":      @{ @"type": @"TEXT", @"tag": @"ownerid" },
+                    @"key":         @{ @"type": @"TEXT", @"tag": @"key" },
+                    @"value":       @{ @"type": @"TEXT" },
+                    @"version":     @{ @"type": @"TEXT", @"tag": @"version" }
 
                 }
             }

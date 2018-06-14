@@ -35,9 +35,6 @@
     NSString *relation = request.pathParameters[@"relation"];
     // An order by clause.
     NSString *orderBy  = request.parameters[@"_orderBy"];
-    if (!orderBy) {
-        orderBy = @"pages.sort";
-    }
     // Reference file path.
     NSString *refPath = @"";
     
@@ -53,6 +50,10 @@
             // File not found.
             [response respondWithError:makePathNotFoundResponseError(request.path)];
             return;
+        }
+        // If reference document is a page and no order by is specified then use page sort order.
+        if ([@"pages" isEqualToString:category] && !orderBy) {
+            orderBy = @"page.sort";
         }
         // Get the path to the directory containing the reference file.
         refPath = [refPath stringByDeletingLastPathComponent];
