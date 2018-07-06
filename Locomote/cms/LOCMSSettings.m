@@ -23,7 +23,7 @@
 #define DefaultAPIHost      (@"locomote.sh")
 #define DefaultAPIVersion   (@"0.2")
 #define DefaultAPIRoot      (@"cms")
-#define AuthRealmPrefix     (@"sh.locomote")
+#define AuthRealmPrefix     (@"Locomote")
 #define DefaultBaseURL      ([NSString stringWithFormat:@"%@://%@/%@/%@", DefaultAPIProtocol, DefaultAPIHost, DefaultAPIRoot, DefaultAPIVersion])
 
 @interface LOCMSSettings()
@@ -80,12 +80,24 @@
         self.authorityName = self.host;
     }
 
+    // Allow additional properties to be specified in the ref URLs query string.
+    // (Currently just authRealm supported).
+    NSArray *queryParams = [repoURL.query componentsSeparatedByString:@"&"];
+    for (NSString *queryParam in queryParams) {
+        NSArray *nameValuePair = [queryParam componentsSeparatedByString:@"="];
+        NSString *name = nameValuePair[0];
+        NSString *value = nameValuePair[1];
+        if ([@"authRealm" isEqualToString:name]) {
+            self.authRealm = value;
+        }
+    }
+    
     return self;
 }
 
 - (NSString *)authRealm {
     if (!_authRealm) {
-        _authRealm = [NSString stringWithFormat:@"%@/%@", AuthRealmPrefix, _basePath];
+        _authRealm = [NSString stringWithFormat:@"%@%@", AuthRealmPrefix, _basePath];
     }
     return _authRealm;
 }
